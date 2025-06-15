@@ -1,0 +1,74 @@
+% -----------------------------------------------------------------------------
+% EEESeaBoat 每 Product Requirement Breakdown
+% Stand-alone LaTeX section ready for Overleaf (replace or include as needed)
+% -----------------------------------------------------------------------------
+
+\section{Introduction}
+
+The objective of this project is to design and build an \emph{amphibious}, remotely-controlled rover 每 the \textbf{EEESeaBoat} 每 capable of exploring a water-themed arena and ``surveying'' the ducks that inhabit it.  Surveying, in this context, requires the rover to determine 
+\begin{enumerate*}[label=\emph{\arabic*)}]
+    \item the \textbf{name} of each duck, transmitted ultrasonically, and
+    \item the \textbf{species} of the duck, encoded in a trio of infrared, radio-frequency and magnetic signatures.
+\end{enumerate*}
+The EEESeaBoat must collect these signals, decode the relevant information and relay it to a web-based user interface that also provides live remote control of the rover.
+
+\subsection{High-Level Requirements}
+To satisfy the brief contained in the project documentation, the rover must meet the following system-level requirements:
+\begin{itemize}
+    \item \textbf{Mobility}: Provide precise forward, reverse, rotational and stationary maneuvers on both land and the shallow water section of the arena.
+    \item \textbf{Signal Detection}: Detect and condition \SI{40}{\kilo\hertz} ultrasonic, sub-\SI{}{}-audio magnetic polarity, and infrared or radio frequency signals in the ranges specified for each duck species.
+    \item \textbf{Signal Decoding}: Recover ASCII characters from the ultrasonic link and discriminate species via frequency and polarity analysis.
+    \item \textbf{Remote Operation}: Deliver an intuitive, low-latency web interface for motion commands and real-time sensor read-outs.
+    \item \textbf{Constraints}: \emph{Mass} $<\SI{750}{\gram}$; \emph{Budget} $<\pounds60$; robust construction suited to a damp environment.
+\end{itemize}
+
+\subsection{Duck Identification Signals}
+\paragraph{Name (Ultrasonic)} Each duck periodically transmits its four-character name using \SI{40}{\kilo\hertz} amplitude-shift keying.  The payload is encoded as UART frames (1~start, 8~data, 1~stop) at \SI{600}{\bit\per\second}, beginning with the sentinel character `\texttt{\#}'.
+
+\paragraph{Species (IR / RF / Magnetic)}  A unique combination of infrared or radio excitation frequency together with magnetic polarity identifies the species, as summarised in Table~\ref{tab:species_char}.
+
+\begin{table}[H]
+    \centering
+    \caption{Species designation}
+    \label{tab:species_char}
+    \begin{tabular}{@{} l c c c @{}}
+        \toprule
+        \textbf{Species} & \textbf{Infrared} & \textbf{Radio} & \textbf{Magnetic} \\
+        \midrule
+        Wibbo    & \SI{457}{\hertz} & 每        & Down \\
+        Gribbit  & 每                 & \SI{100}{\hertz} & Down \\
+        Snorkle  & \SI{293}{\hertz} & 每        & Up \\
+        Zapple   & 每                 & \SI{150}{\hertz} & Up \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{System Components}
+The project explores five tightly-coupled subsystems:
+\begin{enumerate}
+    \item \textbf{Sensor Suite}: Design and implementation of detectors for ultrasonic, infrared, radio and magnetic signals.
+    \item \textbf{Motor Control}: Configuration and firmware for precise two-motor drive with PID velocity control.
+    \item \textbf{Embedded Firmware}: Real-time acquisition, decoding and data fusion executed on an ARM-based microcontroller with Wi-Fi connectivity.
+    \item \textbf{Web Interface}: Front-end/UI providing command inputs and visualisation of decoded duck data.
+    \item \textbf{Mechanical Chassis}: Lightweight, watertight structure accommodating electronics and maintaining the \SI{750}{\gram} target mass.
+\end{enumerate}
+
+\subsection{Acceptance Criteria}
+From the high-level requirements, the acceptance criteria in Table~\ref{tab:acceptance} are derived.
+\begin{table}[H]
+    \centering
+    \caption{Acceptance criteria}
+    \label{tab:acceptance}
+    \begin{tabular}{@{} l p{9.5cm} @{}}
+        \toprule
+        \textbf{ID} & \textbf{Criteria} \\
+        \midrule
+        1a & Duck name reliably decoded via ultrasonic transducer. \\
+        1b & Duck species determined from combined infrared, radio and magnetic cues. \\
+        2  & Total financial expenditure maintained below \pounds60. \\
+        3  & Mass of rover kept below \SI{750}{\gram}. \\
+        4  & Rover can traverse obstacles, ramps and shallow water in the arena without loss of control. \\
+        5  & Remote-control interface is responsive and user-friendly. \\
+        \bottomrule
+    \end{tabular}
+\end{table} 

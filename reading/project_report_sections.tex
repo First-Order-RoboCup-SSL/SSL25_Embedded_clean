@@ -1,0 +1,120 @@
+% -----------------------------------------------------------------------------
+% Project Report ¨C Key Sections
+% This .tex file provides standalone sections that can be input-included into
+% the main report. The structure mirrors the reference report while replacing
+% content with the present team's information (Group-16).
+% -----------------------------------------------------------------------------
+
+% -----------------------------------------------------------------------------
+% 1. Product Requirement Breakdown
+% -----------------------------------------------------------------------------
+\section{Product Requirement Breakdown}
+\label{sec:prd}
+
+\subsection{Product Definition and Expectation}
+A small, lightweight remote-controlled vehicle capable of sensing four distinct
+signal types (infra-red, radio-frequency, magnetic field, and ultrasonic) and
+feeding back the information accurately and quickly to the operator. The design
+prioritises \textbf{accuracy over speed}.
+
+\subsection{System-Level Thinking}
+\begin{itemize}
+    \item \textbf{Power Supply}: Four~\SI{1.5}{\volt} batteries (VBAT) regulated down to
+          \SI{5}{\volt} and \SI{3.3}{\volt} rails through LDOs.
+    \item \textbf{Sensor Interface}: Digital output preferred; analogue fallback where
+          unavoidable.
+    \item \textbf{Remote Communication}: Wi-Fi or NRF24 modules, with a clear
+          front-/back-end abstraction inside the MCU firmware.
+    \item \textbf{Mechanical Considerations}: Compact footprint, balanced weight
+          distribution, DC motor selection, driver choice, battery placement
+          and cooling.
+\end{itemize}
+
+\subsection{Development Principles}
+\begin{description}[leftmargin=1.5cm,labelsep=0.4cm]
+    \item[Fast\hfill\small Be resourceful] Utilise parts already available in the
+          laboratory; pre-order components to minimise lead-times.
+    \item[Iteration matters] Produce a simple but working prototype early;
+          iterate and improve in small, measurable steps. \emph{Stability 
+          $\gg$ fancy features.}
+    \item[Efficient on Budget] Read the datasheets, avoid over-engineering, and
+          select suppliers that balance cost with reliability.
+\end{description}
+
+% -----------------------------------------------------------------------------
+% 2. Team Setup \& Roles
+% -----------------------------------------------------------------------------
+\section{Team Setup \& Roles}
+\label{sec:team}
+
+\begin{table}[H]
+    \centering
+    \caption{Team members and primary responsibilities}
+    \begin{tabular}{@{} l l p{8cm} @{}}
+        \toprule
+        \textbf{Name} & \textbf{GitHub/Handle} & \textbf{Key Responsibilities} \\
+        \midrule
+        Martin Jingchuan-Liang & \texttt{martinJL} & Acting team lead; RF~\& ultrasonic sensor design; mechanical / hardware fabrication; component procurement and budget tracking. \\
+        Jonas Zheng & \texttt{Phantomkiiid} & Infra-red and Hall-effect sensor design; mechanical CAD modelling; final assembly. \\
+        Minsoo Kwak & \texttt{qwertykwak} & Co-development of all four sensors; hardware debugging and bring-up; PCB routing and assembly. \\
+        Clementine White & \texttt{clementinewhite} & Vehicle kinematics and movement algorithms; board¨Cserver communication layer; ADC and UART sensor interfaces. \\
+        Emir Alemdar & \texttt{Emiral46} & Web-based front-end development; UI/UX design; integration testing with embedded back-end. \\
+        Eugene Irwin & \texttt{KRISTO} & Wi-Fi communication stack and remote control; high-rate digital sampling for sensors; co-development on wheel-base CAD. \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:team_roles}
+\end{table}
+
+% -----------------------------------------------------------------------------
+% 3. Project Management
+% -----------------------------------------------------------------------------
+\section{Project Management}
+\label{sec:management}
+
+\subsection{Expectations and Milestones}
+The project launched on \textbf{12~May}. Key delivery milestones are summarised
+in Table~\ref{tab:key_dates}.
+
+\begin{table}[H]
+    \centering
+    \caption{Key dates and deliverables}
+    \begin{tabular}{@{} l l @{}}
+        \toprule
+        \textbf{Date}\hspace{2cm} & \textbf{Milestone / Deliverable} \\
+        \midrule
+        11¨C17~May & All four sensors complete: schematic design, simulation, and prototyping tests. \\
+        21~May & Improved CAD design; software front-end and back-end skeleton finished. \\
+        23~May & Full vehicle assembly; system-level integration; sensor reading verified. \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:key_dates}
+\end{table}
+
+\subsection{Planning Approach}
+A rolling two-week Gantt schedule (Fig.~\ref{fig:gantt}) is maintained to track
+progress. Tasks are logged with clear predecessors and resource assignments.
+
+% -------------------------------------------------
+% Example of including the Gantt chart slide
+% -------------------------------------------------
+\begin{figure}[H]
+    \centering
+    % Replace the path below with the actual exported image / PDF of the Gantt.
+    \includegraphics[width=0.95\linewidth]{figs/gantt_chart.png}
+    \caption{Planning Gantt chart (excerpt)}
+    \label{fig:gantt}
+\end{figure}
+
+\subsection{Communication and Collaboration}
+The team employs a three-layered documentation and communication stack:
+\begin{enumerate}
+    \item \textbf{Notion} -- engineering logbook and design documentation.
+    \item \textbf{GitHub} -- version control for firmware, software, and CAD; issue tracking and project boards for planning.
+    \item \textbf{WhatsApp} -- daily updates, rapid troubleshooting, and ad-hoc discussions.
+\end{enumerate}
+All formal decisions are reflected in Notion and linked to the corresponding
+GitHub issues to maintain traceability.
+
+% -----------------------------------------------------------------------------
+% End of file
+% ----------------------------------------------------------------------------- 

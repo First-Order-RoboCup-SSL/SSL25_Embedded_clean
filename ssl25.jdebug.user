@@ -1,0 +1,40 @@
+
+GraphedExpression="(velocity_debug).actual_motor_speeds[1]", Color=#a00909
+GraphedExpression="(velocity_debug).target_motor_speeds[1]", Color=#09a01b
+OpenDocument="main.c", FilePath="D:/Embedded-SSL25-main (1)/Embedded-SSL25-main/Core/Src/main.c", Line=136
+OpenDocument="startup_stm32h723xx.s", FilePath="D:/Embedded-SSL25-main (1)/Embedded-SSL25-main/startup_stm32h723xx.s", Line=53
+OpenDocument="stm32h7xx_hal.c", FilePath="D:/Embedded-SSL25-main (1)/Embedded-SSL25-main/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c", Line=416
+OpenDocument="fdcan.c", FilePath="D:/Embedded-SSL25-main (1)/Embedded-SSL25-main/Core/Src/fdcan.c", Line=247
+OpenDocument="bsp_motor_feedback.h", FilePath="D:/Embedded-SSL25-main (1)/Embedded-SSL25-main/Bsp/Inc/bsp_motor_feedback.h", Line=0
+OpenDocument="stm32h7xx_it.c", FilePath="D:/Embedded-SSL25-main (1)/Embedded-SSL25-main/Core/Src/stm32h7xx_it.c", Line=108
+OpenToolbar="Debug", Floating=0, x=0, y=0
+OpenWindow="Registers 1", DockArea=RIGHT, x=0, y=0, w=300, h=693, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, FilteredItems=[], RefreshRate=1
+OpenWindow="Disassembly", DockArea=BOTTOM, x=2, y=0, w=593, h=1245, TabPos=0, TopOfStack=0, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Memory 1", DockArea=BOTTOM, x=2, y=0, w=593, h=1245, TabPos=1, TopOfStack=1, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, EditorAddress=0x20000B3A
+OpenWindow="Watched Data 1", DockArea=BOTTOM, x=0, y=0, w=758, h=1245, TabPos=0, TopOfStack=1, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Functions", DockArea=LEFT, x=0, y=0, w=808, h=693, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Data Sampling", DockArea=BOTTOM, x=0, y=0, w=758, h=1245, TabPos=1, TopOfStack=0, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, VisibleTab=0, UniformSampleSpacing=0
+OpenWindow="Timeline", DockArea=BOTTOM, x=1, y=0, w=2487, h=1272, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=1, DataPaneShown=1, PowerPaneShown=0, CodePaneShown=0, PinCursor="Cursor Movable", TimePerDiv="2 s", TimeStampFormat="Time", DataGraphDrawAsPoints=0, DataGraphLegendShown=1, DataGraphUniformSampleSpacing=0, DataGraphLegendPosition="1970;0", PowerGraphDrawAsPoints=0, PowerGraphLegendShown=0, PowerGraphAvgFilterTime=Off, PowerGraphAvgFilterLen=Off, PowerGraphUniformSampleSpacing=0, PowerGraphLegendPosition="70;20", CodeGraphLegendShown=0, CodeGraphLegendPosition="80;20"
+TableHeader="Data Sampling Table", SortCol="None", SortOrder="ASCENDING", VisibleCols=["Index";"Time";" (velocity_debug).actual_motor_speeds[1]";" (velocity_debug).target_motor_speeds[1]"], ColWidths=[100;100;100;100]
+TableHeader="Data Sampling Setup", SortCol="Expression", SortOrder="DESCENDING", VisibleCols=["Expression";"Type";"Value";"Min";"Max";"Average";"# Changes";"Min. Change";"Max. Change"], ColWidths=[465;100;100;146;134;146;132;146;151]
+TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh"], ColWidths=[245;385;134;100]
+TableHeader="Functions", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Address";"Size";"#Insts";"Source"], ColWidths=[832;113;100;100;388]
+TableHeader="Power Sampling", SortCol="None", SortOrder="ASCENDING", VisibleCols=["Index";"Time";"Ch 0"], ColWidths=[100;100;100]
+TableHeader="Registers 1", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Description"], ColWidths=[100;157;399]
+TableHeader="RegisterSelectionDialog", SortCol="None", SortOrder="ASCENDING", VisibleCols=[], ColWidths=[]
+TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Address";"Description"], ColWidths=[200;100;100;340]
+WatchedExpression="feedback_buffer", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="kinematics_debug", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="decoded", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="velocity_debug", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="output1", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="output2", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="output3", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="output1_int", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="output2_int", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="output3_int", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="alpha", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="pid_params", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="g_velocity_deadband", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="g_current_deadband", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="g_control_period_ms", Window=Watched Data 1
