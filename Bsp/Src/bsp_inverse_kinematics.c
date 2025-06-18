@@ -7,6 +7,10 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+#ifndef M_PI_2
+#define M_PI_2 1.57079632679489661923
+#endif
+
 // Define the global debug structures
 kinematics_debug_t kinematics_debug = {0};
 velocity_debug_t velocity_debug = {0};
@@ -16,11 +20,13 @@ void BSP_InverseKinematics_Init(void)
     // Initialize debug structures
     kinematics_debug.update_count = 0;
     velocity_debug.update_count = 0;
-    for(int i = 0; i < 3; i++) {
-        kinematics_debug.raw_inputs[i] = 0;
+    for(int i = 0; i < 4; i++) {
         velocity_debug.target_wheel_speeds[i] = 0;
         velocity_debug.target_motor_speeds[i] = 0;
         velocity_debug.actual_motor_speeds[i] = 0;
+    }
+    for(int i = 0; i < 3; i++) {
+        kinematics_debug.raw_inputs[i] = 0;
     }
     kinematics_debug.vx = 0;
     kinematics_debug.vy = 0;
@@ -28,82 +34,94 @@ void BSP_InverseKinematics_Init(void)
 }
 
 // Map remote control values to velocities
-void BSP_MapRemoteToVelocities(int16_t forward_back, int16_t left_right, int16_t rotation,
+void BSP_MapRemoteToVelocities(int16_t x_input, int16_t y_input, int16_t r_input,
                               float* vx, float* vy, float* omega)
 {
     // Store raw inputs
-    kinematics_debug.raw_inputs[0] = rotation;
-    kinematics_debug.raw_inputs[1] = forward_back;
-    kinematics_debug.raw_inputs[2] = left_right;
+    kinematics_debug.raw_inputs[0] = r_input;
+    kinematics_debug.raw_inputs[1] = y_input;
+    kinematics_debug.raw_inputs[2] = x_input;
     
-    // Map forward/back to vy (forward is positive)
-    float vy_norm = -(float)(forward_back - REMOTE_MID) / REMOTE_MID;  // Forward is positive
-    *vy = vy_norm * MAX_LINEAR_VEL;
+    // Map inputs to velocities with quadratic scaling for better control
+    float x_norm = -(float)(x_input - REMOTE_MID) / REMOTE_MID;  // Invert X direction
+    float y_norm = -(float)(y_input - REMOTE_MID) / REMOTE_MID;  // Invert Y direction
+    float r_norm = (float)(r_input - REMOTE_MID) / REMOTE_MID;   // Keep rotation direction
     
-    // Map left/right to vx (right is positive)
-    float vx_norm = -(float)(left_right - REMOTE_MID) / REMOTE_MID;  // Right is positive
-    *vx = vx_norm * MAX_LINEAR_VEL;
+    // Apply quadratic scaling while preserving sign
+    *vx = (x_norm >= 0 ? 1 : -1) * x_norm * x_norm * MAX_LINEAR_VEL;
+    *vy = (y_norm >= 0 ? 1 : -1) * y_norm * y_norm * MAX_LINEAR_VEL;
+    *omega = (r_norm >= 0 ? 1 : -1) * r_norm * r_norm * MAX_ANGULAR_VEL;
     
-    // Map rotation to omega (clockwise is positive)
-    float omega_norm = (float)(rotation - REMOTE_MID) / REMOTE_MID;  // Clockwise is positive
-    *omega = -omega_norm * MAX_ANGULAR_VEL;  // Added negative sign to reverse rotation direction
-    
-    // Store calculated velocities
+    // Store calculated velocities for debugging
     kinematics_debug.vx = *vx;
     kinematics_debug.vy = *vy;
     kinematics_debug.omega = *omega;
 }
 
-// Calculate motor currents from velocities
+// Calculate wheel velocities from robot velocities
 void BSP_InverseKinematics_Calculate(float vx, float vy, float omega, float* wheel_velocities)
 {
-    const float L = ROBOT_RADIUS;    // Distance from robot center to wheel center
-    const float r = WHEEL_RADIUS;    // Wheel radius
+    // Store wheel angles for easier access
+    float wheel_angles[4] = {
+        WHEEL1_ANGLE,
+        WHEEL2_ANGLE,
+        WHEEL3_ANGLE,
+        WHEEL4_ANGLE
+    };
     
-    // Calculate wheel velocities (rad/s at the wheel) using the inverse kinematics
-    // For each wheel, we project the desired robot velocity onto the wheel's force vector
-    // and add the rotational component. The negative sign is because we want to achieve
-    // the opposite of the wheel's natural force vector direction when needed.
-    
-    // Motor ID1 (index 0) - Front-right wheel (-15бу)
-    // When rotating clockwise: force vector = (-0.258, 0.966)
-    wheel_velocities[0] = -(vx * WHEEL1_VX + vy * WHEEL1_VY) / r + L * omega / r;
-                      
-    // Motor ID2 (index 1) - Rear wheel (90бу)
-    // When rotating clockwise: force vector = (1, 0)
-    wheel_velocities[1] = -(vx * WHEEL2_VX + vy * WHEEL2_VY) / r + L * omega / r;
-                      
-    // Motor ID3 (index 2) - Front-left wheel (-165бу)
-    // When rotating clockwise: force vector = (-0.258, -0.966)
-    wheel_velocities[2] = -(vx * WHEEL3_VX + vy * WHEEL3_VY) / r + L * omega / r;
-    
-    // Store target wheel speeds for debugging
-    for(int i = 0; i < 3; i++) {
+    // Calculate wheel velocities using inverse kinematics
+    for(int i = 0; i < 4; i++) {
+        float theta = wheel_angles[i];
+        // Project robot velocity onto wheel direction and add rotational component
+        wheel_velocities[i] = -vx * sinf(theta) + 
+                             vy * cosf(theta) + 
+                             omega * ROBOT_RADIUS;
+        
+        // Convert linear velocity to angular velocity (rad/s)
+        wheel_velocities[i] /= WHEEL_RADIUS;
+        
+        // Store target wheel speeds for debugging
         velocity_debug.target_wheel_speeds[i] = wheel_velocities[i];
     }
     
     // Find maximum wheel speed for normalization
     float max_speed = 0;
-    for(int i = 0; i < 3; i++) {
+    for(int i = 0; i < 4; i++) {
         float abs_speed = fabsf(wheel_velocities[i]);
         if(abs_speed > max_speed) max_speed = abs_speed;
     }
     
-    // Calculate max allowed wheel angular speed (rad/s)
-    float max_wheel_angular_speed = MAX_LINEAR_VEL / WHEEL_RADIUS;
     // Normalize wheel speeds if they exceed the maximum
-    if(max_speed > max_wheel_angular_speed) {
-        float scale = max_wheel_angular_speed / max_speed;
-        for(int i = 0; i < 3; i++) {
+    if(max_speed > MAX_WHEEL_SPEED) {
+        float scale = MAX_WHEEL_SPEED / max_speed;
+        for(int i = 0; i < 4; i++) {
             wheel_velocities[i] *= scale;
         }
     }
     
-    // Convert wheel speeds to motor speeds by multiplying by gear ratio
-    for(int i = 0; i < 3; i++) {
+    // Convert wheel speeds to motor speeds through gear ratio
+    for(int i = 0; i < 4; i++) {
         velocity_debug.target_motor_speeds[i] = wheel_velocities[i] * GEAR_RATIO;
     }
     
-    // Increment update counter
     velocity_debug.update_count++;
+}
+
+// Convert wheel velocities to motor currents for DM3519
+void BSP_ConvertVelocityToCurrent(float* wheel_velocities, int16_t* motor_currents)
+{
+    // Simple proportional control for current
+    const float KP = 0.5f; // Proportional gain, adjust as needed
+    
+    for(int i = 0; i < 4; i++) {
+        // Calculate current based on desired velocity
+        float current = wheel_velocities[i] * KP;
+        
+        // Limit current to maximum
+        if(current > MAX_CURRENT) current = MAX_CURRENT;
+        if(current < -MAX_CURRENT) current = -MAX_CURRENT;
+        
+        // Convert to DM3519 current scale (-16384 to 16384)
+        motor_currents[i] = (int16_t)(current * CURRENT_SCALE / MAX_CURRENT);
+    }
 } 

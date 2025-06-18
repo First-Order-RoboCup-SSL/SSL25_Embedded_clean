@@ -1,95 +1,94 @@
 #include "bsp_pid.h"
+#include "main.h"
 #include <math.h>
 
-// Define global variables for deadband control
-volatile float g_velocity_deadband = 0.2f;  // Initial value: 0.2 rad/s
-volatile float g_current_deadband = 200.0f;  // Initial value: 200
-
-// Define control loop timing
-volatile uint8_t g_control_period_ms = 5;  // Initial value: 5ms (200Hz)
-
-pid_param_t pid_params[3] = {
-    {50.0f, 1.0f, 6.0f, 0.0f, 0.0f}, // motor1: Kp=50, Ki=1, Kd=6
-    {50.0f, 1.0f, 6.0f, 0.0f, 0.0f}, // motor2: Kp=50, Ki=1, Kd=6
-    {50.0f, 1.0f, 6.0f, 0.0f, 0.0f}  // motor3: Kp=50, Ki=1, Kd=6
+// Define global deadband parameters with initial values
+volatile deadband_params_t g_deadband_params = {
+    .velocity_deadband = 0.2f,           // 0.2 rad/s
+    .current_deadband = 164.0f           // 30mA (164 = 30mA * 16384/3000mA)
 };
 
-float BSP_PID_Calculate_Indiv(pid_param_t* param, float target, float actual)
+// Define PID parameters for 4 motors
+pid_param_t pid_params[4] = {
+    {50.0f, 1.0f, 6.0f, 0.0f, 0.0f, 0.0f}, // motor1
+    {50.0f, 1.0f, 6.0f, 0.0f, 0.0f, 0.0f}, // motor2
+    {50.0f, 1.0f, 6.0f, 0.0f, 0.0f, 0.0f}, // motor3
+    {50.0f, 1.0f, 6.0f, 0.0f, 0.0f, 0.0f}  // motor4
+};
+
+void BSP_PID_Init(void)
 {
+    for(int i = 0; i < 4; i++) {
+        BSP_PID_Reset(i);
+    }
+}
+
+void BSP_PID_Reset(uint8_t motor_index)
+{
+    if(motor_index >= 4) return;
+    
+    pid_params[motor_index].error_sum = 0.0f;
+    pid_params[motor_index].last_error = 0.0f;
+    pid_params[motor_index].last_output = 0.0f;
+}
+
+void BSP_PID_UpdateDeadbandParams(float velocity_db, float current_db)
+{
+    g_deadband_params.velocity_deadband = velocity_db;
+    g_deadband_params.current_deadband = current_db;
+}
+
+float BSP_PID_Calculate(uint8_t motor_index, float target, float actual)
+{
+    if(motor_index >= 4) return 0.0f;
+    
+    pid_param_t* param = &pid_params[motor_index];
     float error = target - actual;
     
-    // 1. Apply velocity deadband
-    if (fabsf(error) < g_velocity_deadband) {
+    // Apply velocity deadband
+    if (fabsf(error) < g_deadband_params.velocity_deadband) {
         error = 0;
         param->error_sum = 0;  // Reset integral when in deadband
-        return 0;  // No output when in deadband
+        param->last_output = 0;
+        return 0;
     }
     
-    // 2. Calculate P term
+    // Calculate PID terms
+    float dt = CONTROL_PERIOD_MS / 1000.0f;  // Convert ms to seconds
+    
+    // P term
     float p_term = param->kp * error;
     
-    // 3. Calculate I term - consider control period
-    float dt = g_control_period_ms / 1000.0f;  // Convert ms to seconds
-    param->error_sum += error * dt;  // Integrate with respect to time
+    // I term with anti-windup
+    param->error_sum += error * dt;
     if (param->error_sum > PID_INTEGRAL_MAX) param->error_sum = PID_INTEGRAL_MAX;
     else if (param->error_sum < PID_INTEGRAL_MIN) param->error_sum = PID_INTEGRAL_MIN;
     float i_term = param->ki * param->error_sum;
     
-    // 4. Calculate D term - consider control period
-    float d_term = param->kd * (error - param->last_error) / dt;  // Derivative with respect to time
+    // D term with filtering
+    float d_term = param->kd * (error - param->last_error) / dt;
     param->last_error = error;
     
-    // 5. Calculate total output
+    // Calculate base output
     float output = p_term + i_term + d_term;
     
-    // 6. Apply current deadband
-    if (fabsf(output) < g_current_deadband) {
-        output = 0;
-    } else if (output > 0) {
-        output = output + g_current_deadband;
+    // Apply current deadband with hysteresis
+    if (fabsf(output) < g_deadband_params.current_deadband) {
+        if (fabsf(param->last_output) < g_deadband_params.current_deadband) {
+            output = 0;
+        }
     } else {
-        output = output - g_current_deadband;
+        // Add or subtract deadband based on direction
+        output += (output > 0) ? g_deadband_params.current_deadband : -g_deadband_params.current_deadband;
     }
     
-    // 7. Final output limiting
+    // Apply output limits
     if (output > PID_OUTPUT_MAX) output = PID_OUTPUT_MAX;
     else if (output < PID_OUTPUT_MIN) output = PID_OUTPUT_MIN;
     
-    return output;
-}
-
-float BSP_PID_Calculate(float target, float actual, float* error_sum, float* last_error)
-{
-    // Calculate error
-    float error = target - actual;
-    
-    // Calculate P term
-    float p_term = g_pid_kp * error;
-    
-    // Calculate I term
-    *error_sum += error;
-    
-    // Apply integral limits (anti-windup)
-    if (*error_sum > PID_INTEGRAL_MAX) {
-        *error_sum = PID_INTEGRAL_MAX;
-    } else if (*error_sum < PID_INTEGRAL_MIN) {
-        *error_sum = PID_INTEGRAL_MIN;
-    }
-    float i_term = g_pid_ki * (*error_sum);
-    
-    // Calculate D term
-    float d_term = g_pid_kd * (error - *last_error);
-    *last_error = error;
-    
-    // Calculate total output
-    float output = p_term + i_term + d_term;
-    
-    // Apply output limits
-    if (output > PID_OUTPUT_MAX) {
-        output = PID_OUTPUT_MAX;
-    } else if (output < PID_OUTPUT_MIN) {
-        output = PID_OUTPUT_MIN;
-    }
+    // Apply output filtering
+    output = output * (1.0f - VELOCITY_FILTER) + param->last_output * VELOCITY_FILTER;
+    param->last_output = output;
     
     return output;
 } 

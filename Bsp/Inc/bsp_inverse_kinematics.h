@@ -2,36 +2,27 @@
 #define BSP_INVERSE_KINEMATICS_H
 
 #include <stdint.h>
+#include <math.h>
 
 // Robot physical parameters (in meters)
-#define ROBOT_RADIUS 0.061f    // 61mm - Distance from robot center to wheel center
-#define WHEEL_RADIUS 0.027f    // 27mm - Wheel radius
-#define GEAR_RATIO 10.0f      // 10:1 gear reduction ratio
+#define ROBOT_RADIUS 0.086f    // 86mm - Distance from robot center to wheel center
+#define WHEEL_RADIUS 0.0262f   // 26.2mm - Wheel radius
+#define GEAR_RATIO 4.0f       // 4:1 gear reduction ratio
 
-// Wheel force vector angles when rotating clockwise (in radians)
-// These angles represent the direction of force vector produced by clockwise wheel rotation
-// Measured counterclockwise from +y axis
-// Motor ID1 (index 0) - Front-right wheel
-#define WHEEL1_ANGLE (-15.0f * M_PI / 180.0f)  // -15° force vector when clockwise
-// Motor ID2 (index 1) - Rear wheel
-#define WHEEL2_ANGLE (90.0f * M_PI / 180.0f)   // 90° force vector when clockwise
-// Motor ID3 (index 2) - Front-left wheel
-#define WHEEL3_ANGLE (-165.0f * M_PI / 180.0f) // -165° force vector when clockwise
+// Wheel angles (in radians) - measured from positive x-axis
+#define WHEEL1_ANGLE (M_PI_2 + 1.0f)        // Wheel 1
+#define WHEEL2_ANGLE (3*M_PI_2 - 0.75f)     // Wheel 2
+#define WHEEL3_ANGLE (3*M_PI_2 + 0.75f)     // Wheel 3
+#define WHEEL4_ANGLE (M_PI_2 - 1.0f)        // Wheel 4
 
-// Force vector components for each wheel when rotating clockwise
-#define WHEEL1_VX -0.258f  // cos(-15°)
-#define WHEEL1_VY 0.966f   // sin(-15°)
-#define WHEEL2_VX 1.0f     // cos(90°)
-#define WHEEL2_VY 0.0f     // sin(90°)
-#define WHEEL3_VX -0.258f  // cos(-165°)
-#define WHEEL3_VY -0.966f  // sin(-165°)
-
-// Motor parameters
-#define MAX_CURRENT 0.6f  // Maximum current in Amperes
+// Motor parameters for DM3519
+#define MAX_CURRENT 3.0f       // Maximum current in Amperes (reduced from 20.5A to 3A)
+#define CURRENT_SCALE 16384    // Current scale factor (-16384 to 16384 maps to -3A to 3A)
 
 // Velocity limits
-#define MAX_LINEAR_VEL 1.5f    // Maximum linear velocity in m/s (increased to 1.5)
-#define MAX_ANGULAR_VEL 6.0f    // Maximum angular velocity in rad/s (unchanged)
+#define MAX_LINEAR_VEL 2.0f    // Maximum linear velocity in m/s (reduced from 5.0 to 2.0)
+#define MAX_ANGULAR_VEL 4.0f   // Maximum angular velocity in rad/s (reduced from 5.0 to 4.0)
+#define MAX_WHEEL_SPEED 60.0f  // Maximum wheel angular speed in rad/s
 
 // Remote control parameters
 #define REMOTE_MAX 4096
@@ -48,9 +39,9 @@ typedef struct {
 
 // Debug structure for velocity monitoring
 typedef struct {
-    float target_wheel_speeds[3];    // Target wheel speeds from inverse kinematics (rad/s)
-    float target_motor_speeds[3];    // Target motor speeds after gear ratio (rad/s)
-    float actual_motor_speeds[3];    // Actual motor speeds from encoder feedback (rad/s)
+    float target_wheel_speeds[4];    // Target wheel speeds from inverse kinematics (rad/s)
+    float target_motor_speeds[4];    // Target motor speeds after gear ratio (rad/s)
+    float actual_motor_speeds[4];    // Actual motor speeds from encoder feedback (rad/s)
     uint32_t update_count;           // Number of updates performed
 } velocity_debug_t;
 
@@ -63,5 +54,6 @@ void BSP_InverseKinematics_Init(void);
 void BSP_MapRemoteToVelocities(int16_t x_input, int16_t y_input, int16_t r_input,
                               float* vx, float* vy, float* omega);
 void BSP_InverseKinematics_Calculate(float vx, float vy, float omega, float* wheel_velocities);
+void BSP_ConvertVelocityToCurrent(float* wheel_velocities, int16_t* motor_currents);
 
 #endif // BSP_INVERSE_KINEMATICS_H 
