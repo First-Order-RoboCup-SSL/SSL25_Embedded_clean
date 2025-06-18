@@ -46,7 +46,7 @@ void BSP_MapRemoteToVelocities(int16_t forward_back, int16_t left_right, int16_t
     
     // Map rotation to omega (clockwise is positive)
     float omega_norm = (float)(rotation - REMOTE_MID) / REMOTE_MID;  // Clockwise is positive
-    *omega = omega_norm * MAX_ANGULAR_VEL;
+    *omega = -omega_norm * MAX_ANGULAR_VEL;  // Added negative sign to reverse rotation direction
     
     // Store calculated velocities
     kinematics_debug.vx = *vx;

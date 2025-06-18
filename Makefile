@@ -79,6 +79,7 @@ Bsp/Src/bsp_fdcan.c \
 Bsp/Src/bsp_inverse_kinematics.c \
 Bsp/Src/bsp_motor_feedback.c \
 Bsp/Src/bsp_pid.c \
+Bsp/Src/bsp_sbus_controller.c \
 
 # ASM sources
 ASM_SOURCES =  \

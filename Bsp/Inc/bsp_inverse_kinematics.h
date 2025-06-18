@@ -30,7 +30,7 @@
 #define MAX_CURRENT 0.6f  // Maximum current in Amperes
 
 // Velocity limits
-#define MAX_LINEAR_VEL 0.9f    // Maximum linear velocity in m/s (0.75 * 1.2 = 0.9)
+#define MAX_LINEAR_VEL 1.5f    // Maximum linear velocity in m/s (increased to 1.5)
 #define MAX_ANGULAR_VEL 6.0f    // Maximum angular velocity in rad/s (unchanged)
 
 // Remote control parameters

@@ -29,6 +29,7 @@
 #include "bsp_motor_feedback.h"
 #include "bsp_inverse_kinematics.h"
 #include "bsp_fdcan.h"
+#include "bsp_sbus_controller.h"
 #include <math.h>
 #include <string.h>
 
@@ -177,6 +178,10 @@ int main(void)
   BSP_InverseKinematics_Init();
   can_init_status = 1;  // Success
   
+  // Initialize SBUS receiver
+  BSP_SBUS_Init();
+  BSP_SBUS_UART_StartReceive();
+  
   // Start UART reception with single byte
   HAL_UART_Receive_IT(&huart1, remote_IN, FRAME_SIZE);
   
@@ -191,11 +196,27 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    // Check SBUS signal status
+    if (!BSP_SBUS_IsSignalValid()) {
+        // If signal is lost, stop all motors
+        uint8_t can_cmd[8] = {0};  // All zeros = stop
+        BSP_FDCAN_Send_Message(&hfdcan3, 0x200, can_cmd, 8);
+        HAL_Delay(g_control_period_ms);
+        continue;  // Skip the rest of the loop
+    }
+    
     // 1. Map remote control values to velocities
     float vx, vy, omega;
-    BSP_MapRemoteToVelocities(decoded[2],    // forward/back
-                            decoded[3],    // left/right
-                            decoded[0],    // rotation
+    int16_t* sbus_mapped = BSP_SBUS_GetMappedChannels();
+    
+    // Map SBUS channels to velocities according to the specified mapping:
+    // sbus_mapped[1] -> decoded[2]  (第2通道 -> 第3通道)
+    // sbus_mapped[0] -> decoded[3]  (第1通道 -> 第4通道)
+    // sbus_mapped[3] -> decoded[0]  (第4通道 -> 第1通道)
+    // sbus_mapped[2] -> decoded[1]  (第3通道 -> 第2通道)
+    BSP_MapRemoteToVelocities(sbus_mapped[1],    // forward/back (原decoded[2])
+                             sbus_mapped[0],    // left/right (原decoded[3])
+                             sbus_mapped[3],    // rotation (原decoded[0])
                             &vx, &vy, &omega);
     
     // 2. Calculate target wheel velocities using inverse kinematics
@@ -348,6 +369,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
       sync_state = 0;
       HAL_UART_Receive_IT(&huart1, remote_IN, 1);
     }
+  }
+  else if (huart->Instance == UART5)
+  {
+    BSP_SBUS_UART_RxCpltCallback(huart);
   }
 }
 

@@ -1,0 +1,35 @@
+
+GraphedExpression="(velocity_debug).target_wheel_speeds[0]", Color=#a00909
+GraphedExpression="(velocity_debug).target_motor_speeds[0]", Color=#ffaa00
+GraphedExpression="(velocity_debug).actual_motor_speeds[0]", Color=#09a087
+OpenDocument="stm32h7xx_hal.c", FilePath="D:/EEE1/EE_Project/DMH7_Chassis_Control/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c", Line=412
+OpenDocument="main.c", FilePath="D:/EEE1/EE_Project/DMH7_Chassis_Control/Core/Src/main.c", Line=180
+OpenToolbar="Debug", Floating=0, x=0, y=0
+OpenWindow="Registers 1", DockArea=RIGHT, x=0, y=0, w=300, h=600, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, FilteredItems=[], RefreshRate=1
+OpenWindow="Source Files", DockArea=LEFT, x=0, y=0, w=1036, h=394, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Disassembly", DockArea=BOTTOM, x=2, y=0, w=1013, h=778, TabPos=0, TopOfStack=0, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Memory 1", DockArea=BOTTOM, x=2, y=0, w=1013, h=778, TabPos=1, TopOfStack=1, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, EditorAddress=0x20000B3A
+OpenWindow="Watched Data 1", DockArea=BOTTOM, x=0, y=0, w=833, h=778, TabPos=0, TopOfStack=1, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Functions", DockArea=LEFT, x=0, y=1, w=1036, h=205, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Data Sampling", DockArea=BOTTOM, x=0, y=0, w=833, h=778, TabPos=1, TopOfStack=0, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, VisibleTab=0, UniformSampleSpacing=0
+OpenWindow="Timeline", DockArea=BOTTOM, x=1, y=0, w=712, h=805, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=1, DataPaneShown=1, PowerPaneShown=1, CodePaneShown=1, PinCursor="Cursor Movable", TimePerDiv="2 s / Div", TimeStampFormat="Time", DataGraphDrawAsPoints=1, DataGraphLegendShown=1, DataGraphUniformSampleSpacing=0, DataGraphLegendPosition="192;0", PowerGraphDrawAsPoints=0, PowerGraphLegendShown=1, PowerGraphAvgFilterTime=Off, PowerGraphAvgFilterLen=Off, PowerGraphUniformSampleSpacing=0, PowerGraphLegendPosition="447;0", CodeGraphLegendShown=1, CodeGraphLegendPosition="481;0"
+TableHeader="Data Sampling Table", SortCol="None", SortOrder="ASCENDING", VisibleCols=["Index";"Time"], ColWidths=[100;100]
+TableHeader="Data Sampling Setup", SortCol="Expression", SortOrder="DESCENDING", VisibleCols=["Expression";"Type";"Value";"Min";"Max";"Average";"# Changes";"Min. Change";"Max. Change"], ColWidths=[465;100;100;100;100;111;132;146;151]
+TableHeader="Functions", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Address";"Size";"#Insts";"Source"], ColWidths=[832;113;100;100;388]
+TableHeader="Source Files", SortCol="File", SortOrder="ASCENDING", VisibleCols=["File";"Status";"Size";"#Insts";"Path"], ColWidths=[215;100;100;100;1114]
+TableHeader="Power Sampling", SortCol="None", SortOrder="ASCENDING", VisibleCols=["Index";"Time";"Ch 0"], ColWidths=[100;100;100]
+TableHeader="Registers 1", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Description"], ColWidths=[100;157;399]
+TableHeader="RegisterSelectionDialog", SortCol="None", SortOrder="ASCENDING", VisibleCols=[], ColWidths=[]
+TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh"], ColWidths=[245;200;228;134]
+TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Address";"Description"], ColWidths=[200;100;100;340]
+WatchedExpression="feedback_buffer", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="kinematics_debug", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="decoded", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="output1", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="velocity_debug", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="pid_params", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="g_velocity_deadband", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="g_current_deadband", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="g_control_period_ms", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="sbus_channels", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="sbus_channels_mapped", RefreshRate=5, Window=Watched Data 1
