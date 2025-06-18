@@ -35,7 +35,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "radio/radio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -85,13 +85,14 @@ float motor3_last_error = 0.0f;
 float motor4_error_sum = 0.0f;
 float motor4_last_error = 0.0f;
 
-// È«¾Ö±äÁ¿£¬±ãÓÚµ÷ÊÔÆ÷¼à¿Ø
+// å…¨å±€å˜é‡ï¼Œä¾¿äºè°ƒè¯•å™¨ç›‘æ§
 float output1 = 0, output2 = 0, output3 = 0, output4 = 0;
 int16_t output1_int = 0, output2_int = 0, output3_int = 0, output4_int = 0;
-// ĞÂÔö£ºÂË²¨ºóµÄÊä³ö
+// æ–°å¢ï¼šæ»¤æ³¢åçš„è¾“å‡º
 float output1_filtered = 0, output2_filtered = 0, output3_filtered = 0, output4_filtered = 0;
 
-// ĞÂÔö£ºÂË²¨ÏµÊı£¬±ãÓÚµ÷ÊÔ
+
+// é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿå‰¿è¯§æ‹·ç³»é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”ŸèŠ‚ç¢‰æ‹·é”Ÿæ–¤æ‹·
 volatile float alpha = 0.2f;
 
 // Add debug counters for CAN reception
@@ -138,6 +139,8 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 
+  NRF24_TypeDef nrf24_1;
+  NRF24_TypeDef nrf24_2;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -147,6 +150,11 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
+    nrf24_1.hspi = &hspi1;
+    nrf24_1.cePort = NRF24_1_CE_GPIO_Port;
+    nrf24_1.cePin = NRF24_1_CE_Pin;
+    nrf24_1.csPort = NRF24_1_CSN_GPIO_Port;
+    nrf24_1.csPin = NRF24_1_CSN_Pin;
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -195,6 +203,7 @@ int main(void)
   
   HAL_TIM_Base_Start_IT(&htim4);
   
+  radio(&nrf24_1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -275,7 +284,7 @@ int main(void)
     // 8. Send CAN message
     BSP_FDCAN_Send_Message(&hfdcan3, 0x200, can_cmd, 8);
     
-    // 9. Control update rate (default 1kHz to match DM3519 feedback)
+    poll(&nrf24_1);
     HAL_Delay(CONTROL_PERIOD_MS);
   }
   /* USER CODE END 3 */
@@ -378,7 +387,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
       // We already have the header, check the footer
       if (remote_IN[FRAME_SIZE-1] == FRAME_FOOTER) {
         // Valid frame received, decode the data (skip header and footer)
-        decode_uart_buffer(&remote_IN[1], decoded);
+        // decode_uart_buffer(&remote_IN[1], decoded);
       }
       // Reset sync state and start looking for next header
       sync_state = 0;

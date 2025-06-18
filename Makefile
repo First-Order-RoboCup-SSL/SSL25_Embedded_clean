@@ -72,7 +72,10 @@ Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart.c \
 Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart_ex.c \
 Core/Src/system_stm32h7xx.c \
 Core/Src/sysmem.c \
-Core/Src/syscalls.c
+Core/Src/syscalls.c \
+Core/Src/radio/nrf24.c \
+Core/Src/radio/radio.c \
+Core/Src/usdelay.c
 
 C_SOURCES += \
 Bsp/Src/bsp_fdcan.c \
@@ -144,7 +147,8 @@ C_INCLUDES =  \
 -IDrivers/STM32H7xx_HAL_Driver/Inc \
 -IDrivers/STM32H7xx_HAL_Driver/Inc/Legacy \
 -IDrivers/CMSIS/Device/ST/STM32H7xx/Include \
--IDrivers/CMSIS/Include
+-IDrivers/CMSIS/Include \
+-IDrivers/Inc/radio
 
 C_INCLUDES += \
 -IBsp/Inc
