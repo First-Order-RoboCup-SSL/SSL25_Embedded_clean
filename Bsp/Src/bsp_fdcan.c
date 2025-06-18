@@ -4,6 +4,12 @@
 
 /* Private variables */
 static uint8_t rx_buffer[8];  // 8 bytes buffer for receiving data
+static uint8_t tx_buffer[8];  // 8 bytes buffer for sending data
+
+// Debug counters for CAN reception
+volatile uint32_t can1_rx_count = 0;
+volatile uint32_t can2_rx_count = 0;
+volatile uint32_t can3_rx_count = 0;
 
 /**
   * @brief  Initialize FDCAN peripherals
@@ -44,7 +50,7 @@ void BSP_FDCAN_Filter_Init(void)
     sFilterConfig.FilterType = FDCAN_FILTER_MASK;
     sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
     sFilterConfig.FilterID1 = 0x200;  // Base ID for motor messages
-    sFilterConfig.FilterID2 = 0x7F0;  // Mask to accept IDs 0x201-0x203
+    sFilterConfig.FilterID2 = 0x7F0;  // Mask to accept IDs 0x201-0x204
     
     /* Configure filters for all FDCAN instances */
     HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig);
@@ -85,6 +91,46 @@ HAL_StatusTypeDef BSP_FDCAN_Send_Message(FDCAN_HandleTypeDef *hfdcan, uint32_t i
 }
 
 /**
+  * @brief  Send motor control command for DM3519 motors
+  * @param  hfdcan: FDCAN handle
+  * @param  motor_currents: Array of 4 current values for motors
+  * @retval HAL status
+  */
+HAL_StatusTypeDef BSP_FDCAN_Send_Motor_Command(FDCAN_HandleTypeDef *hfdcan, int16_t *motor_currents)
+{
+    // Pack motor currents into CAN frame
+    for(int i = 0; i < 4; i++) {
+        tx_buffer[2*i] = (motor_currents[i] >> 8) & 0xFF;     // High byte
+        tx_buffer[2*i + 1] = motor_currents[i] & 0xFF;        // Low byte
+    }
+    
+    // Send command frame
+    return BSP_FDCAN_Send_Message(hfdcan, FDCAN_MSG_ID_CONTROL, tx_buffer, 8);
+}
+
+/**
+  * @brief  Clear error for a specific motor
+  * @param  hfdcan: FDCAN handle
+  * @param  motor_id: Motor ID (1-4)
+  * @retval HAL status
+  */
+HAL_StatusTypeDef BSP_FDCAN_Clear_Error(FDCAN_HandleTypeDef *hfdcan, uint8_t motor_id)
+{
+    // Prepare error clear command
+    tx_buffer[0] = motor_id & 0xFF;        // CANID_L
+    tx_buffer[1] = (motor_id >> 8) & 0xFF; // CANID_H
+    tx_buffer[2] = 0x55;
+    tx_buffer[3] = 0x3C;
+    tx_buffer[4] = 0x00;
+    tx_buffer[5] = 0x00;
+    tx_buffer[6] = 0x00;
+    tx_buffer[7] = 0x00;
+    
+    // Send error clear command
+    return BSP_FDCAN_Send_Message(hfdcan, FDCAN_MSG_ID_ERROR_CLEAR, tx_buffer, 8);
+}
+
+/**
   * @brief  Process received feedback message
   * @param  rx_header: Pointer to CAN message header
   * @param  data: Pointer to received data
@@ -92,11 +138,11 @@ HAL_StatusTypeDef BSP_FDCAN_Send_Message(FDCAN_HandleTypeDef *hfdcan, uint32_t i
   */
 static void ProcessFeedbackMessage(FDCAN_RxHeaderTypeDef *rx_header, uint8_t *data)
 {
-    // Get motor ID from CAN ID (0x201 -> 1, 0x202 -> 2, 0x203 -> 3)
+    // Get motor ID from CAN ID (0x201 -> 1, 0x202 -> 2, etc.)
     uint8_t motor_id = rx_header->Identifier - 0x200;
     
     // Process through motor feedback system if it's a valid motor ID
-    if(motor_id >= 1 && motor_id <= 3) {
+    if(motor_id >= 1 && motor_id <= 4) {
         BSP_MotorFeedback_ProcessMessage(motor_id, data);
     }
 }
@@ -128,6 +174,7 @@ HAL_StatusTypeDef BSP_FDCAN_Receive_Message(FDCAN_HandleTypeDef *hfdcan, uint8_t
   */
 void BSP_FDCAN1_RxCallback(void)
 {
+    can1_rx_count++;
     BSP_FDCAN_Receive_Message(&hfdcan1, rx_buffer);
 }
 
@@ -138,6 +185,7 @@ void BSP_FDCAN1_RxCallback(void)
   */
 void BSP_FDCAN2_RxCallback(void)
 {
+    can2_rx_count++;
     BSP_FDCAN_Receive_Message(&hfdcan2, rx_buffer);
 }
 
@@ -148,6 +196,7 @@ void BSP_FDCAN2_RxCallback(void)
   */
 void BSP_FDCAN3_RxCallback(void)
 {
+    can3_rx_count++;
     BSP_FDCAN_Receive_Message(&hfdcan3, rx_buffer);
 }
 

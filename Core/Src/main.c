@@ -29,6 +29,7 @@
 #include "bsp_motor_feedback.h"
 #include "bsp_inverse_kinematics.h"
 #include "bsp_fdcan.h"
+#include "bsp_sbus_controller.h"
 #include <math.h>
 #include <string.h>
 
@@ -49,10 +50,11 @@
 #define FRAME_SIZE 12  // 1 byte header + 10 bytes data + 1 byte footer
 
 /* Motor control parameters */
-#define MOTOR_COUNT 3
+#define MOTOR_COUNT 4
 #define MOTOR_ID_1 0x201
 #define MOTOR_ID_2 0x202
 #define MOTOR_ID_3 0x203
+#define MOTOR_ID_4 0x204
 #define RPM_TO_RADS 0.10472f  // 2*pi/60 to convert RPM to rad/s
 
 /* USER CODE END PD */
@@ -80,15 +82,23 @@ float motor2_error_sum = 0.0f;
 float motor2_last_error = 0.0f;
 float motor3_error_sum = 0.0f;
 float motor3_last_error = 0.0f;
+float motor4_error_sum = 0.0f;
+float motor4_last_error = 0.0f;
 
-// ȫ�ֱ��������ڵ��������
-float output1 = 0, output2 = 0, output3 = 0;
-int16_t output1_int = 0, output2_int = 0, output3_int = 0;
-// �������˲�������
-float output1_filtered = 0, output2_filtered = 0, output3_filtered = 0;
+// 全局变量，便于调试器监控
+float output1 = 0, output2 = 0, output3 = 0, output4 = 0;
+int16_t output1_int = 0, output2_int = 0, output3_int = 0, output4_int = 0;
+// 新增：滤波后的输出
+float output1_filtered = 0, output2_filtered = 0, output3_filtered = 0, output4_filtered = 0;
 
-// �������˲�ϵ�������ڵ���
+
+// 锟斤拷锟斤拷锟斤拷锟剿诧拷系锟斤拷锟斤拷锟斤拷锟节碉拷锟斤拷
 volatile float alpha = 0.2f;
+
+// Add debug counters for CAN reception
+extern volatile uint32_t can1_rx_count;
+extern volatile uint32_t can2_rx_count;
+extern volatile uint32_t can3_rx_count;
 
 /* USER CODE END PV */
 
@@ -184,6 +194,10 @@ int main(void)
   BSP_InverseKinematics_Init();
   can_init_status = 1;  // Success
   
+  // Initialize SBUS receiver
+  BSP_SBUS_Init();
+  BSP_SBUS_UART_StartReceive();
+  
   // Start UART reception with single byte
   HAL_UART_Receive_IT(&huart1, remote_IN, FRAME_SIZE);
   
@@ -199,41 +213,62 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    // Check SBUS signal status
+    if (!BSP_SBUS_IsSignalValid()) {
+        // If signal is lost, stop all motors
+        uint8_t can_cmd[8] = {0};  // All zeros = stop
+        BSP_FDCAN_Send_Message(&hfdcan3, 0x200, can_cmd, 8);
+        HAL_Delay(CONTROL_PERIOD_MS);
+        continue;  // Skip the rest of the loop
+    }
+    
     // 1. Map remote control values to velocities
     float vx, vy, omega;
-    BSP_MapRemoteToVelocities(decoded[2],    // forward/back
-                            decoded[3],    // left/right
-                            decoded[0],    // rotation
+    int16_t* sbus_mapped = BSP_SBUS_GetMappedChannels();
+    
+    // Map SBUS channels to velocities:
+    // Channel 1 (sbus_mapped[0]) -> X translation
+    // Channel 2 (sbus_mapped[1]) -> Y translation
+    // Channel 4 (sbus_mapped[3]) -> Rotation
+    BSP_MapRemoteToVelocities(sbus_mapped[0],    // x translation (channel 1)
+                             sbus_mapped[1],    // y translation (channel 2)
+                             sbus_mapped[3],    // rotation (channel 4)
                             &vx, &vy, &omega);
     
     // 2. Calculate target wheel velocities using inverse kinematics
-    float wheel_velocities[3];
+    float wheel_velocities[4];  // Now 4 elements
     BSP_InverseKinematics_Calculate(vx, vy, omega, wheel_velocities);
     
     // 3. Get actual motor velocities from FDCAN feedback
     motor_feedback_t* feedback1 = BSP_MotorFeedback_GetMotorData(0);
     motor_feedback_t* feedback2 = BSP_MotorFeedback_GetMotorData(1);
     motor_feedback_t* feedback3 = BSP_MotorFeedback_GetMotorData(2);
+    motor_feedback_t* feedback4 = BSP_MotorFeedback_GetMotorData(3);
     
     // Convert rotor speed to wheel speed by dividing by gear ratio
     float actual_velocity1 = feedback1 ? (feedback1->rotor_speed * RPM_TO_RADS) / GEAR_RATIO : 0.0f;
     float actual_velocity2 = feedback2 ? (feedback2->rotor_speed * RPM_TO_RADS) / GEAR_RATIO : 0.0f;
     float actual_velocity3 = feedback3 ? (feedback3->rotor_speed * RPM_TO_RADS) / GEAR_RATIO : 0.0f;
+    float actual_velocity4 = feedback4 ? (feedback4->rotor_speed * RPM_TO_RADS) / GEAR_RATIO : 0.0f;
     
     // 4. Calculate motor outputs using PID
-    float output1 = BSP_PID_Calculate_Indiv(&pid_params[0], wheel_velocities[0], actual_velocity1);
-    float output2 = BSP_PID_Calculate_Indiv(&pid_params[1], wheel_velocities[1], actual_velocity2);
-    float output3 = BSP_PID_Calculate_Indiv(&pid_params[2], wheel_velocities[2], actual_velocity3);
+    float output1 = BSP_PID_Calculate(0, wheel_velocities[0], actual_velocity1);
+    float output2 = BSP_PID_Calculate(1, wheel_velocities[1], actual_velocity2);
+    float output3 = BSP_PID_Calculate(2, wheel_velocities[2], actual_velocity3);
+    float output4 = BSP_PID_Calculate(3, wheel_velocities[3], actual_velocity4);
     
     // 5. Apply low-pass filter
     output1_filtered = alpha * output1 + (1.0f - alpha) * output1_filtered;
     output2_filtered = alpha * output2 + (1.0f - alpha) * output2_filtered;
     output3_filtered = alpha * output3 + (1.0f - alpha) * output3_filtered;
+    output4_filtered = alpha * output4 + (1.0f - alpha) * output4_filtered;
     
-    // 6. Convert to CAN format (-32768 to 32767)
-    output1_int = (int16_t)(output1_filtered * 32767.0f / PID_OUTPUT_MAX);
-    output2_int = (int16_t)(output2_filtered * 32767.0f / PID_OUTPUT_MAX);
-    output3_int = (int16_t)(output3_filtered * 32767.0f / PID_OUTPUT_MAX);
+    
+    // 6. Convert to CAN format (-16384 to 16384 for DM3519)
+    output1_int = (int16_t)(output1_filtered);
+    output2_int = (int16_t)(output2_filtered);
+    output3_int = (int16_t)(output3_filtered);
+    output4_int = (int16_t)(output4_filtered);
     
     // 7. Pack data into CAN message
     uint8_t can_cmd[8] = {0};
@@ -243,14 +278,14 @@ int main(void)
     can_cmd[3] = output2_int & 0xFF;
     can_cmd[4] = (output3_int >> 8) & 0xFF;
     can_cmd[5] = output3_int & 0xFF;
+    can_cmd[6] = (output4_int >> 8) & 0xFF;
+    can_cmd[7] = output4_int & 0xFF;
     
     // 8. Send CAN message
     BSP_FDCAN_Send_Message(&hfdcan3, 0x200, can_cmd, 8);
     
-    // 9. Control update rate (default 200Hz, but now adjustable)
-    HAL_Delay(g_control_period_ms);
-
     poll(&nrf24_1);
+    HAL_Delay(CONTROL_PERIOD_MS);
   }
   /* USER CODE END 3 */
 }
@@ -358,6 +393,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
       sync_state = 0;
       HAL_UART_Receive_IT(&huart1, remote_IN, 1);
     }
+  }
+  else if (huart->Instance == UART5)
+  {
+    BSP_SBUS_UART_RxCpltCallback(huart);
   }
 }
 
