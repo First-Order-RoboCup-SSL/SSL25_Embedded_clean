@@ -34,7 +34,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "radio/radio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -81,13 +81,13 @@ float motor2_last_error = 0.0f;
 float motor3_error_sum = 0.0f;
 float motor3_last_error = 0.0f;
 
-// È«¾Ö±äÁ¿£¬±ãÓÚµ÷ÊÔÆ÷¼à¿Ø
+// È«ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 float output1 = 0, output2 = 0, output3 = 0;
 int16_t output1_int = 0, output2_int = 0, output3_int = 0;
-// ÐÂÔö£ºÂË²¨ºóµÄÊä³ö
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 float output1_filtered = 0, output2_filtered = 0, output3_filtered = 0;
 
-// ÐÂÔö£ºÂË²¨ÏµÊý£¬±ãÓÚµ÷ÊÔ
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë²ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Úµï¿½ï¿½ï¿½
 volatile float alpha = 0.2f;
 
 /* USER CODE END PV */
@@ -129,6 +129,8 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 
+  NRF24_TypeDef nrf24_1;
+  NRF24_TypeDef nrf24_2;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -138,6 +140,11 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
+    nrf24_1.hspi = &hspi1;
+    nrf24_1.cePort = NRF24_1_CE_GPIO_Port;
+    nrf24_1.cePin = NRF24_1_CE_Pin;
+    nrf24_1.csPort = NRF24_1_CSN_GPIO_Port;
+    nrf24_1.csPin = NRF24_1_CSN_Pin;
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -182,6 +189,7 @@ int main(void)
   
   HAL_TIM_Base_Start_IT(&htim4);
   
+  radio(&nrf24_1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -241,6 +249,8 @@ int main(void)
     
     // 9. Control update rate (default 200Hz, but now adjustable)
     HAL_Delay(g_control_period_ms);
+
+    poll(&nrf24_1);
   }
   /* USER CODE END 3 */
 }
@@ -342,7 +352,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
       // We already have the header, check the footer
       if (remote_IN[FRAME_SIZE-1] == FRAME_FOOTER) {
         // Valid frame received, decode the data (skip header and footer)
-        decode_uart_buffer(&remote_IN[1], decoded);
+        // decode_uart_buffer(&remote_IN[1], decoded);
       }
       // Reset sync state and start looking for next header
       sync_state = 0;
