@@ -224,16 +224,19 @@ int main(void)
     
     // 1. Map remote control values to velocities
     float vx, vy, omega;
-    int16_t* sbus_mapped = BSP_SBUS_GetMappedChannels();
+    // int16_t* sbus_mapped = BSP_SBUS_GetMappedChannels();
+    vx = currentPacket.left;
+    vy = currentPacket.forward;
+    omega = currentPacket.angular;
     
     // Map SBUS channels to velocities:
     // Channel 1 (sbus_mapped[0]) -> X translation
     // Channel 2 (sbus_mapped[1]) -> Y translation
-    // Channel 4 (sbus_mapped[3]) -> Rotation
-    BSP_MapRemoteToVelocities(sbus_mapped[0],    // x translation (channel 1)
-                             sbus_mapped[1],    // y translation (channel 2)
-                             sbus_mapped[3],    // rotation (channel 4)
-                            &vx, &vy, &omega);
+    // // Channel 4 (sbus_mapped[3]) -> Rotation
+    // BSP_MapRemoteToVelocities(sbus_mapped[0],    // x translation (channel 1)
+    //                          sbus_mapped[1],    // y translation (channel 2)
+    //                          sbus_mapped[3],    // rotation (channel 4)
+    //                         &vx, &vy, &omega);
     
     // 2. Calculate target wheel velocities using inverse kinematics
     float wheel_velocities[4];  // Now 4 elements
@@ -258,17 +261,17 @@ int main(void)
     float output4 = BSP_PID_Calculate(3, wheel_velocities[3], actual_velocity4);
     
     // 5. Apply low-pass filter
-    output1_filtered = alpha * output1 + (1.0f - alpha) * output1_filtered;
-    output2_filtered = alpha * output2 + (1.0f - alpha) * output2_filtered;
-    output3_filtered = alpha * output3 + (1.0f - alpha) * output3_filtered;
-    output4_filtered = alpha * output4 + (1.0f - alpha) * output4_filtered;
+    // output1_filtered = alpha * output1 + (1.0f - alpha) * output1_filtered;
+    // output2_filtered = alpha * output2 + (1.0f - alpha) * output2_filtered;
+    // output3_filtered = alpha * output3 + (1.0f - alpha) * output3_filtered;
+    // output4_filtered = alpha * output4 + (1.0f - alpha) * output4_filtered;
     
     
     // 6. Convert to CAN format (-16384 to 16384 for DM3519)
-    output1_int = (int16_t)(output1_filtered);
-    output2_int = (int16_t)(output2_filtered);
-    output3_int = (int16_t)(output3_filtered);
-    output4_int = (int16_t)(output4_filtered);
+    output1_int = (int16_t)(output1);
+    output2_int = (int16_t)(output2);
+    output3_int = (int16_t)(output3);
+    output4_int = (int16_t)(output4);
     
     // 7. Pack data into CAN message
     uint8_t can_cmd[8] = {0};

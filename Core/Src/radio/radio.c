@@ -11,6 +11,7 @@
 #include "../../Inc/usdelay.h"
 #include <string.h>
 
+
 // Compute CRC-8 using polynomial 0x07 over the provided data buffer.
 uint8_t compute_crc(const uint8_t* data, size_t length) {
     uint8_t crc = 0x00;
@@ -104,22 +105,16 @@ void RTT_PrintBool(const char* label, bool value) {
     // SEGGER_RTT_WriteString(0, "\n");
 }
 
-typedef struct {
-  uint16_t adc_ch1;          // ADC Channel 1 (2 bytes)
-  uint16_t adc_ch2;          // ADC Channel 2 (2 bytes)  
-  uint16_t adc_ch3;          // ADC Channel 3 (2 bytes)
-  uint16_t adc_ch4;          // ADC Channel 4 (2 bytes)
-  uint8_t aux1_state;        // AUX1 button state (1 byte)
-  uint8_t aux2_state;        // AUX2 button state (1 byte)
-} __attribute__((packed)) NRF24_TxBuffer_t;
+Packet currentPacket;
 
 extern uint16_t decoded[6];
 
 void poll(const NRF24_TypeDef *nrf) {
     
     if (nRF24_GetStatus_RXFIFO(nrf) != nRF24_STATUS_RXFIFO_EMPTY) {
-        uint8_t payload[10];
-        uint8_t length = 10;
+        
+        uint8_t payload[8];
+        uint8_t length = 8;
 
         uint8_t pipe = nRF24_ReadPayload(nrf, payload, &length);
         uint8_t ackPayload = !HAL_GPIO_ReadPin(IR_SENSOR_GPIO_Port, IR_SENSOR_Pin);
@@ -134,13 +129,7 @@ void poll(const NRF24_TypeDef *nrf) {
         // //     SEGGER_RTT_WriteString(0, "CRC error: Invalid packet. Discarding packet.\n");
         // //     return;  // Discard the packet if CRC does not match
         // // }
-
-        NRF24_TxBuffer_t data;
-        memcpy(&data, &payload, 10);
-        decoded[0] = data.adc_ch1;
-        decoded[1] = data.adc_ch2;
-        decoded[2] = data.adc_ch3;
-        decoded[4] = data.adc_ch4;
+        parsePacket(payload, &currentPacket);
     }
 
     // Flush TX FIFO and clear IRQ flags

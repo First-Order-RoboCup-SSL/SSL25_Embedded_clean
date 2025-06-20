@@ -24,6 +24,8 @@ typedef struct {
 void poll(const NRF24_TypeDef *nrf);
 void parsePacket(uint8_t *bytes, Packet *packet);
 
+extern Packet currentPacket;
+
 // volatile bool gNRFErrorDetected;
 
 #endif //RADIO_H
