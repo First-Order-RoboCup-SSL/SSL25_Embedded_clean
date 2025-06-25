@@ -28,15 +28,6 @@
 #define REMOTE_MAX 4096
 #define REMOTE_MID (REMOTE_MAX / 2)
 
-// Debug structure
-typedef struct {
-    uint16_t raw_inputs[3];     // Raw remote control inputs
-    float vx;                   // Calculated X velocity
-    float vy;                   // Calculated Y velocity
-    float omega;                // Calculated angular velocity
-    uint32_t update_count;      // Number of updates performed
-} kinematics_debug_t;
-
 // Debug structure for velocity monitoring
 typedef struct {
     float target_wheel_speeds[4];    // Target wheel speeds from inverse kinematics (rad/s)
@@ -45,8 +36,7 @@ typedef struct {
     uint32_t update_count;           // Number of updates performed
 } velocity_debug_t;
 
-// Global debug structures
-extern kinematics_debug_t kinematics_debug;
+// Global debug structure
 extern velocity_debug_t velocity_debug;
 
 // Function declarations

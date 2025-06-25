@@ -45,10 +45,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define FRAME_HEADER 0xAA
-#define FRAME_FOOTER 0x55
-#define FRAME_SIZE 12  // 1 byte header + 10 bytes data + 1 byte footer
-
 /* Motor control parameters */
 #define MOTOR_COUNT 4
 #define MOTOR_ID_1 0x201
@@ -67,15 +63,12 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint8_t remote_IN[FRAME_SIZE];
-uint16_t decoded[6];
-uint8_t sync_state = 0;  // 0: looking for header, 1: receiving frame
-
 // Debug flags
 volatile uint8_t can_init_status = 0;    // 0=not initialized, 1=success, 2=failed
 volatile uint32_t can_tx_count = 0;      // Count of successful transmissions
 volatile uint32_t can_error_count = 0;   // Count of transmission errors
 
+// Motor control variables
 float motor1_error_sum = 0.0f;
 float motor1_last_error = 0.0f;
 float motor2_error_sum = 0.0f;
@@ -85,14 +78,13 @@ float motor3_last_error = 0.0f;
 float motor4_error_sum = 0.0f;
 float motor4_last_error = 0.0f;
 
-// 全局变量，便于调试器监控
-float output1 = 0, output2 = 0, output3 = 0, output4 = 0;
-int16_t output1_int = 0, output2_int = 0, output3_int = 0, output4_int = 0;
-// 新增：滤波后的输出
-float output1_filtered = 0, output2_filtered = 0, output3_filtered = 0, output4_filtered = 0;
+// Output filtering variables
+float output1_filtered = 0.0f;
+float output2_filtered = 0.0f;
+float output3_filtered = 0.0f;
+float output4_filtered = 0.0f;
 
-
-// 锟斤拷锟斤拷锟斤拷锟剿诧拷系锟斤拷锟斤拷锟斤拷锟节碉拷锟斤拷
+// Low-pass filter coefficient
 volatile float alpha = 0.2f;
 
 // Add debug counters for CAN reception
@@ -117,17 +109,6 @@ int _write(int file, char *ptr, int len)
     HAL_UART_Transmit(&huart1, (uint8_t*)ptr, len, HAL_MAX_DELAY);
     return len;
 }
-
-void decode_uart_buffer(uint8_t* uart_buffer, uint16_t* decoded) {
-    // Decode ADC values (4 channels)
-    decoded[0] = (uart_buffer[0] << 8) | uart_buffer[1];  // ADC1
-    decoded[1] = (uart_buffer[2] << 8) | uart_buffer[3];  // ADC2
-    decoded[2] = (uart_buffer[4] << 8) | uart_buffer[5];  // ADC3
-    decoded[3] = (uart_buffer[6] << 8) | uart_buffer[7];  // ADC4
-    // Decode button states (2 channels)
-    decoded[4] = uart_buffer[8];  // AUX1 button
-    decoded[5] = uart_buffer[9];  // AUX2 button
-}
 /* USER CODE END 0 */
 
 /**
@@ -140,7 +121,6 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
   NRF24_TypeDef nrf24_1;
-  NRF24_TypeDef nrf24_2;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -189,17 +169,11 @@ int main(void)
   HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_SET);
   HAL_GPIO_WritePin(GPIOC,GPIO_PIN_15,GPIO_PIN_SET);
   
+  
   // Initialize FDCAN with BSP function
   BSP_FDCAN_Init();
   BSP_InverseKinematics_Init();
   can_init_status = 1;  // Success
-  
-  // Initialize SBUS receiver
-  BSP_SBUS_Init();
-  BSP_SBUS_UART_StartReceive();
-  
-  // Start UART reception with single byte
-  HAL_UART_Receive_IT(&huart1, remote_IN, FRAME_SIZE);
   
   HAL_TIM_Base_Start_IT(&htim4);
   
@@ -213,36 +187,19 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    // Check SBUS signal status
-    if (!BSP_SBUS_IsSignalValid()) {
-        // If signal is lost, stop all motors
-        uint8_t can_cmd[8] = {0};  // All zeros = stop
-        BSP_FDCAN_Send_Message(&hfdcan3, 0x200, can_cmd, 8);
-        HAL_Delay(CONTROL_PERIOD_MS);
-        continue;  // Skip the rest of the loop
-    }
+    // Poll NRF24 for new data
+    poll(&nrf24_1);
     
-    // 1. Map remote control values to velocities
-    float vx, vy, omega;
-    // int16_t* sbus_mapped = BSP_SBUS_GetMappedChannels();
-    vx = currentPacket.left;
-    vy = currentPacket.forward;
-    omega = currentPacket.angular;
+    // Map NRF24 received values to velocities
+    float vx = currentPacket.forward_vel;  // Forward/backward
+    float vy = currentPacket.left_vel;     // Left/right
+    float omega = currentPacket.angular_vel; // Angular velocity
     
-    // Map SBUS channels to velocities:
-    // Channel 1 (sbus_mapped[0]) -> X translation
-    // Channel 2 (sbus_mapped[1]) -> Y translation
-    // // Channel 4 (sbus_mapped[3]) -> Rotation
-    // BSP_MapRemoteToVelocities(sbus_mapped[0],    // x translation (channel 1)
-    //                          sbus_mapped[1],    // y translation (channel 2)
-    //                          sbus_mapped[3],    // rotation (channel 4)
-    //                         &vx, &vy, &omega);
-    
-    // 2. Calculate target wheel velocities using inverse kinematics
+    // Calculate target wheel velocities using inverse kinematics
     float wheel_velocities[4];  // Now 4 elements
     BSP_InverseKinematics_Calculate(vx, vy, omega, wheel_velocities);
     
-    // 3. Get actual motor velocities from FDCAN feedback
+    // Get actual motor velocities from FDCAN feedback
     motor_feedback_t* feedback1 = BSP_MotorFeedback_GetMotorData(0);
     motor_feedback_t* feedback2 = BSP_MotorFeedback_GetMotorData(1);
     motor_feedback_t* feedback3 = BSP_MotorFeedback_GetMotorData(2);
@@ -254,26 +211,23 @@ int main(void)
     float actual_velocity3 = feedback3 ? (feedback3->rotor_speed * RPM_TO_RADS) / GEAR_RATIO : 0.0f;
     float actual_velocity4 = feedback4 ? (feedback4->rotor_speed * RPM_TO_RADS) / GEAR_RATIO : 0.0f;
     
-    // 4. Calculate motor outputs using PID
-    float output1 = BSP_PID_Calculate(0, wheel_velocities[0], actual_velocity1);
-    float output2 = BSP_PID_Calculate(1, wheel_velocities[1], actual_velocity2);
-    float output3 = BSP_PID_Calculate(2, wheel_velocities[2], actual_velocity3);
-    float output4 = BSP_PID_Calculate(3, wheel_velocities[3], actual_velocity4);
+    // Calculate motor outputs using PID and apply low-pass filter
+    output1_filtered = alpha * BSP_PID_Calculate(0, wheel_velocities[0], actual_velocity1) + 
+                      (1.0f - alpha) * output1_filtered;
+    output2_filtered = alpha * BSP_PID_Calculate(1, wheel_velocities[1], actual_velocity2) + 
+                      (1.0f - alpha) * output2_filtered;
+    output3_filtered = alpha * BSP_PID_Calculate(2, wheel_velocities[2], actual_velocity3) + 
+                      (1.0f - alpha) * output3_filtered;
+    output4_filtered = alpha * BSP_PID_Calculate(3, wheel_velocities[3], actual_velocity4) + 
+                      (1.0f - alpha) * output4_filtered;
     
-    // 5. Apply low-pass filter
-    // output1_filtered = alpha * output1 + (1.0f - alpha) * output1_filtered;
-    // output2_filtered = alpha * output2 + (1.0f - alpha) * output2_filtered;
-    // output3_filtered = alpha * output3 + (1.0f - alpha) * output3_filtered;
-    // output4_filtered = alpha * output4 + (1.0f - alpha) * output4_filtered;
+    // Convert to CAN format (-16384 to 16384 for DM3519)
+    int16_t output1_int = (int16_t)(output1_filtered);
+    int16_t output2_int = (int16_t)(output2_filtered);
+    int16_t output3_int = (int16_t)(output3_filtered);
+    int16_t output4_int = (int16_t)(output4_filtered);
     
-    
-    // 6. Convert to CAN format (-16384 to 16384 for DM3519)
-    output1_int = (int16_t)(output1);
-    output2_int = (int16_t)(output2);
-    output3_int = (int16_t)(output3);
-    output4_int = (int16_t)(output4);
-    
-    // 7. Pack data into CAN message
+    // Pack data into CAN message
     uint8_t can_cmd[8] = {0};
     can_cmd[0] = (output1_int >> 8) & 0xFF;
     can_cmd[1] = output1_int & 0xFF;
@@ -284,10 +238,9 @@ int main(void)
     can_cmd[6] = (output4_int >> 8) & 0xFF;
     can_cmd[7] = output4_int & 0xFF;
     
-    // 8. Send CAN message
+    // Send CAN message
     BSP_FDCAN_Send_Message(&hfdcan3, 0x200, can_cmd, 8);
     
-    poll(&nrf24_1);
     HAL_Delay(CONTROL_PERIOD_MS);
   }
   /* USER CODE END 3 */
@@ -374,35 +327,11 @@ void PeriphCommonClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-  if (huart->Instance == USART1)
-  {
-    if (sync_state == 0) {
-      // Looking for frame header
-      if (remote_IN[0] == FRAME_HEADER) {
-        sync_state = 1;
-        // Start receiving the rest of the frame
-        HAL_UART_Receive_IT(&huart1, &remote_IN[1], FRAME_SIZE-1);
-      } else {
-        // Keep looking for header
-        HAL_UART_Receive_IT(&huart1, remote_IN, 1);
-      }
-    } else {
-      // We already have the header, check the footer
-      if (remote_IN[FRAME_SIZE-1] == FRAME_FOOTER) {
-        // Valid frame received, decode the data (skip header and footer)
-        // decode_uart_buffer(&remote_IN[1], decoded);
-      }
-      // Reset sync state and start looking for next header
-      sync_state = 0;
-      HAL_UART_Receive_IT(&huart1, remote_IN, 1);
-    }
-  }
-  else if (huart->Instance == UART5)
+  if (huart->Instance == UART5)
   {
     BSP_SBUS_UART_RxCpltCallback(huart);
   }
 }
-
 /* USER CODE END 4 */
 
 /**
