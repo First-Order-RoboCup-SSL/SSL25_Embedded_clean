@@ -1,0 +1,3045 @@
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 2
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"radio.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "Core/Src/radio/radio.c"
+  19              		.section	.text.compute_crc,"ax",%progbits
+  20              		.align	1
+  21              		.p2align 2,,3
+  22              		.global	compute_crc
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	compute_crc:
+  28              	.LVL0:
+  29              	.LFB150:
+   1:Core/Src/radio/radio.c **** // 
+   2:Core/Src/radio/radio.c **** // Created by sam on 23/01/2025.
+   3:Core/Src/radio/radio.c **** // Updated by Han on 02/02/2025.
+   4:Core/Src/radio/radio.c **** // 
+   5:Core/Src/radio/radio.c **** 
+   6:Core/Src/radio/radio.c **** #include "../../Inc/radio/radio.h"
+   7:Core/Src/radio/radio.c **** #include "main.h"
+   8:Core/Src/radio/radio.c **** #include <stdbool.h>
+   9:Core/Src/radio/radio.c **** #include <stdlib.h>
+  10:Core/Src/radio/radio.c **** #include <stdint.h>      // For uint8_t, uint16_t, etc.
+  11:Core/Src/radio/radio.c **** #include "../../Inc/usdelay.h"
+  12:Core/Src/radio/radio.c **** #include <string.h>
+  13:Core/Src/radio/radio.c **** 
+  14:Core/Src/radio/radio.c **** // Global variables
+  15:Core/Src/radio/radio.c **** ProcessedPacket_t currentPacket;
+  16:Core/Src/radio/radio.c **** volatile NRF24_RxBuffer_t rawPacket;  // Raw buffer for debugging
+  17:Core/Src/radio/radio.c **** 
+  18:Core/Src/radio/radio.c **** // Compute CRC-8 using polynomial 0x07 over the provided data buffer.
+  19:Core/Src/radio/radio.c **** uint8_t compute_crc(const uint8_t* data, size_t length) {
+  30              		.loc 1 19 57 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  34              		@ link register save eliminated.
+  20:Core/Src/radio/radio.c ****     uint8_t crc = 0x00;
+  35              		.loc 1 20 5 view .LVU1
+  21:Core/Src/radio/radio.c ****     uint8_t poly = 0x07;
+  36              		.loc 1 21 5 view .LVU2
+  22:Core/Src/radio/radio.c ****     for (size_t i = 0; i < length; i++) {
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 2
+
+
+  37              		.loc 1 22 5 view .LVU3
+  38              	.LBB8:
+  39              		.loc 1 22 10 view .LVU4
+  40              		.loc 1 22 26 view .LVU5
+  41 0000 0029     		cmp	r1, #0
+  42 0002 68D0     		beq	.L20
+  43 0004 421E     		subs	r2, r0, #1
+  44              	.LBE8:
+  20:Core/Src/radio/radio.c ****     uint8_t crc = 0x00;
+  45              		.loc 1 20 13 is_stmt 0 view .LVU6
+  46 0006 0020     		movs	r0, #0
+  47              	.LVL1:
+  20:Core/Src/radio/radio.c ****     uint8_t crc = 0x00;
+  48              		.loc 1 20 13 view .LVU7
+  49 0008 1144     		add	r1, r1, r2
+  50              	.LVL2:
+  20:Core/Src/radio/radio.c ****     uint8_t crc = 0x00;
+  51              		.loc 1 20 13 view .LVU8
+  52 000a 27E0     		b	.L19
+  53              	.LVL3:
+  54              	.L25:
+  55              	.LBB12:
+  56              	.LBB9:
+  23:Core/Src/radio/radio.c ****         crc ^= data[i];
+  24:Core/Src/radio/radio.c ****         for (int j = 0; j < 8; j++) {
+  25:Core/Src/radio/radio.c ****             if (crc & 0x80)
+  26:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+  27:Core/Src/radio/radio.c ****             else
+  28:Core/Src/radio/radio.c ****                 crc = (uint8_t)(crc << 1);
+  57              		.loc 1 28 17 is_stmt 1 view .LVU9
+  58              		.loc 1 28 21 is_stmt 0 view .LVU10
+  59 000c C3B2     		uxtb	r3, r0
+  60              	.LVL4:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+  61              		.loc 1 25 17 view .LVU11
+  62 000e 40B2     		sxtb	r0, r0
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+  63              		.loc 1 24 33 is_stmt 1 view .LVU12
+  64              	.LVL5:
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+  65              		.loc 1 24 27 view .LVU13
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+  66              		.loc 1 25 13 view .LVU14
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+  67              		.loc 1 25 16 is_stmt 0 view .LVU15
+  68 0010 0028     		cmp	r0, #0
+  69 0012 31DB     		blt	.L5
+  70              	.L26:
+  71              		.loc 1 28 17 is_stmt 1 view .LVU16
+  72              		.loc 1 28 21 is_stmt 0 view .LVU17
+  73 0014 5800     		lsls	r0, r3, #1
+  74 0016 C3B2     		uxtb	r3, r0
+  75              	.LVL6:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+  76              		.loc 1 25 17 view .LVU18
+  77 0018 40B2     		sxtb	r0, r0
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 3
+
+
+  78              		.loc 1 24 33 is_stmt 1 view .LVU19
+  79              	.LVL7:
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+  80              		.loc 1 24 27 view .LVU20
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+  81              		.loc 1 25 13 view .LVU21
+  26:Core/Src/radio/radio.c ****             else
+  82              		.loc 1 26 38 is_stmt 0 view .LVU22
+  83 001a 5B00     		lsls	r3, r3, #1
+  84              	.LVL8:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+  85              		.loc 1 25 16 view .LVU23
+  86 001c 0028     		cmp	r0, #0
+  87 001e 34DB     		blt	.L7
+  88              	.LVL9:
+  89              	.L27:
+  90              		.loc 1 28 17 is_stmt 1 view .LVU24
+  91              		.loc 1 28 21 is_stmt 0 view .LVU25
+  92 0020 D8B2     		uxtb	r0, r3
+  93              	.LVL10:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+  94              		.loc 1 25 17 view .LVU26
+  95 0022 5BB2     		sxtb	r3, r3
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+  96              		.loc 1 24 33 is_stmt 1 view .LVU27
+  97              	.LVL11:
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+  98              		.loc 1 24 27 view .LVU28
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+  99              		.loc 1 25 13 view .LVU29
+  26:Core/Src/radio/radio.c ****             else
+ 100              		.loc 1 26 38 is_stmt 0 view .LVU30
+ 101 0024 4000     		lsls	r0, r0, #1
+ 102              	.LVL12:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 103              		.loc 1 25 16 view .LVU31
+ 104 0026 002B     		cmp	r3, #0
+ 105 0028 37DB     		blt	.L9
+ 106              	.LVL13:
+ 107              	.L28:
+ 108              		.loc 1 28 17 is_stmt 1 view .LVU32
+ 109              		.loc 1 28 21 is_stmt 0 view .LVU33
+ 110 002a C3B2     		uxtb	r3, r0
+ 111              	.LVL14:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 112              		.loc 1 25 17 view .LVU34
+ 113 002c 40B2     		sxtb	r0, r0
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 114              		.loc 1 24 33 is_stmt 1 view .LVU35
+ 115              	.LVL15:
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 116              		.loc 1 24 27 view .LVU36
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 117              		.loc 1 25 13 view .LVU37
+  26:Core/Src/radio/radio.c ****             else
+ 118              		.loc 1 26 38 is_stmt 0 view .LVU38
+ 119 002e 5B00     		lsls	r3, r3, #1
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 4
+
+
+ 120              	.LVL16:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 121              		.loc 1 25 16 view .LVU39
+ 122 0030 0028     		cmp	r0, #0
+ 123 0032 3ADB     		blt	.L11
+ 124              	.LVL17:
+ 125              	.L29:
+ 126              		.loc 1 28 17 is_stmt 1 view .LVU40
+ 127              		.loc 1 28 21 is_stmt 0 view .LVU41
+ 128 0034 D8B2     		uxtb	r0, r3
+ 129              	.LVL18:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 130              		.loc 1 25 17 view .LVU42
+ 131 0036 5BB2     		sxtb	r3, r3
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 132              		.loc 1 24 33 is_stmt 1 view .LVU43
+ 133              	.LVL19:
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 134              		.loc 1 24 27 view .LVU44
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 135              		.loc 1 25 13 view .LVU45
+  26:Core/Src/radio/radio.c ****             else
+ 136              		.loc 1 26 38 is_stmt 0 view .LVU46
+ 137 0038 4000     		lsls	r0, r0, #1
+ 138              	.LVL20:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 139              		.loc 1 25 16 view .LVU47
+ 140 003a 002B     		cmp	r3, #0
+ 141 003c 3DDB     		blt	.L13
+ 142              	.LVL21:
+ 143              	.L30:
+ 144              		.loc 1 28 17 is_stmt 1 view .LVU48
+ 145              		.loc 1 28 21 is_stmt 0 view .LVU49
+ 146 003e C3B2     		uxtb	r3, r0
+ 147              	.LVL22:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 148              		.loc 1 25 17 view .LVU50
+ 149 0040 40B2     		sxtb	r0, r0
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 150              		.loc 1 24 33 is_stmt 1 view .LVU51
+ 151              	.LVL23:
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 152              		.loc 1 24 27 view .LVU52
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 153              		.loc 1 25 13 view .LVU53
+  26:Core/Src/radio/radio.c ****             else
+ 154              		.loc 1 26 38 is_stmt 0 view .LVU54
+ 155 0042 5B00     		lsls	r3, r3, #1
+ 156              	.LVL24:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 157              		.loc 1 25 16 view .LVU55
+ 158 0044 0028     		cmp	r0, #0
+ 159 0046 40DB     		blt	.L15
+ 160              	.LVL25:
+ 161              	.L31:
+ 162              		.loc 1 28 17 is_stmt 1 view .LVU56
+ 163              		.loc 1 28 21 is_stmt 0 view .LVU57
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 5
+
+
+ 164 0048 D8B2     		uxtb	r0, r3
+ 165              	.LVL26:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 166              		.loc 1 25 17 view .LVU58
+ 167 004a 5BB2     		sxtb	r3, r3
+ 168              	.L16:
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 169              		.loc 1 24 33 is_stmt 1 view .LVU59
+ 170              	.LVL27:
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 171              		.loc 1 24 27 view .LVU60
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 172              		.loc 1 25 13 view .LVU61
+  26:Core/Src/radio/radio.c ****             else
+ 173              		.loc 1 26 38 is_stmt 0 view .LVU62
+ 174 004c 4000     		lsls	r0, r0, #1
+ 175              	.LVL28:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 176              		.loc 1 25 16 view .LVU63
+ 177 004e 002B     		cmp	r3, #0
+ 178              		.loc 1 28 17 is_stmt 1 view .LVU64
+  26:Core/Src/radio/radio.c ****             else
+ 179              		.loc 1 26 17 view .LVU65
+  26:Core/Src/radio/radio.c ****             else
+ 180              		.loc 1 26 44 is_stmt 0 view .LVU66
+ 181 0050 B8BF     		it	lt
+ 182 0052 80F00700 		eorlt	r0, r0, #7
+ 183              	.LBE9:
+  22:Core/Src/radio/radio.c ****         crc ^= data[i];
+ 184              		.loc 1 22 26 view .LVU67
+ 185 0056 8A42     		cmp	r2, r1
+ 186              	.LBB10:
+  26:Core/Src/radio/radio.c ****             else
+ 187              		.loc 1 26 21 view .LVU68
+ 188 0058 C0B2     		uxtb	r0, r0
+ 189              	.LVL29:
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 190              		.loc 1 24 33 is_stmt 1 view .LVU69
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 191              		.loc 1 24 27 view .LVU70
+ 192              	.LBE10:
+  22:Core/Src/radio/radio.c ****         crc ^= data[i];
+ 193              		.loc 1 22 37 view .LVU71
+  22:Core/Src/radio/radio.c ****         crc ^= data[i];
+ 194              		.loc 1 22 26 view .LVU72
+ 195 005a 3BD0     		beq	.L24
+ 196              	.LVL30:
+ 197              	.L19:
+  23:Core/Src/radio/radio.c ****         for (int j = 0; j < 8; j++) {
+ 198              		.loc 1 23 9 view .LVU73
+  23:Core/Src/radio/radio.c ****         for (int j = 0; j < 8; j++) {
+ 199              		.loc 1 23 13 is_stmt 0 view .LVU74
+ 200 005c 12F8013F 		ldrb	r3, [r2, #1]!	@ zero_extendqisi2
+ 201              	.LVL31:
+  23:Core/Src/radio/radio.c ****         for (int j = 0; j < 8; j++) {
+ 202              		.loc 1 23 13 view .LVU75
+ 203 0060 5840     		eors	r0, r0, r3
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 6
+
+
+ 204              	.LVL32:
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 205              		.loc 1 24 9 is_stmt 1 view .LVU76
+ 206              	.LBB11:
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 207              		.loc 1 24 14 view .LVU77
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 208              		.loc 1 24 27 view .LVU78
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 209              		.loc 1 25 13 view .LVU79
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 210              		.loc 1 25 16 is_stmt 0 view .LVU80
+ 211 0062 10F0800F 		tst	r0, #128
+  26:Core/Src/radio/radio.c ****             else
+ 212              		.loc 1 26 38 view .LVU81
+ 213 0066 4FEA4000 		lsl	r0, r0, #1
+ 214              	.LVL33:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 215              		.loc 1 25 16 view .LVU82
+ 216 006a CFD0     		beq	.L25
+  26:Core/Src/radio/radio.c ****             else
+ 217              		.loc 1 26 17 is_stmt 1 view .LVU83
+  26:Core/Src/radio/radio.c ****             else
+ 218              		.loc 1 26 44 is_stmt 0 view .LVU84
+ 219 006c 80F00703 		eor	r3, r0, #7
+ 220 0070 58B2     		sxtb	r0, r3
+  26:Core/Src/radio/radio.c ****             else
+ 221              		.loc 1 26 21 view .LVU85
+ 222 0072 DBB2     		uxtb	r3, r3
+ 223              	.LVL34:
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 224              		.loc 1 24 33 is_stmt 1 view .LVU86
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 225              		.loc 1 24 27 view .LVU87
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 226              		.loc 1 25 13 view .LVU88
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 227              		.loc 1 25 16 is_stmt 0 view .LVU89
+ 228 0074 0028     		cmp	r0, #0
+ 229 0076 CDDA     		bge	.L26
+ 230              	.L5:
+  26:Core/Src/radio/radio.c ****             else
+ 231              		.loc 1 26 17 is_stmt 1 view .LVU90
+  26:Core/Src/radio/radio.c ****             else
+ 232              		.loc 1 26 38 is_stmt 0 view .LVU91
+ 233 0078 5B00     		lsls	r3, r3, #1
+ 234              	.LVL35:
+  26:Core/Src/radio/radio.c ****             else
+ 235              		.loc 1 26 44 view .LVU92
+ 236 007a 83F00703 		eor	r3, r3, #7
+ 237 007e 58B2     		sxtb	r0, r3
+  26:Core/Src/radio/radio.c ****             else
+ 238              		.loc 1 26 21 view .LVU93
+ 239 0080 DBB2     		uxtb	r3, r3
+ 240              	.LVL36:
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 241              		.loc 1 24 33 is_stmt 1 view .LVU94
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 7
+
+
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 242              		.loc 1 24 27 view .LVU95
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 243              		.loc 1 25 13 view .LVU96
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 244              		.loc 1 25 16 is_stmt 0 view .LVU97
+ 245 0082 0028     		cmp	r0, #0
+  26:Core/Src/radio/radio.c ****             else
+ 246              		.loc 1 26 38 view .LVU98
+ 247 0084 4FEA4303 		lsl	r3, r3, #1
+ 248              	.LVL37:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 249              		.loc 1 25 16 view .LVU99
+ 250 0088 CADA     		bge	.L27
+ 251              	.LVL38:
+ 252              	.L7:
+  26:Core/Src/radio/radio.c ****             else
+ 253              		.loc 1 26 17 is_stmt 1 view .LVU100
+  26:Core/Src/radio/radio.c ****             else
+ 254              		.loc 1 26 44 is_stmt 0 view .LVU101
+ 255 008a 83F00700 		eor	r0, r3, #7
+ 256 008e 43B2     		sxtb	r3, r0
+  26:Core/Src/radio/radio.c ****             else
+ 257              		.loc 1 26 21 view .LVU102
+ 258 0090 C0B2     		uxtb	r0, r0
+ 259              	.LVL39:
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 260              		.loc 1 24 33 is_stmt 1 view .LVU103
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 261              		.loc 1 24 27 view .LVU104
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 262              		.loc 1 25 13 view .LVU105
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 263              		.loc 1 25 16 is_stmt 0 view .LVU106
+ 264 0092 002B     		cmp	r3, #0
+  26:Core/Src/radio/radio.c ****             else
+ 265              		.loc 1 26 38 view .LVU107
+ 266 0094 4FEA4000 		lsl	r0, r0, #1
+ 267              	.LVL40:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 268              		.loc 1 25 16 view .LVU108
+ 269 0098 C7DA     		bge	.L28
+ 270              	.LVL41:
+ 271              	.L9:
+  26:Core/Src/radio/radio.c ****             else
+ 272              		.loc 1 26 17 is_stmt 1 view .LVU109
+  26:Core/Src/radio/radio.c ****             else
+ 273              		.loc 1 26 44 is_stmt 0 view .LVU110
+ 274 009a 80F00703 		eor	r3, r0, #7
+ 275 009e 58B2     		sxtb	r0, r3
+  26:Core/Src/radio/radio.c ****             else
+ 276              		.loc 1 26 21 view .LVU111
+ 277 00a0 DBB2     		uxtb	r3, r3
+ 278              	.LVL42:
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 279              		.loc 1 24 33 is_stmt 1 view .LVU112
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 8
+
+
+ 280              		.loc 1 24 27 view .LVU113
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 281              		.loc 1 25 13 view .LVU114
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 282              		.loc 1 25 16 is_stmt 0 view .LVU115
+ 283 00a2 0028     		cmp	r0, #0
+  26:Core/Src/radio/radio.c ****             else
+ 284              		.loc 1 26 38 view .LVU116
+ 285 00a4 4FEA4303 		lsl	r3, r3, #1
+ 286              	.LVL43:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 287              		.loc 1 25 16 view .LVU117
+ 288 00a8 C4DA     		bge	.L29
+ 289              	.LVL44:
+ 290              	.L11:
+  26:Core/Src/radio/radio.c ****             else
+ 291              		.loc 1 26 17 is_stmt 1 view .LVU118
+  26:Core/Src/radio/radio.c ****             else
+ 292              		.loc 1 26 44 is_stmt 0 view .LVU119
+ 293 00aa 83F00700 		eor	r0, r3, #7
+ 294 00ae 43B2     		sxtb	r3, r0
+  26:Core/Src/radio/radio.c ****             else
+ 295              		.loc 1 26 21 view .LVU120
+ 296 00b0 C0B2     		uxtb	r0, r0
+ 297              	.LVL45:
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 298              		.loc 1 24 33 is_stmt 1 view .LVU121
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 299              		.loc 1 24 27 view .LVU122
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 300              		.loc 1 25 13 view .LVU123
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 301              		.loc 1 25 16 is_stmt 0 view .LVU124
+ 302 00b2 002B     		cmp	r3, #0
+  26:Core/Src/radio/radio.c ****             else
+ 303              		.loc 1 26 38 view .LVU125
+ 304 00b4 4FEA4000 		lsl	r0, r0, #1
+ 305              	.LVL46:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 306              		.loc 1 25 16 view .LVU126
+ 307 00b8 C1DA     		bge	.L30
+ 308              	.LVL47:
+ 309              	.L13:
+  26:Core/Src/radio/radio.c ****             else
+ 310              		.loc 1 26 17 is_stmt 1 view .LVU127
+  26:Core/Src/radio/radio.c ****             else
+ 311              		.loc 1 26 44 is_stmt 0 view .LVU128
+ 312 00ba 80F00703 		eor	r3, r0, #7
+ 313 00be 58B2     		sxtb	r0, r3
+  26:Core/Src/radio/radio.c ****             else
+ 314              		.loc 1 26 21 view .LVU129
+ 315 00c0 DBB2     		uxtb	r3, r3
+ 316              	.LVL48:
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 317              		.loc 1 24 33 is_stmt 1 view .LVU130
+  24:Core/Src/radio/radio.c ****             if (crc & 0x80)
+ 318              		.loc 1 24 27 view .LVU131
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 9
+
+
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 319              		.loc 1 25 13 view .LVU132
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 320              		.loc 1 25 16 is_stmt 0 view .LVU133
+ 321 00c2 0028     		cmp	r0, #0
+  26:Core/Src/radio/radio.c ****             else
+ 322              		.loc 1 26 38 view .LVU134
+ 323 00c4 4FEA4303 		lsl	r3, r3, #1
+ 324              	.LVL49:
+  25:Core/Src/radio/radio.c ****                 crc = (uint8_t)((crc << 1) ^ poly);
+ 325              		.loc 1 25 16 view .LVU135
+ 326 00c8 BEDA     		bge	.L31
+ 327              	.LVL50:
+ 328              	.L15:
+  26:Core/Src/radio/radio.c ****             else
+ 329              		.loc 1 26 17 is_stmt 1 view .LVU136
+  26:Core/Src/radio/radio.c ****             else
+ 330              		.loc 1 26 44 is_stmt 0 view .LVU137
+ 331 00ca 83F00700 		eor	r0, r3, #7
+ 332 00ce 43B2     		sxtb	r3, r0
+  26:Core/Src/radio/radio.c ****             else
+ 333              		.loc 1 26 21 view .LVU138
+ 334 00d0 C0B2     		uxtb	r0, r0
+ 335              	.LVL51:
+  26:Core/Src/radio/radio.c ****             else
+ 336              		.loc 1 26 21 view .LVU139
+ 337 00d2 BBE7     		b	.L16
+ 338              	.LVL52:
+ 339              	.L24:
+  26:Core/Src/radio/radio.c ****             else
+ 340              		.loc 1 26 21 view .LVU140
+ 341 00d4 7047     		bx	lr
+ 342              	.LVL53:
+ 343              	.L20:
+  26:Core/Src/radio/radio.c ****             else
+ 344              		.loc 1 26 21 view .LVU141
+ 345              	.LBE11:
+ 346              	.LBE12:
+  20:Core/Src/radio/radio.c ****     uint8_t poly = 0x07;
+ 347              		.loc 1 20 13 view .LVU142
+ 348 00d6 0846     		mov	r0, r1
+ 349              	.LVL54:
+  29:Core/Src/radio/radio.c ****         }
+  30:Core/Src/radio/radio.c ****     }
+  31:Core/Src/radio/radio.c ****     return crc;
+ 350              		.loc 1 31 5 is_stmt 1 view .LVU143
+  32:Core/Src/radio/radio.c **** }
+ 351              		.loc 1 32 1 is_stmt 0 view .LVU144
+ 352 00d8 7047     		bx	lr
+ 353              		.cfi_endproc
+ 354              	.LFE150:
+ 356 00da 00BF     		.section	.text.RTT_PrintFloatWithLabel,"ax",%progbits
+ 357              		.align	1
+ 358              		.p2align 2,,3
+ 359              		.global	RTT_PrintFloatWithLabel
+ 360              		.syntax unified
+ 361              		.thumb
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 10
+
+
+ 362              		.thumb_func
+ 364              	RTT_PrintFloatWithLabel:
+ 365              	.LVL55:
+ 366              	.LFB151:
+  33:Core/Src/radio/radio.c **** 
+  34:Core/Src/radio/radio.c **** void RTT_PrintFloatWithLabel(const char* label, float value) {
+ 367              		.loc 1 34 62 is_stmt 1 view -0
+ 368              		.cfi_startproc
+ 369              		@ args = 0, pretend = 0, frame = 0
+ 370              		@ frame_needed = 0, uses_anonymous_args = 0
+ 371              		@ link register save eliminated.
+  35:Core/Src/radio/radio.c ****     // char buffer[32];
+  36:Core/Src/radio/radio.c ****     // char* ptr = buffer;
+  37:Core/Src/radio/radio.c ****     
+  38:Core/Src/radio/radio.c ****     // // Copy label
+  39:Core/Src/radio/radio.c ****     // while (*label) {
+  40:Core/Src/radio/radio.c ****     //     *ptr++ = *label++;
+  41:Core/Src/radio/radio.c ****     // }
+  42:Core/Src/radio/radio.c ****     
+  43:Core/Src/radio/radio.c ****     // // Add separator
+  44:Core/Src/radio/radio.c ****     // *ptr++ = ':';
+  45:Core/Src/radio/radio.c ****     // *ptr++ = ' ';
+  46:Core/Src/radio/radio.c ****     
+  47:Core/Src/radio/radio.c ****     // // Handle negative numbers
+  48:Core/Src/radio/radio.c ****     // if (value < 0) {
+  49:Core/Src/radio/radio.c ****     //     *ptr++ = '-';
+  50:Core/Src/radio/radio.c ****     //     value = -value;
+  51:Core/Src/radio/radio.c ****     // }
+  52:Core/Src/radio/radio.c ****     
+  53:Core/Src/radio/radio.c ****     // // Extract integer part
+  54:Core/Src/radio/radio.c ****     // int32_t integer_part = (int32_t)value;
+  55:Core/Src/radio/radio.c ****     
+  56:Core/Src/radio/radio.c ****     // // Extract decimal part (fixed 3 decimal places)
+  57:Core/Src/radio/radio.c ****     // float decimal = value - (float)integer_part;
+  58:Core/Src/radio/radio.c ****     
+  59:Core/Src/radio/radio.c ****     // // Convert integer to temporary buffer (reverse order)
+  60:Core/Src/radio/radio.c ****     // char temp[16];
+  61:Core/Src/radio/radio.c ****     // int pos = 0;
+  62:Core/Src/radio/radio.c ****     // int32_t temp_int = integer_part;
+  63:Core/Src/radio/radio.c ****     
+  64:Core/Src/radio/radio.c ****     // // Handle zero case
+  65:Core/Src/radio/radio.c ****     // if (temp_int == 0) {
+  66:Core/Src/radio/radio.c ****     //     temp[pos++] = '0';
+  67:Core/Src/radio/radio.c ****     // }
+  68:Core/Src/radio/radio.c ****     
+  69:Core/Src/radio/radio.c ****     // // Convert other numbers
+  70:Core/Src/radio/radio.c ****     // while (temp_int > 0) {
+  71:Core/Src/radio/radio.c ****     //     temp[pos++] = '0' + (temp_int % 10);
+  72:Core/Src/radio/radio.c ****     //     temp_int /= 10;
+  73:Core/Src/radio/radio.c ****     // }
+  74:Core/Src/radio/radio.c ****     
+  75:Core/Src/radio/radio.c ****     // // Copy to main buffer in correct order
+  76:Core/Src/radio/radio.c ****     // while (pos > 0) {
+  77:Core/Src/radio/radio.c ****     //     *ptr++ = temp[--pos];
+  78:Core/Src/radio/radio.c ****     // }
+  79:Core/Src/radio/radio.c ****     
+  80:Core/Src/radio/radio.c ****     // // Add decimal point and 3 decimal places
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 11
+
+
+  81:Core/Src/radio/radio.c ****     // *ptr++ = '.';
+  82:Core/Src/radio/radio.c ****     // for (int i = 0; i < 3; i++) {
+  83:Core/Src/radio/radio.c ****     //     decimal *= 10;
+  84:Core/Src/radio/radio.c ****     //     int digit = (int)decimal;
+  85:Core/Src/radio/radio.c ****     //     *ptr++ = '0' + digit;
+  86:Core/Src/radio/radio.c ****     //     decimal -= digit;
+  87:Core/Src/radio/radio.c ****     // }
+  88:Core/Src/radio/radio.c ****     
+  89:Core/Src/radio/radio.c ****     // // Add newline
+  90:Core/Src/radio/radio.c ****     // *ptr++ = '\n';
+  91:Core/Src/radio/radio.c ****     // *ptr = '\0';
+  92:Core/Src/radio/radio.c ****     
+  93:Core/Src/radio/radio.c ****     // // Print to RTT
+  94:Core/Src/radio/radio.c ****     // SEGGER_RTT_WriteString(0, buffer);
+  95:Core/Src/radio/radio.c **** }
+ 372              		.loc 1 95 1 view .LVU146
+ 373 0000 7047     		bx	lr
+ 374              		.cfi_endproc
+ 375              	.LFE151:
+ 377 0002 00BF     		.section	.text.RTT_PrintBool,"ax",%progbits
+ 378              		.align	1
+ 379              		.p2align 2,,3
+ 380              		.global	RTT_PrintBool
+ 381              		.syntax unified
+ 382              		.thumb
+ 383              		.thumb_func
+ 385              	RTT_PrintBool:
+ 386              	.LVL56:
+ 387              	.LFB152:
+  96:Core/Src/radio/radio.c **** 
+  97:Core/Src/radio/radio.c **** void RTT_PrintBool(const char* label, bool value) {
+ 388              		.loc 1 97 51 view -0
+ 389              		.cfi_startproc
+ 390              		@ args = 0, pretend = 0, frame = 0
+ 391              		@ frame_needed = 0, uses_anonymous_args = 0
+ 392              		@ link register save eliminated.
+  98:Core/Src/radio/radio.c ****     // Print label if provided
+  99:Core/Src/radio/radio.c ****     // if (label) {
+ 100:Core/Src/radio/radio.c ****     //     // SEGGER_RTT_WriteString(0, label);
+ 101:Core/Src/radio/radio.c ****     //     // SEGGER_RTT_WriteString(0, ": ");
+ 102:Core/Src/radio/radio.c ****     // }
+ 103:Core/Src/radio/radio.c ****     
+ 104:Core/Src/radio/radio.c ****     // // Print boolean value
+ 105:Core/Src/radio/radio.c ****     // // SEGGER_RTT_WriteString(0, value ? "true" : "false");
+ 106:Core/Src/radio/radio.c ****     
+ 107:Core/Src/radio/radio.c ****     // // Add newline
+ 108:Core/Src/radio/radio.c ****     // SEGGER_RTT_WriteString(0, "\n");
+ 109:Core/Src/radio/radio.c **** }
+ 393              		.loc 1 109 1 view .LVU148
+ 394 0000 7047     		bx	lr
+ 395              		.cfi_endproc
+ 396              	.LFE152:
+ 398 0002 00BF     		.section	.text.float16_to_float32,"ax",%progbits
+ 399              		.align	1
+ 400              		.p2align 2,,3
+ 401              		.global	float16_to_float32
+ 402              		.syntax unified
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 12
+
+
+ 403              		.thumb
+ 404              		.thumb_func
+ 406              	float16_to_float32:
+ 407              	.LVL57:
+ 408              	.LFB153:
+ 110:Core/Src/radio/radio.c **** 
+ 111:Core/Src/radio/radio.c **** float float16_to_float32(uint16_t h) {
+ 409              		.loc 1 111 38 view -0
+ 410              		.cfi_startproc
+ 411              		@ args = 0, pretend = 0, frame = 0
+ 412              		@ frame_needed = 0, uses_anonymous_args = 0
+ 413              		@ link register save eliminated.
+ 112:Core/Src/radio/radio.c ****     uint32_t sign = (h >> 15) & 0x1;
+ 414              		.loc 1 112 5 view .LVU150
+ 113:Core/Src/radio/radio.c ****     uint32_t exponent = (h >> 10) & 0x1F;
+ 415              		.loc 1 113 5 view .LVU151
+ 112:Core/Src/radio/radio.c ****     uint32_t sign = (h >> 15) & 0x1;
+ 416              		.loc 1 112 31 is_stmt 0 view .LVU152
+ 417 0000 C20B     		lsrs	r2, r0, #15
+ 114:Core/Src/radio/radio.c ****     uint32_t mantissa = h & 0x3FF;
+ 115:Core/Src/radio/radio.c **** 
+ 116:Core/Src/radio/radio.c ****     uint32_t f32_sign = sign << 31;
+ 117:Core/Src/radio/radio.c ****     uint32_t f32_exponent;
+ 118:Core/Src/radio/radio.c ****     uint32_t f32_mantissa;
+ 119:Core/Src/radio/radio.c **** 
+ 120:Core/Src/radio/radio.c ****     if (exponent == 0) {
+ 418              		.loc 1 120 8 view .LVU153
+ 419 0002 10F4F84F 		tst	r0, #31744
+ 420 0006 C0F38421 		ubfx	r1, r0, #10, #5
+ 421              	.LVL58:
+ 114:Core/Src/radio/radio.c ****     uint32_t mantissa = h & 0x3FF;
+ 422              		.loc 1 114 5 is_stmt 1 view .LVU154
+ 423 000a C0F30903 		ubfx	r3, r0, #0, #10
+ 424              	.LVL59:
+ 116:Core/Src/radio/radio.c ****     uint32_t f32_exponent;
+ 425              		.loc 1 116 5 view .LVU155
+ 116:Core/Src/radio/radio.c ****     uint32_t f32_exponent;
+ 426              		.loc 1 116 14 is_stmt 0 view .LVU156
+ 427 000e 4FEAC272 		lsl	r2, r2, #31
+ 428              	.LVL60:
+ 117:Core/Src/radio/radio.c ****     uint32_t f32_mantissa;
+ 429              		.loc 1 117 5 is_stmt 1 view .LVU157
+ 118:Core/Src/radio/radio.c **** 
+ 430              		.loc 1 118 5 view .LVU158
+ 431              		.loc 1 120 5 view .LVU159
+ 432              		.loc 1 120 8 is_stmt 0 view .LVU160
+ 433 0012 13D1     		bne	.L35
+ 121:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 434              		.loc 1 121 9 is_stmt 1 view .LVU161
+ 435              		.loc 1 121 12 is_stmt 0 view .LVU162
+ 436 0014 7BB1     		cbz	r3, .L36
+ 437              	.LBB14:
+ 122:Core/Src/radio/radio.c ****             // Zero
+ 123:Core/Src/radio/radio.c ****             f32_exponent = 0;
+ 124:Core/Src/radio/radio.c ****             f32_mantissa = 0;
+ 125:Core/Src/radio/radio.c ****         } else {
+ 126:Core/Src/radio/radio.c ****             // Subnormal number
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 13
+
+
+ 127:Core/Src/radio/radio.c ****             // Normalize the mantissa
+ 128:Core/Src/radio/radio.c ****             int e = -1;
+ 438              		.loc 1 128 17 view .LVU163
+ 439 0016 4FF0FF31 		mov	r1, #-1
+ 440              	.LVL61:
+ 441              	.L37:
+ 129:Core/Src/radio/radio.c ****             uint32_t m = mantissa;
+ 130:Core/Src/radio/radio.c ****             while ((m & 0x400) == 0) { // While leading bit is not 1
+ 131:Core/Src/radio/radio.c ****                 m <<= 1;
+ 442              		.loc 1 131 17 is_stmt 1 view .LVU164
+ 443 001a 9C46     		mov	ip, r3
+ 444              	.LVL62:
+ 445              		.loc 1 131 19 is_stmt 0 view .LVU165
+ 446 001c 5B00     		lsls	r3, r3, #1
+ 447              	.LVL63:
+ 132:Core/Src/radio/radio.c ****                 e--;
+ 448              		.loc 1 132 17 is_stmt 1 view .LVU166
+ 449 001e 0846     		mov	r0, r1
+ 450              		.loc 1 132 18 is_stmt 0 view .LVU167
+ 451 0020 0139     		subs	r1, r1, #1
+ 452              	.LVL64:
+ 130:Core/Src/radio/radio.c ****                 m <<= 1;
+ 453              		.loc 1 130 32 is_stmt 1 view .LVU168
+ 454 0022 13F4806F 		tst	r3, #1024
+ 455 0026 F8D0     		beq	.L37
+ 133:Core/Src/radio/radio.c ****             }
+ 134:Core/Src/radio/radio.c ****             m &= 0x3FF;  // remove leading 1
+ 456              		.loc 1 134 13 view .LVU169
+ 457              	.LVL65:
+ 135:Core/Src/radio/radio.c **** 
+ 136:Core/Src/radio/radio.c ****             f32_exponent = (127 - 15 + e) << 23; // Adjust exponent bias difference (127 vs 15)
+ 458              		.loc 1 136 13 view .LVU170
+ 137:Core/Src/radio/radio.c ****             f32_mantissa = m << 13;
+ 459              		.loc 1 137 13 view .LVU171
+ 460              		.loc 1 137 26 is_stmt 0 view .LVU172
+ 461 0028 0D4B     		ldr	r3, .L47
+ 462              	.LVL66:
+ 136:Core/Src/radio/radio.c ****             f32_mantissa = m << 13;
+ 463              		.loc 1 136 38 view .LVU173
+ 464 002a 6F30     		adds	r0, r0, #111
+ 465              	.LVL67:
+ 466              		.loc 1 137 26 view .LVU174
+ 467 002c 03EA8C33 		and	r3, r3, ip, lsl #14
+ 468              	.LVL68:
+ 469              		.loc 1 137 26 view .LVU175
+ 470              	.LBE14:
+ 138:Core/Src/radio/radio.c ****         }
+ 139:Core/Src/radio/radio.c ****     } else if (exponent == 0x1F) {
+ 140:Core/Src/radio/radio.c ****         // Inf or NaN
+ 141:Core/Src/radio/radio.c ****         f32_exponent = 0xFF << 23;
+ 142:Core/Src/radio/radio.c ****         f32_mantissa = mantissa ? (mantissa << 13) : 0;
+ 143:Core/Src/radio/radio.c ****     } else {
+ 144:Core/Src/radio/radio.c ****         // Normalized number
+ 145:Core/Src/radio/radio.c ****         f32_exponent = (exponent - 15 + 127) << 23;
+ 146:Core/Src/radio/radio.c ****         f32_mantissa = mantissa << 13;
+ 147:Core/Src/radio/radio.c ****     }
+ 148:Core/Src/radio/radio.c **** 
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 14
+
+
+ 149:Core/Src/radio/radio.c ****     uint32_t f32_bits = f32_sign | f32_exponent | f32_mantissa;
+ 471              		.loc 1 149 14 view .LVU176
+ 472 0030 1A43     		orrs	r2, r2, r3
+ 473              	.LVL69:
+ 474              		.loc 1 149 14 view .LVU177
+ 475 0032 42EAC052 		orr	r2, r2, r0, lsl #23
+ 476              	.LVL70:
+ 477              	.L36:
+ 478              		.loc 1 149 5 is_stmt 1 view .LVU178
+ 150:Core/Src/radio/radio.c **** 
+ 151:Core/Src/radio/radio.c ****     union {
+ 479              		.loc 1 151 5 view .LVU179
+ 152:Core/Src/radio/radio.c ****         uint32_t u;
+ 153:Core/Src/radio/radio.c ****         float f;
+ 154:Core/Src/radio/radio.c ****     } conv;
+ 155:Core/Src/radio/radio.c **** 
+ 156:Core/Src/radio/radio.c ****     conv.u = f32_bits;
+ 480              		.loc 1 156 5 view .LVU180
+ 157:Core/Src/radio/radio.c ****     return conv.f;
+ 481              		.loc 1 157 5 view .LVU181
+ 482              		.loc 1 157 16 is_stmt 0 view .LVU182
+ 483 0036 00EE102A 		vmov	s0, r2
+ 158:Core/Src/radio/radio.c **** }
+ 484              		.loc 1 158 1 view .LVU183
+ 485 003a 7047     		bx	lr
+ 486              	.LVL71:
+ 487              	.L35:
+ 139:Core/Src/radio/radio.c ****         // Inf or NaN
+ 488              		.loc 1 139 12 is_stmt 1 view .LVU184
+ 139:Core/Src/radio/radio.c ****         // Inf or NaN
+ 489              		.loc 1 139 15 is_stmt 0 view .LVU185
+ 490 003c 1F29     		cmp	r1, #31
+ 491 003e 07D0     		beq	.L46
+ 145:Core/Src/radio/radio.c ****         f32_mantissa = mantissa << 13;
+ 492              		.loc 1 145 9 is_stmt 1 view .LVU186
+ 493              	.LVL72:
+ 146:Core/Src/radio/radio.c ****     }
+ 494              		.loc 1 146 9 view .LVU187
+ 149:Core/Src/radio/radio.c **** 
+ 495              		.loc 1 149 14 is_stmt 0 view .LVU188
+ 496 0040 42EA4332 		orr	r2, r2, r3, lsl #13
+ 497              	.LVL73:
+ 145:Core/Src/radio/radio.c ****         f32_mantissa = mantissa << 13;
+ 498              		.loc 1 145 39 view .LVU189
+ 499 0044 7031     		adds	r1, r1, #112
+ 500              	.LVL74:
+ 149:Core/Src/radio/radio.c **** 
+ 501              		.loc 1 149 14 view .LVU190
+ 502 0046 42EAC152 		orr	r2, r2, r1, lsl #23
+ 503              	.LVL75:
+ 149:Core/Src/radio/radio.c **** 
+ 504              		.loc 1 149 5 is_stmt 1 view .LVU191
+ 151:Core/Src/radio/radio.c ****         uint32_t u;
+ 505              		.loc 1 151 5 view .LVU192
+ 156:Core/Src/radio/radio.c ****     return conv.f;
+ 506              		.loc 1 156 5 view .LVU193
+ 157:Core/Src/radio/radio.c **** }
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 15
+
+
+ 507              		.loc 1 157 5 view .LVU194
+ 157:Core/Src/radio/radio.c **** }
+ 508              		.loc 1 157 16 is_stmt 0 view .LVU195
+ 509 004a 00EE102A 		vmov	s0, r2
+ 510              		.loc 1 158 1 view .LVU196
+ 511 004e 7047     		bx	lr
+ 512              	.LVL76:
+ 513              	.L46:
+ 141:Core/Src/radio/radio.c ****         f32_mantissa = mantissa ? (mantissa << 13) : 0;
+ 514              		.loc 1 141 9 is_stmt 1 view .LVU197
+ 142:Core/Src/radio/radio.c ****     } else {
+ 515              		.loc 1 142 9 view .LVU198
+ 142:Core/Src/radio/radio.c ****     } else {
+ 516              		.loc 1 142 52 is_stmt 0 view .LVU199
+ 517 0050 0BB1     		cbz	r3, .L45
+ 149:Core/Src/radio/radio.c **** 
+ 518              		.loc 1 149 14 discriminator 1 view .LVU200
+ 519 0052 42EA4332 		orr	r2, r2, r3, lsl #13
+ 520              	.LVL77:
+ 521              	.L45:
+ 149:Core/Src/radio/radio.c **** 
+ 522              		.loc 1 149 14 discriminator 1 view .LVU201
+ 523 0056 42F0FF42 		orr	r2, r2, #2139095040
+ 524              	.LVL78:
+ 149:Core/Src/radio/radio.c **** 
+ 525              		.loc 1 149 5 is_stmt 1 discriminator 1 view .LVU202
+ 151:Core/Src/radio/radio.c ****         uint32_t u;
+ 526              		.loc 1 151 5 discriminator 1 view .LVU203
+ 156:Core/Src/radio/radio.c ****     return conv.f;
+ 527              		.loc 1 156 5 discriminator 1 view .LVU204
+ 157:Core/Src/radio/radio.c **** }
+ 528              		.loc 1 157 5 discriminator 1 view .LVU205
+ 157:Core/Src/radio/radio.c **** }
+ 529              		.loc 1 157 16 is_stmt 0 discriminator 1 view .LVU206
+ 530 005a 00EE102A 		vmov	s0, r2
+ 531              		.loc 1 158 1 discriminator 1 view .LVU207
+ 532 005e 7047     		bx	lr
+ 533              	.L48:
+ 534              		.align	2
+ 535              	.L47:
+ 536 0060 00E07F00 		.word	8380416
+ 537              		.cfi_endproc
+ 538              	.LFE153:
+ 540              		.section	.text.poll,"ax",%progbits
+ 541              		.align	1
+ 542              		.p2align 2,,3
+ 543              		.global	poll
+ 544              		.syntax unified
+ 545              		.thumb
+ 546              		.thumb_func
+ 548              	poll:
+ 549              	.LVL79:
+ 550              	.LFB154:
+ 159:Core/Src/radio/radio.c **** 
+ 160:Core/Src/radio/radio.c **** void poll(const NRF24_TypeDef *nrf) {
+ 551              		.loc 1 160 37 is_stmt 1 view -0
+ 552              		.cfi_startproc
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 16
+
+
+ 553              		@ args = 0, pretend = 0, frame = 16
+ 554              		@ frame_needed = 0, uses_anonymous_args = 0
+ 161:Core/Src/radio/radio.c ****     if (nRF24_GetStatus_RXFIFO(nrf) != nRF24_STATUS_RXFIFO_EMPTY) {
+ 555              		.loc 1 161 5 view .LVU209
+ 160:Core/Src/radio/radio.c ****     if (nRF24_GetStatus_RXFIFO(nrf) != nRF24_STATUS_RXFIFO_EMPTY) {
+ 556              		.loc 1 160 37 is_stmt 0 view .LVU210
+ 557 0000 70B5     		push	{r4, r5, r6, lr}
+ 558              	.LCFI0:
+ 559              		.cfi_def_cfa_offset 16
+ 560              		.cfi_offset 4, -16
+ 561              		.cfi_offset 5, -12
+ 562              		.cfi_offset 6, -8
+ 563              		.cfi_offset 14, -4
+ 564 0002 84B0     		sub	sp, sp, #16
+ 565              	.LCFI1:
+ 566              		.cfi_def_cfa_offset 32
+ 160:Core/Src/radio/radio.c ****     if (nRF24_GetStatus_RXFIFO(nrf) != nRF24_STATUS_RXFIFO_EMPTY) {
+ 567              		.loc 1 160 37 view .LVU211
+ 568 0004 0446     		mov	r4, r0
+ 569              		.loc 1 161 9 view .LVU212
+ 570 0006 FFF7FEFF 		bl	nRF24_GetStatus_RXFIFO
+ 571              	.LVL80:
+ 572              		.loc 1 161 8 view .LVU213
+ 573 000a 0128     		cmp	r0, #1
+ 574 000c 05D1     		bne	.L88
+ 162:Core/Src/radio/radio.c ****         uint8_t payload[10];  // 10 bytes for the complete packet
+ 163:Core/Src/radio/radio.c ****         uint8_t length = 10;
+ 164:Core/Src/radio/radio.c **** 
+ 165:Core/Src/radio/radio.c ****         uint8_t pipe = nRF24_ReadPayload(nrf, payload, &length);
+ 166:Core/Src/radio/radio.c ****         uint8_t ackPayload = !HAL_GPIO_ReadPin(IR_SENSOR_GPIO_Port, IR_SENSOR_Pin);
+ 167:Core/Src/radio/radio.c ****         nRF24_WriteAckPayload(nrf, pipe, &ackPayload, 1);
+ 168:Core/Src/radio/radio.c **** 
+ 169:Core/Src/radio/radio.c ****         // Copy raw data to debug buffer first
+ 170:Core/Src/radio/radio.c ****         memcpy((void*)&rawPacket, payload, sizeof(NRF24_RxBuffer_t));
+ 171:Core/Src/radio/radio.c ****         
+ 172:Core/Src/radio/radio.c ****         // Then parse into processed packet
+ 173:Core/Src/radio/radio.c ****         parsePacket(payload, &currentPacket);
+ 174:Core/Src/radio/radio.c ****     }
+ 175:Core/Src/radio/radio.c **** 
+ 176:Core/Src/radio/radio.c ****     // Flush TX FIFO and clear IRQ flags
+ 177:Core/Src/radio/radio.c ****     nRF24_ClearIRQFlags(nrf);
+ 575              		.loc 1 177 5 is_stmt 1 view .LVU214
+ 576 000e 2046     		mov	r0, r4
+ 178:Core/Src/radio/radio.c **** }
+ 577              		.loc 1 178 1 is_stmt 0 view .LVU215
+ 578 0010 04B0     		add	sp, sp, #16
+ 579              	.LCFI2:
+ 580              		.cfi_remember_state
+ 581              		.cfi_def_cfa_offset 16
+ 582              		@ sp needed
+ 583 0012 BDE87040 		pop	{r4, r5, r6, lr}
+ 584              	.LCFI3:
+ 585              		.cfi_restore 14
+ 586              		.cfi_restore 6
+ 587              		.cfi_restore 5
+ 588              		.cfi_restore 4
+ 589              		.cfi_def_cfa_offset 0
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 17
+
+
+ 590              	.LVL81:
+ 177:Core/Src/radio/radio.c **** }
+ 591              		.loc 1 177 5 view .LVU216
+ 592 0016 FFF7FEBF 		b	nRF24_ClearIRQFlags
+ 593              	.LVL82:
+ 594              	.L88:
+ 595              	.LCFI4:
+ 596              		.cfi_restore_state
+ 597              	.LBB27:
+ 162:Core/Src/radio/radio.c ****         uint8_t payload[10];  // 10 bytes for the complete packet
+ 598              		.loc 1 162 9 is_stmt 1 view .LVU217
+ 163:Core/Src/radio/radio.c **** 
+ 599              		.loc 1 163 9 view .LVU218
+ 165:Core/Src/radio/radio.c ****         uint8_t ackPayload = !HAL_GPIO_ReadPin(IR_SENSOR_GPIO_Port, IR_SENSOR_Pin);
+ 600              		.loc 1 165 24 is_stmt 0 view .LVU219
+ 601 001a 01AE     		add	r6, sp, #4
+ 163:Core/Src/radio/radio.c **** 
+ 602              		.loc 1 163 17 view .LVU220
+ 603 001c 0A23     		movs	r3, #10
+ 165:Core/Src/radio/radio.c ****         uint8_t ackPayload = !HAL_GPIO_ReadPin(IR_SENSOR_GPIO_Port, IR_SENSOR_Pin);
+ 604              		.loc 1 165 24 view .LVU221
+ 605 001e 0DF10202 		add	r2, sp, #2
+ 606 0022 2046     		mov	r0, r4
+ 607 0024 3146     		mov	r1, r6
+ 163:Core/Src/radio/radio.c **** 
+ 608              		.loc 1 163 17 view .LVU222
+ 609 0026 8DF80230 		strb	r3, [sp, #2]
+ 165:Core/Src/radio/radio.c ****         uint8_t ackPayload = !HAL_GPIO_ReadPin(IR_SENSOR_GPIO_Port, IR_SENSOR_Pin);
+ 610              		.loc 1 165 9 is_stmt 1 view .LVU223
+ 165:Core/Src/radio/radio.c ****         uint8_t ackPayload = !HAL_GPIO_ReadPin(IR_SENSOR_GPIO_Port, IR_SENSOR_Pin);
+ 611              		.loc 1 165 24 is_stmt 0 view .LVU224
+ 612 002a FFF7FEFF 		bl	nRF24_ReadPayload
+ 613              	.LVL83:
+ 166:Core/Src/radio/radio.c ****         nRF24_WriteAckPayload(nrf, pipe, &ackPayload, 1);
+ 614              		.loc 1 166 31 view .LVU225
+ 615 002e 4FF40071 		mov	r1, #512
+ 165:Core/Src/radio/radio.c ****         uint8_t ackPayload = !HAL_GPIO_ReadPin(IR_SENSOR_GPIO_Port, IR_SENSOR_Pin);
+ 616              		.loc 1 165 24 view .LVU226
+ 617 0032 0546     		mov	r5, r0
+ 166:Core/Src/radio/radio.c ****         nRF24_WriteAckPayload(nrf, pipe, &ackPayload, 1);
+ 618              		.loc 1 166 31 view .LVU227
+ 619 0034 5B48     		ldr	r0, .L94
+ 620              	.LVL84:
+ 166:Core/Src/radio/radio.c ****         nRF24_WriteAckPayload(nrf, pipe, &ackPayload, 1);
+ 621              		.loc 1 166 9 is_stmt 1 view .LVU228
+ 166:Core/Src/radio/radio.c ****         nRF24_WriteAckPayload(nrf, pipe, &ackPayload, 1);
+ 622              		.loc 1 166 31 is_stmt 0 view .LVU229
+ 623 0036 FFF7FEFF 		bl	HAL_GPIO_ReadPin
+ 624              	.LVL85:
+ 166:Core/Src/radio/radio.c ****         nRF24_WriteAckPayload(nrf, pipe, &ackPayload, 1);
+ 625              		.loc 1 166 30 view .LVU230
+ 626 003a B0FA80F0 		clz	r0, r0
+ 167:Core/Src/radio/radio.c **** 
+ 627              		.loc 1 167 9 view .LVU231
+ 628 003e 2946     		mov	r1, r5
+ 170:Core/Src/radio/radio.c ****         
+ 629              		.loc 1 170 9 view .LVU232
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 18
+
+
+ 630 0040 594D     		ldr	r5, .L94+4
+ 631              	.LVL86:
+ 166:Core/Src/radio/radio.c ****         nRF24_WriteAckPayload(nrf, pipe, &ackPayload, 1);
+ 632              		.loc 1 166 30 view .LVU233
+ 633 0042 4009     		lsrs	r0, r0, #5
+ 167:Core/Src/radio/radio.c **** 
+ 634              		.loc 1 167 9 view .LVU234
+ 635 0044 0DF10302 		add	r2, sp, #3
+ 636 0048 0123     		movs	r3, #1
+ 166:Core/Src/radio/radio.c ****         nRF24_WriteAckPayload(nrf, pipe, &ackPayload, 1);
+ 637              		.loc 1 166 30 view .LVU235
+ 638 004a 8DF80300 		strb	r0, [sp, #3]
+ 167:Core/Src/radio/radio.c **** 
+ 639              		.loc 1 167 9 is_stmt 1 view .LVU236
+ 640 004e 2046     		mov	r0, r4
+ 641 0050 FFF7FEFF 		bl	nRF24_WriteAckPayload
+ 642              	.LVL87:
+ 170:Core/Src/radio/radio.c ****         
+ 643              		.loc 1 170 9 view .LVU237
+ 644 0054 2B46     		mov	r3, r5
+ 645 0056 96E80700 		ldm	r6, {r0, r1, r2}
+ 646 005a 03C3     		stmia	r3!, {r0, r1}
+ 647 005c 1A80     		strh	r2, [r3]	@ movhi
+ 173:Core/Src/radio/radio.c ****     }
+ 648              		.loc 1 173 9 view .LVU238
+ 649              	.LVL88:
+ 650              	.LBB28:
+ 651              	.LBI28:
+ 179:Core/Src/radio/radio.c **** 
+ 180:Core/Src/radio/radio.c **** void parsePacket(uint8_t *bytes, ProcessedPacket_t* packet) {
+ 652              		.loc 1 180 6 view .LVU239
+ 653              	.LBB29:
+ 181:Core/Src/radio/radio.c ****     // Use the already copied raw packet
+ 182:Core/Src/radio/radio.c ****     packet->robot_id = rawPacket.robot_id;
+ 654              		.loc 1 182 5 view .LVU240
+ 655              		.loc 1 182 33 is_stmt 0 view .LVU241
+ 656 005e 2B78     		ldrb	r3, [r5]	@ zero_extendqisi2
+ 183:Core/Src/radio/radio.c ****     
+ 184:Core/Src/radio/radio.c ****     // Convert float16 velocities to float32
+ 185:Core/Src/radio/radio.c ****     packet->forward_vel = float16_to_float32(rawPacket.forward_vel);
+ 657              		.loc 1 185 55 view .LVU242
+ 658 0060 B5F80100 		ldrh	r0, [r5, #1]	@ unaligned
+ 182:Core/Src/radio/radio.c ****     
+ 659              		.loc 1 182 22 view .LVU243
+ 660 0064 514A     		ldr	r2, .L94+8
+ 661              	.LBB30:
+ 662              	.LBB31:
+ 112:Core/Src/radio/radio.c ****     uint32_t exponent = (h >> 10) & 0x1F;
+ 663              		.loc 1 112 31 view .LVU244
+ 664 0066 C10B     		lsrs	r1, r0, #15
+ 120:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 665              		.loc 1 120 8 view .LVU245
+ 666 0068 10F4F84F 		tst	r0, #31744
+ 667              	.LBE31:
+ 668              	.LBE30:
+ 182:Core/Src/radio/radio.c ****     
+ 669              		.loc 1 182 22 view .LVU246
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 19
+
+
+ 670 006c 1370     		strb	r3, [r2]
+ 671              		.loc 1 185 5 is_stmt 1 view .LVU247
+ 672              	.LVL89:
+ 673              	.LBB37:
+ 674              	.LBI30:
+ 111:Core/Src/radio/radio.c ****     uint32_t sign = (h >> 15) & 0x1;
+ 675              		.loc 1 111 7 view .LVU248
+ 676              	.LBB33:
+ 112:Core/Src/radio/radio.c ****     uint32_t exponent = (h >> 10) & 0x1F;
+ 677              		.loc 1 112 5 view .LVU249
+ 113:Core/Src/radio/radio.c ****     uint32_t mantissa = h & 0x3FF;
+ 678              		.loc 1 113 5 view .LVU250
+ 679 006e C0F38426 		ubfx	r6, r0, #10, #5
+ 680              	.LVL90:
+ 114:Core/Src/radio/radio.c **** 
+ 681              		.loc 1 114 5 view .LVU251
+ 116:Core/Src/radio/radio.c ****     uint32_t f32_exponent;
+ 682              		.loc 1 116 14 is_stmt 0 view .LVU252
+ 683 0072 4FEAC171 		lsl	r1, r1, #31
+ 684 0076 C0F30903 		ubfx	r3, r0, #0, #10
+ 685              	.LVL91:
+ 116:Core/Src/radio/radio.c ****     uint32_t f32_exponent;
+ 686              		.loc 1 116 5 is_stmt 1 view .LVU253
+ 117:Core/Src/radio/radio.c ****     uint32_t f32_mantissa;
+ 687              		.loc 1 117 5 view .LVU254
+ 118:Core/Src/radio/radio.c **** 
+ 688              		.loc 1 118 5 view .LVU255
+ 120:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 689              		.loc 1 120 5 view .LVU256
+ 120:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 690              		.loc 1 120 8 is_stmt 0 view .LVU257
+ 691 007a 57D1     		bne	.L51
+ 121:Core/Src/radio/radio.c ****             // Zero
+ 692              		.loc 1 121 9 is_stmt 1 view .LVU258
+ 121:Core/Src/radio/radio.c ****             // Zero
+ 693              		.loc 1 121 12 is_stmt 0 view .LVU259
+ 694 007c 002B     		cmp	r3, #0
+ 695 007e 6ED1     		bne	.L89
+ 696              	.LVL92:
+ 697              	.L52:
+ 149:Core/Src/radio/radio.c **** 
+ 698              		.loc 1 149 5 is_stmt 1 view .LVU260
+ 151:Core/Src/radio/radio.c ****         uint32_t u;
+ 699              		.loc 1 151 5 view .LVU261
+ 156:Core/Src/radio/radio.c ****     return conv.f;
+ 700              		.loc 1 156 5 view .LVU262
+ 157:Core/Src/radio/radio.c **** }
+ 701              		.loc 1 157 5 view .LVU263
+ 157:Core/Src/radio/radio.c **** }
+ 702              		.loc 1 157 5 is_stmt 0 view .LVU264
+ 703              	.LBE33:
+ 704              	.LBE37:
+ 186:Core/Src/radio/radio.c ****     packet->left_vel = float16_to_float32(rawPacket.left_vel);
+ 705              		.loc 1 186 52 view .LVU265
+ 706 0080 B5F80300 		ldrh	r0, [r5, #3]	@ unaligned
+ 185:Core/Src/radio/radio.c ****     packet->left_vel = float16_to_float32(rawPacket.left_vel);
+ 707              		.loc 1 185 25 view .LVU266
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 20
+
+
+ 708 0084 5160     		str	r1, [r2, #4]	@ float
+ 709              		.loc 1 186 5 is_stmt 1 view .LVU267
+ 710              	.LVL93:
+ 711              	.LBB38:
+ 712              	.LBI38:
+ 111:Core/Src/radio/radio.c ****     uint32_t sign = (h >> 15) & 0x1;
+ 713              		.loc 1 111 7 view .LVU268
+ 714              	.LBB39:
+ 112:Core/Src/radio/radio.c ****     uint32_t exponent = (h >> 10) & 0x1F;
+ 715              		.loc 1 112 5 view .LVU269
+ 113:Core/Src/radio/radio.c ****     uint32_t mantissa = h & 0x3FF;
+ 716              		.loc 1 113 5 view .LVU270
+ 120:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 717              		.loc 1 120 8 is_stmt 0 view .LVU271
+ 718 0086 10F4F84F 		tst	r0, #31744
+ 112:Core/Src/radio/radio.c ****     uint32_t exponent = (h >> 10) & 0x1F;
+ 719              		.loc 1 112 31 view .LVU272
+ 720 008a 4FEAD031 		lsr	r1, r0, #15
+ 721 008e C0F38426 		ubfx	r6, r0, #10, #5
+ 722              	.LVL94:
+ 114:Core/Src/radio/radio.c **** 
+ 723              		.loc 1 114 5 is_stmt 1 view .LVU273
+ 724 0092 C0F30903 		ubfx	r3, r0, #0, #10
+ 725              	.LVL95:
+ 116:Core/Src/radio/radio.c ****     uint32_t f32_exponent;
+ 726              		.loc 1 116 5 view .LVU274
+ 116:Core/Src/radio/radio.c ****     uint32_t f32_exponent;
+ 727              		.loc 1 116 14 is_stmt 0 view .LVU275
+ 728 0096 4FEAC171 		lsl	r1, r1, #31
+ 729              	.LVL96:
+ 117:Core/Src/radio/radio.c ****     uint32_t f32_mantissa;
+ 730              		.loc 1 117 5 is_stmt 1 view .LVU276
+ 118:Core/Src/radio/radio.c **** 
+ 731              		.loc 1 118 5 view .LVU277
+ 120:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 732              		.loc 1 120 5 view .LVU278
+ 120:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 733              		.loc 1 120 8 is_stmt 0 view .LVU279
+ 734 009a 3FD1     		bne	.L56
+ 121:Core/Src/radio/radio.c ****             // Zero
+ 735              		.loc 1 121 9 is_stmt 1 view .LVU280
+ 121:Core/Src/radio/radio.c ****             // Zero
+ 736              		.loc 1 121 12 is_stmt 0 view .LVU281
+ 737 009c 002B     		cmp	r3, #0
+ 738 009e 4DD1     		bne	.L90
+ 739              	.LVL97:
+ 740              	.L57:
+ 149:Core/Src/radio/radio.c **** 
+ 741              		.loc 1 149 5 is_stmt 1 view .LVU282
+ 151:Core/Src/radio/radio.c ****         uint32_t u;
+ 742              		.loc 1 151 5 view .LVU283
+ 156:Core/Src/radio/radio.c ****     return conv.f;
+ 743              		.loc 1 156 5 view .LVU284
+ 157:Core/Src/radio/radio.c **** }
+ 744              		.loc 1 157 5 view .LVU285
+ 157:Core/Src/radio/radio.c **** }
+ 745              		.loc 1 157 5 is_stmt 0 view .LVU286
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 21
+
+
+ 746              	.LBE39:
+ 747              	.LBE38:
+ 187:Core/Src/radio/radio.c ****     packet->angular_vel = float16_to_float32(rawPacket.angular_vel);
+ 748              		.loc 1 187 55 view .LVU287
+ 749 00a0 B5F80500 		ldrh	r0, [r5, #5]	@ unaligned
+ 186:Core/Src/radio/radio.c ****     packet->angular_vel = float16_to_float32(rawPacket.angular_vel);
+ 750              		.loc 1 186 22 view .LVU288
+ 751 00a4 9160     		str	r1, [r2, #8]	@ float
+ 752              		.loc 1 187 5 is_stmt 1 view .LVU289
+ 753              	.LVL98:
+ 754              	.LBB44:
+ 755              	.LBI44:
+ 111:Core/Src/radio/radio.c ****     uint32_t sign = (h >> 15) & 0x1;
+ 756              		.loc 1 111 7 view .LVU290
+ 757              	.LBB45:
+ 112:Core/Src/radio/radio.c ****     uint32_t exponent = (h >> 10) & 0x1F;
+ 758              		.loc 1 112 5 view .LVU291
+ 113:Core/Src/radio/radio.c ****     uint32_t mantissa = h & 0x3FF;
+ 759              		.loc 1 113 5 view .LVU292
+ 120:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 760              		.loc 1 120 8 is_stmt 0 view .LVU293
+ 761 00a6 10F4F84F 		tst	r0, #31744
+ 112:Core/Src/radio/radio.c ****     uint32_t exponent = (h >> 10) & 0x1F;
+ 762              		.loc 1 112 31 view .LVU294
+ 763 00aa 4FEAD031 		lsr	r1, r0, #15
+ 764 00ae C0F38426 		ubfx	r6, r0, #10, #5
+ 765              	.LVL99:
+ 114:Core/Src/radio/radio.c **** 
+ 766              		.loc 1 114 5 is_stmt 1 view .LVU295
+ 767 00b2 C0F30903 		ubfx	r3, r0, #0, #10
+ 768              	.LVL100:
+ 116:Core/Src/radio/radio.c ****     uint32_t f32_exponent;
+ 769              		.loc 1 116 5 view .LVU296
+ 116:Core/Src/radio/radio.c ****     uint32_t f32_exponent;
+ 770              		.loc 1 116 14 is_stmt 0 view .LVU297
+ 771 00b6 4FEAC171 		lsl	r1, r1, #31
+ 772              	.LVL101:
+ 117:Core/Src/radio/radio.c ****     uint32_t f32_mantissa;
+ 773              		.loc 1 117 5 is_stmt 1 view .LVU298
+ 118:Core/Src/radio/radio.c **** 
+ 774              		.loc 1 118 5 view .LVU299
+ 120:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 775              		.loc 1 120 5 view .LVU300
+ 120:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 776              		.loc 1 120 8 is_stmt 0 view .LVU301
+ 777 00ba 27D1     		bne	.L61
+ 121:Core/Src/radio/radio.c ****             // Zero
+ 778              		.loc 1 121 9 is_stmt 1 view .LVU302
+ 121:Core/Src/radio/radio.c ****             // Zero
+ 779              		.loc 1 121 12 is_stmt 0 view .LVU303
+ 780 00bc 7BB1     		cbz	r3, .L62
+ 781              	.LBB46:
+ 128:Core/Src/radio/radio.c ****             uint32_t m = mantissa;
+ 782              		.loc 1 128 17 view .LVU304
+ 783 00be 4FF0FF30 		mov	r0, #-1
+ 784              	.LVL102:
+ 785              	.L63:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 22
+
+
+ 131:Core/Src/radio/radio.c ****                 e--;
+ 786              		.loc 1 131 17 is_stmt 1 view .LVU305
+ 787 00c2 9C46     		mov	ip, r3
+ 788              	.LVL103:
+ 131:Core/Src/radio/radio.c ****                 e--;
+ 789              		.loc 1 131 19 is_stmt 0 view .LVU306
+ 790 00c4 5B00     		lsls	r3, r3, #1
+ 791              	.LVL104:
+ 132:Core/Src/radio/radio.c ****             }
+ 792              		.loc 1 132 17 is_stmt 1 view .LVU307
+ 793 00c6 0646     		mov	r6, r0
+ 132:Core/Src/radio/radio.c ****             }
+ 794              		.loc 1 132 18 is_stmt 0 view .LVU308
+ 795 00c8 0138     		subs	r0, r0, #1
+ 796              	.LVL105:
+ 130:Core/Src/radio/radio.c ****                 m <<= 1;
+ 797              		.loc 1 130 32 is_stmt 1 view .LVU309
+ 798 00ca 13F4806F 		tst	r3, #1024
+ 799 00ce F8D0     		beq	.L63
+ 134:Core/Src/radio/radio.c **** 
+ 800              		.loc 1 134 13 view .LVU310
+ 801              	.LVL106:
+ 136:Core/Src/radio/radio.c ****             f32_mantissa = m << 13;
+ 802              		.loc 1 136 13 view .LVU311
+ 137:Core/Src/radio/radio.c ****         }
+ 803              		.loc 1 137 13 view .LVU312
+ 137:Core/Src/radio/radio.c ****         }
+ 804              		.loc 1 137 26 is_stmt 0 view .LVU313
+ 805 00d0 374B     		ldr	r3, .L94+12
+ 806              	.LVL107:
+ 136:Core/Src/radio/radio.c ****             f32_mantissa = m << 13;
+ 807              		.loc 1 136 38 view .LVU314
+ 808 00d2 6F36     		adds	r6, r6, #111
+ 809              	.LVL108:
+ 137:Core/Src/radio/radio.c ****         }
+ 810              		.loc 1 137 26 view .LVU315
+ 811 00d4 03EA8C33 		and	r3, r3, ip, lsl #14
+ 812              	.LVL109:
+ 137:Core/Src/radio/radio.c ****         }
+ 813              		.loc 1 137 26 view .LVU316
+ 814              	.LBE46:
+ 149:Core/Src/radio/radio.c **** 
+ 815              		.loc 1 149 14 view .LVU317
+ 816 00d8 1943     		orrs	r1, r1, r3
+ 817              	.LVL110:
+ 149:Core/Src/radio/radio.c **** 
+ 818              		.loc 1 149 14 view .LVU318
+ 819 00da 41EAC651 		orr	r1, r1, r6, lsl #23
+ 820              	.LVL111:
+ 821              	.L62:
+ 149:Core/Src/radio/radio.c **** 
+ 822              		.loc 1 149 5 is_stmt 1 view .LVU319
+ 151:Core/Src/radio/radio.c ****         uint32_t u;
+ 823              		.loc 1 151 5 view .LVU320
+ 156:Core/Src/radio/radio.c ****     return conv.f;
+ 824              		.loc 1 156 5 view .LVU321
+ 157:Core/Src/radio/radio.c **** }
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 23
+
+
+ 825              		.loc 1 157 5 view .LVU322
+ 157:Core/Src/radio/radio.c **** }
+ 826              		.loc 1 157 5 is_stmt 0 view .LVU323
+ 827              	.LBE45:
+ 828              	.LBE44:
+ 188:Core/Src/radio/radio.c ****     
+ 189:Core/Src/radio/radio.c ****     // Parse dribbler state and speed
+ 190:Core/Src/radio/radio.c ****     packet->dribbler_state = (rawPacket.dribbler >> 14) & 0x03;  // Top 2 bits
+ 829              		.loc 1 190 40 view .LVU324
+ 830 00de B5F80730 		ldrh	r3, [r5, #7]	@ unaligned
+ 187:Core/Src/radio/radio.c ****     
+ 831              		.loc 1 187 25 view .LVU325
+ 832 00e2 D160     		str	r1, [r2, #12]	@ float
+ 833              		.loc 1 190 5 is_stmt 1 view .LVU326
+ 834              		.loc 1 190 57 is_stmt 0 view .LVU327
+ 835 00e4 9B0B     		lsrs	r3, r3, #14
+ 836 00e6 1374     		strb	r3, [r2, #16]
+ 191:Core/Src/radio/radio.c ****     packet->dribbler_speed = rawPacket.dribbler & 0x3FFF;        // Bottom 14 bits
+ 837              		.loc 1 191 5 is_stmt 1 view .LVU328
+ 838              		.loc 1 191 39 is_stmt 0 view .LVU329
+ 839 00e8 B5F80700 		ldrh	r0, [r5, #7]	@ unaligned
+ 192:Core/Src/radio/radio.c ****     
+ 193:Core/Src/radio/radio.c ****     // Parse kicker values
+ 194:Core/Src/radio/radio.c ****     packet->upper_kicker = (rawPacket.kickers >> 4) & 0x0F;  // Upper 4 bits
+ 840              		.loc 1 194 38 view .LVU330
+ 841 00ec 697A     		ldrb	r1, [r5, #9]	@ zero_extendqisi2
+ 191:Core/Src/radio/radio.c ****     packet->dribbler_speed = rawPacket.dribbler & 0x3FFF;        // Bottom 14 bits
+ 842              		.loc 1 191 49 view .LVU331
+ 843 00ee C0F30D00 		ubfx	r0, r0, #0, #14
+ 195:Core/Src/radio/radio.c ****     packet->lower_kicker = rawPacket.kickers & 0x0F;         // Lower 4 bits
+ 844              		.loc 1 195 37 view .LVU332
+ 845 00f2 6B7A     		ldrb	r3, [r5, #9]	@ zero_extendqisi2
+ 194:Core/Src/radio/radio.c ****     packet->lower_kicker = rawPacket.kickers & 0x0F;         // Lower 4 bits
+ 846              		.loc 1 194 53 view .LVU333
+ 847 00f4 0909     		lsrs	r1, r1, #4
+ 848              		.loc 1 195 46 view .LVU334
+ 849 00f6 03F00F03 		and	r3, r3, #15
+ 191:Core/Src/radio/radio.c ****     
+ 850              		.loc 1 191 28 view .LVU335
+ 851 00fa 5082     		strh	r0, [r2, #18]	@ movhi
+ 194:Core/Src/radio/radio.c ****     packet->lower_kicker = rawPacket.kickers & 0x0F;         // Lower 4 bits
+ 852              		.loc 1 194 5 is_stmt 1 view .LVU336
+ 853              	.LBE29:
+ 854              	.LBE28:
+ 855              	.LBE27:
+ 177:Core/Src/radio/radio.c **** }
+ 856              		.loc 1 177 5 is_stmt 0 view .LVU337
+ 857 00fc 2046     		mov	r0, r4
+ 858              	.LBB61:
+ 859              	.LBB59:
+ 860              	.LBB57:
+ 194:Core/Src/radio/radio.c ****     packet->lower_kicker = rawPacket.kickers & 0x0F;         // Lower 4 bits
+ 861              		.loc 1 194 26 view .LVU338
+ 862 00fe 1175     		strb	r1, [r2, #20]
+ 863              		.loc 1 195 5 is_stmt 1 view .LVU339
+ 864              		.loc 1 195 26 is_stmt 0 view .LVU340
+ 865 0100 5375     		strb	r3, [r2, #21]
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 24
+
+
+ 866              	.LVL112:
+ 867              		.loc 1 195 26 view .LVU341
+ 868              	.LBE57:
+ 869              	.LBE59:
+ 870              	.LBE61:
+ 177:Core/Src/radio/radio.c **** }
+ 871              		.loc 1 177 5 is_stmt 1 view .LVU342
+ 178:Core/Src/radio/radio.c **** 
+ 872              		.loc 1 178 1 is_stmt 0 view .LVU343
+ 873 0102 04B0     		add	sp, sp, #16
+ 874              	.LCFI5:
+ 875              		.cfi_remember_state
+ 876              		.cfi_def_cfa_offset 16
+ 877              		@ sp needed
+ 878 0104 BDE87040 		pop	{r4, r5, r6, lr}
+ 879              	.LCFI6:
+ 880              		.cfi_restore 14
+ 881              		.cfi_restore 6
+ 882              		.cfi_restore 5
+ 883              		.cfi_restore 4
+ 884              		.cfi_def_cfa_offset 0
+ 885              	.LVL113:
+ 177:Core/Src/radio/radio.c **** }
+ 886              		.loc 1 177 5 view .LVU344
+ 887 0108 FFF7FEBF 		b	nRF24_ClearIRQFlags
+ 888              	.LVL114:
+ 889              	.L61:
+ 890              	.LCFI7:
+ 891              		.cfi_restore_state
+ 892              	.LBB62:
+ 893              	.LBB60:
+ 894              	.LBB58:
+ 895              	.LBB49:
+ 896              	.LBB47:
+ 139:Core/Src/radio/radio.c ****         // Inf or NaN
+ 897              		.loc 1 139 12 is_stmt 1 view .LVU345
+ 139:Core/Src/radio/radio.c ****         // Inf or NaN
+ 898              		.loc 1 139 15 is_stmt 0 view .LVU346
+ 899 010c 1F2E     		cmp	r6, #31
+ 900 010e 37D0     		beq	.L91
+ 145:Core/Src/radio/radio.c ****         f32_mantissa = mantissa << 13;
+ 901              		.loc 1 145 9 is_stmt 1 view .LVU347
+ 902              	.LVL115:
+ 146:Core/Src/radio/radio.c ****     }
+ 903              		.loc 1 146 9 view .LVU348
+ 149:Core/Src/radio/radio.c **** 
+ 904              		.loc 1 149 14 is_stmt 0 view .LVU349
+ 905 0110 41EA4331 		orr	r1, r1, r3, lsl #13
+ 906              	.LVL116:
+ 145:Core/Src/radio/radio.c ****         f32_mantissa = mantissa << 13;
+ 907              		.loc 1 145 39 view .LVU350
+ 908 0114 7036     		adds	r6, r6, #112
+ 909              	.LVL117:
+ 149:Core/Src/radio/radio.c **** 
+ 910              		.loc 1 149 14 view .LVU351
+ 911 0116 41EAC651 		orr	r1, r1, r6, lsl #23
+ 912 011a E0E7     		b	.L62
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 25
+
+
+ 913              	.LVL118:
+ 914              	.L56:
+ 149:Core/Src/radio/radio.c **** 
+ 915              		.loc 1 149 14 view .LVU352
+ 916              	.LBE47:
+ 917              	.LBE49:
+ 918              	.LBB50:
+ 919              	.LBB41:
+ 139:Core/Src/radio/radio.c ****         // Inf or NaN
+ 920              		.loc 1 139 12 is_stmt 1 view .LVU353
+ 139:Core/Src/radio/radio.c ****         // Inf or NaN
+ 921              		.loc 1 139 15 is_stmt 0 view .LVU354
+ 922 011c 1F2E     		cmp	r6, #31
+ 923 011e 3BD0     		beq	.L92
+ 145:Core/Src/radio/radio.c ****         f32_mantissa = mantissa << 13;
+ 924              		.loc 1 145 9 is_stmt 1 view .LVU355
+ 925              	.LVL119:
+ 146:Core/Src/radio/radio.c ****     }
+ 926              		.loc 1 146 9 view .LVU356
+ 149:Core/Src/radio/radio.c **** 
+ 927              		.loc 1 149 14 is_stmt 0 view .LVU357
+ 928 0120 41EA4331 		orr	r1, r1, r3, lsl #13
+ 929              	.LVL120:
+ 145:Core/Src/radio/radio.c ****         f32_mantissa = mantissa << 13;
+ 930              		.loc 1 145 39 view .LVU358
+ 931 0124 7036     		adds	r6, r6, #112
+ 932              	.LVL121:
+ 149:Core/Src/radio/radio.c **** 
+ 933              		.loc 1 149 14 view .LVU359
+ 934 0126 41EAC651 		orr	r1, r1, r6, lsl #23
+ 935 012a B9E7     		b	.L57
+ 936              	.LVL122:
+ 937              	.L51:
+ 149:Core/Src/radio/radio.c **** 
+ 938              		.loc 1 149 14 view .LVU360
+ 939              	.LBE41:
+ 940              	.LBE50:
+ 941              	.LBB51:
+ 942              	.LBB34:
+ 139:Core/Src/radio/radio.c ****         // Inf or NaN
+ 943              		.loc 1 139 12 is_stmt 1 view .LVU361
+ 139:Core/Src/radio/radio.c ****         // Inf or NaN
+ 944              		.loc 1 139 15 is_stmt 0 view .LVU362
+ 945 012c 1F2E     		cmp	r6, #31
+ 946 012e 2DD0     		beq	.L93
+ 145:Core/Src/radio/radio.c ****         f32_mantissa = mantissa << 13;
+ 947              		.loc 1 145 9 is_stmt 1 view .LVU363
+ 948              	.LVL123:
+ 146:Core/Src/radio/radio.c ****     }
+ 949              		.loc 1 146 9 view .LVU364
+ 149:Core/Src/radio/radio.c **** 
+ 950              		.loc 1 149 14 is_stmt 0 view .LVU365
+ 951 0130 41EA4331 		orr	r1, r1, r3, lsl #13
+ 952              	.LVL124:
+ 145:Core/Src/radio/radio.c ****         f32_mantissa = mantissa << 13;
+ 953              		.loc 1 145 39 view .LVU366
+ 954 0134 7036     		adds	r6, r6, #112
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 26
+
+
+ 955              	.LVL125:
+ 149:Core/Src/radio/radio.c **** 
+ 956              		.loc 1 149 14 view .LVU367
+ 957 0136 41EAC651 		orr	r1, r1, r6, lsl #23
+ 958 013a A1E7     		b	.L52
+ 959              	.LVL126:
+ 960              	.L90:
+ 149:Core/Src/radio/radio.c **** 
+ 961              		.loc 1 149 14 view .LVU368
+ 962              	.LBE34:
+ 963              	.LBE51:
+ 964              	.LBB52:
+ 965              	.LBB42:
+ 966              	.LBB40:
+ 128:Core/Src/radio/radio.c ****             uint32_t m = mantissa;
+ 967              		.loc 1 128 17 view .LVU369
+ 968 013c 4FF0FF30 		mov	r0, #-1
+ 969              	.LVL127:
+ 970              	.L58:
+ 131:Core/Src/radio/radio.c ****                 e--;
+ 971              		.loc 1 131 17 is_stmt 1 view .LVU370
+ 972 0140 9C46     		mov	ip, r3
+ 973              	.LVL128:
+ 131:Core/Src/radio/radio.c ****                 e--;
+ 974              		.loc 1 131 19 is_stmt 0 view .LVU371
+ 975 0142 5B00     		lsls	r3, r3, #1
+ 976              	.LVL129:
+ 132:Core/Src/radio/radio.c ****             }
+ 977              		.loc 1 132 17 is_stmt 1 view .LVU372
+ 978 0144 0646     		mov	r6, r0
+ 132:Core/Src/radio/radio.c ****             }
+ 979              		.loc 1 132 18 is_stmt 0 view .LVU373
+ 980 0146 0138     		subs	r0, r0, #1
+ 981              	.LVL130:
+ 130:Core/Src/radio/radio.c ****                 m <<= 1;
+ 982              		.loc 1 130 32 is_stmt 1 view .LVU374
+ 983 0148 13F4806F 		tst	r3, #1024
+ 984 014c F8D0     		beq	.L58
+ 134:Core/Src/radio/radio.c **** 
+ 985              		.loc 1 134 13 view .LVU375
+ 986              	.LVL131:
+ 136:Core/Src/radio/radio.c ****             f32_mantissa = m << 13;
+ 987              		.loc 1 136 13 view .LVU376
+ 137:Core/Src/radio/radio.c ****         }
+ 988              		.loc 1 137 13 view .LVU377
+ 137:Core/Src/radio/radio.c ****         }
+ 989              		.loc 1 137 26 is_stmt 0 view .LVU378
+ 990 014e 184B     		ldr	r3, .L94+12
+ 991              	.LVL132:
+ 136:Core/Src/radio/radio.c ****             f32_mantissa = m << 13;
+ 992              		.loc 1 136 38 view .LVU379
+ 993 0150 6F36     		adds	r6, r6, #111
+ 994              	.LVL133:
+ 137:Core/Src/radio/radio.c ****         }
+ 995              		.loc 1 137 26 view .LVU380
+ 996 0152 03EA8C33 		and	r3, r3, ip, lsl #14
+ 997              	.LVL134:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 27
+
+
+ 137:Core/Src/radio/radio.c ****         }
+ 998              		.loc 1 137 26 view .LVU381
+ 999              	.LBE40:
+ 149:Core/Src/radio/radio.c **** 
+ 1000              		.loc 1 149 14 view .LVU382
+ 1001 0156 1943     		orrs	r1, r1, r3
+ 1002              	.LVL135:
+ 149:Core/Src/radio/radio.c **** 
+ 1003              		.loc 1 149 14 view .LVU383
+ 1004 0158 41EAC651 		orr	r1, r1, r6, lsl #23
+ 1005 015c A0E7     		b	.L57
+ 1006              	.LVL136:
+ 1007              	.L89:
+ 149:Core/Src/radio/radio.c **** 
+ 1008              		.loc 1 149 14 view .LVU384
+ 1009              	.LBE42:
+ 1010              	.LBE52:
+ 1011              	.LBB53:
+ 1012              	.LBB35:
+ 1013              	.LBB32:
+ 128:Core/Src/radio/radio.c ****             uint32_t m = mantissa;
+ 1014              		.loc 1 128 17 view .LVU385
+ 1015 015e 4FF0FF30 		mov	r0, #-1
+ 1016              	.LVL137:
+ 1017              	.L53:
+ 131:Core/Src/radio/radio.c ****                 e--;
+ 1018              		.loc 1 131 17 is_stmt 1 view .LVU386
+ 1019 0162 9C46     		mov	ip, r3
+ 1020              	.LVL138:
+ 131:Core/Src/radio/radio.c ****                 e--;
+ 1021              		.loc 1 131 19 is_stmt 0 view .LVU387
+ 1022 0164 5B00     		lsls	r3, r3, #1
+ 1023              	.LVL139:
+ 132:Core/Src/radio/radio.c ****             }
+ 1024              		.loc 1 132 17 is_stmt 1 view .LVU388
+ 1025 0166 0646     		mov	r6, r0
+ 132:Core/Src/radio/radio.c ****             }
+ 1026              		.loc 1 132 18 is_stmt 0 view .LVU389
+ 1027 0168 0138     		subs	r0, r0, #1
+ 1028              	.LVL140:
+ 130:Core/Src/radio/radio.c ****                 m <<= 1;
+ 1029              		.loc 1 130 32 is_stmt 1 view .LVU390
+ 1030 016a 13F4806F 		tst	r3, #1024
+ 1031 016e F8D0     		beq	.L53
+ 134:Core/Src/radio/radio.c **** 
+ 1032              		.loc 1 134 13 view .LVU391
+ 1033              	.LVL141:
+ 136:Core/Src/radio/radio.c ****             f32_mantissa = m << 13;
+ 1034              		.loc 1 136 13 view .LVU392
+ 137:Core/Src/radio/radio.c ****         }
+ 1035              		.loc 1 137 13 view .LVU393
+ 137:Core/Src/radio/radio.c ****         }
+ 1036              		.loc 1 137 26 is_stmt 0 view .LVU394
+ 1037 0170 0F4B     		ldr	r3, .L94+12
+ 1038              	.LVL142:
+ 136:Core/Src/radio/radio.c ****             f32_mantissa = m << 13;
+ 1039              		.loc 1 136 38 view .LVU395
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 28
+
+
+ 1040 0172 6F36     		adds	r6, r6, #111
+ 1041              	.LVL143:
+ 137:Core/Src/radio/radio.c ****         }
+ 1042              		.loc 1 137 26 view .LVU396
+ 1043 0174 03EA8C33 		and	r3, r3, ip, lsl #14
+ 1044              	.LVL144:
+ 137:Core/Src/radio/radio.c ****         }
+ 1045              		.loc 1 137 26 view .LVU397
+ 1046              	.LBE32:
+ 149:Core/Src/radio/radio.c **** 
+ 1047              		.loc 1 149 14 view .LVU398
+ 1048 0178 1943     		orrs	r1, r1, r3
+ 1049              	.LVL145:
+ 149:Core/Src/radio/radio.c **** 
+ 1050              		.loc 1 149 14 view .LVU399
+ 1051 017a 41EAC651 		orr	r1, r1, r6, lsl #23
+ 1052 017e 7FE7     		b	.L52
+ 1053              	.LVL146:
+ 1054              	.L91:
+ 149:Core/Src/radio/radio.c **** 
+ 1055              		.loc 1 149 14 view .LVU400
+ 1056              	.LBE35:
+ 1057              	.LBE53:
+ 1058              	.LBB54:
+ 1059              	.LBB48:
+ 141:Core/Src/radio/radio.c ****         f32_mantissa = mantissa ? (mantissa << 13) : 0;
+ 1060              		.loc 1 141 9 is_stmt 1 view .LVU401
+ 142:Core/Src/radio/radio.c ****     } else {
+ 1061              		.loc 1 142 9 view .LVU402
+ 142:Core/Src/radio/radio.c ****     } else {
+ 1062              		.loc 1 142 52 is_stmt 0 view .LVU403
+ 1063 0180 0BB1     		cbz	r3, .L87
+ 149:Core/Src/radio/radio.c **** 
+ 1064              		.loc 1 149 14 view .LVU404
+ 1065 0182 41EA4331 		orr	r1, r1, r3, lsl #13
+ 1066              	.LVL147:
+ 1067              	.L87:
+ 149:Core/Src/radio/radio.c **** 
+ 1068              		.loc 1 149 14 view .LVU405
+ 1069 0186 41F0FF41 		orr	r1, r1, #2139095040
+ 1070 018a A8E7     		b	.L62
+ 1071              	.LVL148:
+ 1072              	.L93:
+ 149:Core/Src/radio/radio.c **** 
+ 1073              		.loc 1 149 14 view .LVU406
+ 1074              	.LBE48:
+ 1075              	.LBE54:
+ 1076              	.LBB55:
+ 1077              	.LBB36:
+ 141:Core/Src/radio/radio.c ****         f32_mantissa = mantissa ? (mantissa << 13) : 0;
+ 1078              		.loc 1 141 9 is_stmt 1 view .LVU407
+ 142:Core/Src/radio/radio.c ****     } else {
+ 1079              		.loc 1 142 9 view .LVU408
+ 142:Core/Src/radio/radio.c ****     } else {
+ 1080              		.loc 1 142 52 is_stmt 0 view .LVU409
+ 1081 018c 0BB1     		cbz	r3, .L85
+ 149:Core/Src/radio/radio.c **** 
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 29
+
+
+ 1082              		.loc 1 149 14 view .LVU410
+ 1083 018e 41EA4331 		orr	r1, r1, r3, lsl #13
+ 1084              	.LVL149:
+ 1085              	.L85:
+ 149:Core/Src/radio/radio.c **** 
+ 1086              		.loc 1 149 14 view .LVU411
+ 1087 0192 41F0FF41 		orr	r1, r1, #2139095040
+ 1088 0196 73E7     		b	.L52
+ 1089              	.LVL150:
+ 1090              	.L92:
+ 149:Core/Src/radio/radio.c **** 
+ 1091              		.loc 1 149 14 view .LVU412
+ 1092              	.LBE36:
+ 1093              	.LBE55:
+ 1094              	.LBB56:
+ 1095              	.LBB43:
+ 141:Core/Src/radio/radio.c ****         f32_mantissa = mantissa ? (mantissa << 13) : 0;
+ 1096              		.loc 1 141 9 is_stmt 1 view .LVU413
+ 142:Core/Src/radio/radio.c ****     } else {
+ 1097              		.loc 1 142 9 view .LVU414
+ 142:Core/Src/radio/radio.c ****     } else {
+ 1098              		.loc 1 142 52 is_stmt 0 view .LVU415
+ 1099 0198 0BB1     		cbz	r3, .L86
+ 149:Core/Src/radio/radio.c **** 
+ 1100              		.loc 1 149 14 view .LVU416
+ 1101 019a 41EA4331 		orr	r1, r1, r3, lsl #13
+ 1102              	.LVL151:
+ 1103              	.L86:
+ 149:Core/Src/radio/radio.c **** 
+ 1104              		.loc 1 149 14 view .LVU417
+ 1105 019e 41F0FF41 		orr	r1, r1, #2139095040
+ 1106 01a2 7DE7     		b	.L57
+ 1107              	.L95:
+ 1108              		.align	2
+ 1109              	.L94:
+ 1110 01a4 00040258 		.word	1476527104
+ 1111 01a8 00000000 		.word	rawPacket
+ 1112 01ac 00000000 		.word	currentPacket
+ 1113 01b0 00E07F00 		.word	8380416
+ 1114              	.LBE43:
+ 1115              	.LBE56:
+ 1116              	.LBE58:
+ 1117              	.LBE60:
+ 1118              	.LBE62:
+ 1119              		.cfi_endproc
+ 1120              	.LFE154:
+ 1122              		.section	.text.parsePacket,"ax",%progbits
+ 1123              		.align	1
+ 1124              		.p2align 2,,3
+ 1125              		.global	parsePacket
+ 1126              		.syntax unified
+ 1127              		.thumb
+ 1128              		.thumb_func
+ 1130              	parsePacket:
+ 1131              	.LVL152:
+ 1132              	.LFB155:
+ 180:Core/Src/radio/radio.c ****     // Use the already copied raw packet
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 30
+
+
+ 1133              		.loc 1 180 61 is_stmt 1 view -0
+ 1134              		.cfi_startproc
+ 1135              		@ args = 0, pretend = 0, frame = 0
+ 1136              		@ frame_needed = 0, uses_anonymous_args = 0
+ 182:Core/Src/radio/radio.c ****     
+ 1137              		.loc 1 182 5 view .LVU419
+ 182:Core/Src/radio/radio.c ****     
+ 1138              		.loc 1 182 33 is_stmt 0 view .LVU420
+ 1139 0000 564A     		ldr	r2, .L136
+ 180:Core/Src/radio/radio.c ****     // Use the already copied raw packet
+ 1140              		.loc 1 180 61 view .LVU421
+ 1141 0002 10B5     		push	{r4, lr}
+ 1142              	.LCFI8:
+ 1143              		.cfi_def_cfa_offset 8
+ 1144              		.cfi_offset 4, -8
+ 1145              		.cfi_offset 14, -4
+ 182:Core/Src/radio/radio.c ****     
+ 1146              		.loc 1 182 33 view .LVU422
+ 1147 0004 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 182:Core/Src/radio/radio.c ****     
+ 1148              		.loc 1 182 22 view .LVU423
+ 1149 0006 0B70     		strb	r3, [r1]
+ 185:Core/Src/radio/radio.c ****     packet->left_vel = float16_to_float32(rawPacket.left_vel);
+ 1150              		.loc 1 185 5 is_stmt 1 view .LVU424
+ 185:Core/Src/radio/radio.c ****     packet->left_vel = float16_to_float32(rawPacket.left_vel);
+ 1151              		.loc 1 185 55 is_stmt 0 view .LVU425
+ 1152 0008 B2F801C0 		ldrh	ip, [r2, #1]	@ unaligned
+ 1153              	.LVL153:
+ 1154              	.LBB72:
+ 1155              	.LBI72:
+ 111:Core/Src/radio/radio.c ****     uint32_t sign = (h >> 15) & 0x1;
+ 1156              		.loc 1 111 7 is_stmt 1 view .LVU426
+ 1157              	.LBB73:
+ 112:Core/Src/radio/radio.c ****     uint32_t exponent = (h >> 10) & 0x1F;
+ 1158              		.loc 1 112 5 view .LVU427
+ 113:Core/Src/radio/radio.c ****     uint32_t mantissa = h & 0x3FF;
+ 1159              		.loc 1 113 5 view .LVU428
+ 112:Core/Src/radio/radio.c ****     uint32_t exponent = (h >> 10) & 0x1F;
+ 1160              		.loc 1 112 31 is_stmt 0 view .LVU429
+ 1161 000c 4FEADC30 		lsr	r0, ip, #15
+ 1162              	.LVL154:
+ 120:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 1163              		.loc 1 120 8 view .LVU430
+ 1164 0010 1CF4F84F 		tst	ip, #31744
+ 1165 0014 CCF3842E 		ubfx	lr, ip, #10, #5
+ 1166              	.LVL155:
+ 114:Core/Src/radio/radio.c **** 
+ 1167              		.loc 1 114 5 is_stmt 1 view .LVU431
+ 1168 0018 CCF30903 		ubfx	r3, ip, #0, #10
+ 1169              	.LVL156:
+ 116:Core/Src/radio/radio.c ****     uint32_t f32_exponent;
+ 1170              		.loc 1 116 5 view .LVU432
+ 116:Core/Src/radio/radio.c ****     uint32_t f32_exponent;
+ 1171              		.loc 1 116 14 is_stmt 0 view .LVU433
+ 1172 001c 4FEAC070 		lsl	r0, r0, #31
+ 1173              	.LVL157:
+ 117:Core/Src/radio/radio.c ****     uint32_t f32_mantissa;
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 31
+
+
+ 1174              		.loc 1 117 5 is_stmt 1 view .LVU434
+ 118:Core/Src/radio/radio.c **** 
+ 1175              		.loc 1 118 5 view .LVU435
+ 120:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 1176              		.loc 1 120 5 view .LVU436
+ 120:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 1177              		.loc 1 120 8 is_stmt 0 view .LVU437
+ 1178 0020 59D1     		bne	.L97
+ 121:Core/Src/radio/radio.c ****             // Zero
+ 1179              		.loc 1 121 9 is_stmt 1 view .LVU438
+ 121:Core/Src/radio/radio.c ****             // Zero
+ 1180              		.loc 1 121 12 is_stmt 0 view .LVU439
+ 1181 0022 002B     		cmp	r3, #0
+ 1182 0024 74D1     		bne	.L131
+ 1183              	.LVL158:
+ 1184              	.L98:
+ 149:Core/Src/radio/radio.c **** 
+ 1185              		.loc 1 149 5 is_stmt 1 view .LVU440
+ 151:Core/Src/radio/radio.c ****         uint32_t u;
+ 1186              		.loc 1 151 5 view .LVU441
+ 156:Core/Src/radio/radio.c ****     return conv.f;
+ 1187              		.loc 1 156 5 view .LVU442
+ 157:Core/Src/radio/radio.c **** }
+ 1188              		.loc 1 157 5 view .LVU443
+ 157:Core/Src/radio/radio.c **** }
+ 1189              		.loc 1 157 5 is_stmt 0 view .LVU444
+ 1190              	.LBE73:
+ 1191              	.LBE72:
+ 185:Core/Src/radio/radio.c ****     packet->left_vel = float16_to_float32(rawPacket.left_vel);
+ 1192              		.loc 1 185 25 view .LVU445
+ 1193 0026 4860     		str	r0, [r1, #4]	@ float
+ 186:Core/Src/radio/radio.c ****     packet->angular_vel = float16_to_float32(rawPacket.angular_vel);
+ 1194              		.loc 1 186 5 is_stmt 1 view .LVU446
+ 186:Core/Src/radio/radio.c ****     packet->angular_vel = float16_to_float32(rawPacket.angular_vel);
+ 1195              		.loc 1 186 52 is_stmt 0 view .LVU447
+ 1196 0028 B2F803C0 		ldrh	ip, [r2, #3]	@ unaligned
+ 1197              	.LVL159:
+ 1198              	.LBB78:
+ 1199              	.LBI78:
+ 111:Core/Src/radio/radio.c ****     uint32_t sign = (h >> 15) & 0x1;
+ 1200              		.loc 1 111 7 is_stmt 1 view .LVU448
+ 1201              	.LBB79:
+ 112:Core/Src/radio/radio.c ****     uint32_t exponent = (h >> 10) & 0x1F;
+ 1202              		.loc 1 112 5 view .LVU449
+ 113:Core/Src/radio/radio.c ****     uint32_t mantissa = h & 0x3FF;
+ 1203              		.loc 1 113 5 view .LVU450
+ 112:Core/Src/radio/radio.c ****     uint32_t exponent = (h >> 10) & 0x1F;
+ 1204              		.loc 1 112 31 is_stmt 0 view .LVU451
+ 1205 002c 4FEADC30 		lsr	r0, ip, #15
+ 120:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 1206              		.loc 1 120 8 view .LVU452
+ 1207 0030 1CF4F84F 		tst	ip, #31744
+ 1208 0034 CCF3842E 		ubfx	lr, ip, #10, #5
+ 1209              	.LVL160:
+ 114:Core/Src/radio/radio.c **** 
+ 1210              		.loc 1 114 5 is_stmt 1 view .LVU453
+ 1211 0038 CCF30903 		ubfx	r3, ip, #0, #10
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 32
+
+
+ 1212              	.LVL161:
+ 116:Core/Src/radio/radio.c ****     uint32_t f32_exponent;
+ 1213              		.loc 1 116 5 view .LVU454
+ 116:Core/Src/radio/radio.c ****     uint32_t f32_exponent;
+ 1214              		.loc 1 116 14 is_stmt 0 view .LVU455
+ 1215 003c 4FEAC070 		lsl	r0, r0, #31
+ 1216              	.LVL162:
+ 117:Core/Src/radio/radio.c ****     uint32_t f32_mantissa;
+ 1217              		.loc 1 117 5 is_stmt 1 view .LVU456
+ 118:Core/Src/radio/radio.c **** 
+ 1218              		.loc 1 118 5 view .LVU457
+ 120:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 1219              		.loc 1 120 5 view .LVU458
+ 120:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 1220              		.loc 1 120 8 is_stmt 0 view .LVU459
+ 1221 0040 3FD1     		bne	.L102
+ 121:Core/Src/radio/radio.c ****             // Zero
+ 1222              		.loc 1 121 9 is_stmt 1 view .LVU460
+ 121:Core/Src/radio/radio.c ****             // Zero
+ 1223              		.loc 1 121 12 is_stmt 0 view .LVU461
+ 1224 0042 002B     		cmp	r3, #0
+ 1225 0044 51D1     		bne	.L132
+ 1226              	.LVL163:
+ 1227              	.L103:
+ 149:Core/Src/radio/radio.c **** 
+ 1228              		.loc 1 149 5 is_stmt 1 view .LVU462
+ 151:Core/Src/radio/radio.c ****         uint32_t u;
+ 1229              		.loc 1 151 5 view .LVU463
+ 156:Core/Src/radio/radio.c ****     return conv.f;
+ 1230              		.loc 1 156 5 view .LVU464
+ 157:Core/Src/radio/radio.c **** }
+ 1231              		.loc 1 157 5 view .LVU465
+ 157:Core/Src/radio/radio.c **** }
+ 1232              		.loc 1 157 5 is_stmt 0 view .LVU466
+ 1233              	.LBE79:
+ 1234              	.LBE78:
+ 186:Core/Src/radio/radio.c ****     packet->angular_vel = float16_to_float32(rawPacket.angular_vel);
+ 1235              		.loc 1 186 22 view .LVU467
+ 1236 0046 8860     		str	r0, [r1, #8]	@ float
+ 187:Core/Src/radio/radio.c ****     
+ 1237              		.loc 1 187 5 is_stmt 1 view .LVU468
+ 187:Core/Src/radio/radio.c ****     
+ 1238              		.loc 1 187 55 is_stmt 0 view .LVU469
+ 1239 0048 B2F805C0 		ldrh	ip, [r2, #5]	@ unaligned
+ 1240              	.LVL164:
+ 1241              	.LBB84:
+ 1242              	.LBI84:
+ 111:Core/Src/radio/radio.c ****     uint32_t sign = (h >> 15) & 0x1;
+ 1243              		.loc 1 111 7 is_stmt 1 view .LVU470
+ 1244              	.LBB85:
+ 112:Core/Src/radio/radio.c ****     uint32_t exponent = (h >> 10) & 0x1F;
+ 1245              		.loc 1 112 5 view .LVU471
+ 113:Core/Src/radio/radio.c ****     uint32_t mantissa = h & 0x3FF;
+ 1246              		.loc 1 113 5 view .LVU472
+ 112:Core/Src/radio/radio.c ****     uint32_t exponent = (h >> 10) & 0x1F;
+ 1247              		.loc 1 112 31 is_stmt 0 view .LVU473
+ 1248 004c 4FEADC30 		lsr	r0, ip, #15
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 33
+
+
+ 120:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 1249              		.loc 1 120 8 view .LVU474
+ 1250 0050 1CF4F84F 		tst	ip, #31744
+ 1251 0054 CCF3842E 		ubfx	lr, ip, #10, #5
+ 1252              	.LVL165:
+ 114:Core/Src/radio/radio.c **** 
+ 1253              		.loc 1 114 5 is_stmt 1 view .LVU475
+ 1254 0058 CCF30903 		ubfx	r3, ip, #0, #10
+ 1255              	.LVL166:
+ 116:Core/Src/radio/radio.c ****     uint32_t f32_exponent;
+ 1256              		.loc 1 116 5 view .LVU476
+ 116:Core/Src/radio/radio.c ****     uint32_t f32_exponent;
+ 1257              		.loc 1 116 14 is_stmt 0 view .LVU477
+ 1258 005c 4FEAC070 		lsl	r0, r0, #31
+ 1259              	.LVL167:
+ 117:Core/Src/radio/radio.c ****     uint32_t f32_mantissa;
+ 1260              		.loc 1 117 5 is_stmt 1 view .LVU478
+ 118:Core/Src/radio/radio.c **** 
+ 1261              		.loc 1 118 5 view .LVU479
+ 120:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 1262              		.loc 1 120 5 view .LVU480
+ 120:Core/Src/radio/radio.c ****         if (mantissa == 0) {
+ 1263              		.loc 1 120 8 is_stmt 0 view .LVU481
+ 1264 0060 25D1     		bne	.L107
+ 121:Core/Src/radio/radio.c ****             // Zero
+ 1265              		.loc 1 121 9 is_stmt 1 view .LVU482
+ 121:Core/Src/radio/radio.c ****             // Zero
+ 1266              		.loc 1 121 12 is_stmt 0 view .LVU483
+ 1267 0062 8BB1     		cbz	r3, .L108
+ 1268              	.LBB86:
+ 128:Core/Src/radio/radio.c ****             uint32_t m = mantissa;
+ 1269              		.loc 1 128 17 view .LVU484
+ 1270 0064 4FF0FF3C 		mov	ip, #-1
+ 1271              	.LVL168:
+ 1272              	.L109:
+ 131:Core/Src/radio/radio.c ****                 e--;
+ 1273              		.loc 1 131 17 is_stmt 1 view .LVU485
+ 1274 0068 1C46     		mov	r4, r3
+ 1275              	.LVL169:
+ 131:Core/Src/radio/radio.c ****                 e--;
+ 1276              		.loc 1 131 19 is_stmt 0 view .LVU486
+ 1277 006a 5B00     		lsls	r3, r3, #1
+ 1278              	.LVL170:
+ 132:Core/Src/radio/radio.c ****             }
+ 1279              		.loc 1 132 17 is_stmt 1 view .LVU487
+ 1280 006c E646     		mov	lr, ip
+ 132:Core/Src/radio/radio.c ****             }
+ 1281              		.loc 1 132 18 is_stmt 0 view .LVU488
+ 1282 006e 0CF1FF3C 		add	ip, ip, #-1
+ 1283              	.LVL171:
+ 130:Core/Src/radio/radio.c ****                 m <<= 1;
+ 1284              		.loc 1 130 32 is_stmt 1 view .LVU489
+ 1285 0072 13F4806F 		tst	r3, #1024
+ 1286 0076 F7D0     		beq	.L109
+ 134:Core/Src/radio/radio.c **** 
+ 1287              		.loc 1 134 13 view .LVU490
+ 1288              	.LVL172:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 34
+
+
+ 136:Core/Src/radio/radio.c ****             f32_mantissa = m << 13;
+ 1289              		.loc 1 136 13 view .LVU491
+ 137:Core/Src/radio/radio.c ****         }
+ 1290              		.loc 1 137 13 view .LVU492
+ 137:Core/Src/radio/radio.c ****         }
+ 1291              		.loc 1 137 26 is_stmt 0 view .LVU493
+ 1292 0078 394B     		ldr	r3, .L136+4
+ 1293              	.LVL173:
+ 136:Core/Src/radio/radio.c ****             f32_mantissa = m << 13;
+ 1294              		.loc 1 136 38 view .LVU494
+ 1295 007a 0EF16F0E 		add	lr, lr, #111
+ 1296              	.LVL174:
+ 137:Core/Src/radio/radio.c ****         }
+ 1297              		.loc 1 137 26 view .LVU495
+ 1298 007e 03EA8433 		and	r3, r3, r4, lsl #14
+ 1299              	.LVL175:
+ 137:Core/Src/radio/radio.c ****         }
+ 1300              		.loc 1 137 26 view .LVU496
+ 1301              	.LBE86:
+ 149:Core/Src/radio/radio.c **** 
+ 1302              		.loc 1 149 14 view .LVU497
+ 1303 0082 1843     		orrs	r0, r0, r3
+ 1304              	.LVL176:
+ 149:Core/Src/radio/radio.c **** 
+ 1305              		.loc 1 149 14 view .LVU498
+ 1306 0084 40EACE50 		orr	r0, r0, lr, lsl #23
+ 1307              	.LVL177:
+ 1308              	.L108:
+ 149:Core/Src/radio/radio.c **** 
+ 1309              		.loc 1 149 5 is_stmt 1 view .LVU499
+ 151:Core/Src/radio/radio.c ****         uint32_t u;
+ 1310              		.loc 1 151 5 view .LVU500
+ 156:Core/Src/radio/radio.c ****     return conv.f;
+ 1311              		.loc 1 156 5 view .LVU501
+ 157:Core/Src/radio/radio.c **** }
+ 1312              		.loc 1 157 5 view .LVU502
+ 157:Core/Src/radio/radio.c **** }
+ 1313              		.loc 1 157 5 is_stmt 0 view .LVU503
+ 1314              	.LBE85:
+ 1315              	.LBE84:
+ 187:Core/Src/radio/radio.c ****     
+ 1316              		.loc 1 187 25 view .LVU504
+ 1317 0088 C860     		str	r0, [r1, #12]	@ float
+ 190:Core/Src/radio/radio.c ****     packet->dribbler_speed = rawPacket.dribbler & 0x3FFF;        // Bottom 14 bits
+ 1318              		.loc 1 190 5 is_stmt 1 view .LVU505
+ 190:Core/Src/radio/radio.c ****     packet->dribbler_speed = rawPacket.dribbler & 0x3FFF;        // Bottom 14 bits
+ 1319              		.loc 1 190 40 is_stmt 0 view .LVU506
+ 1320 008a B2F80730 		ldrh	r3, [r2, #7]	@ unaligned
+ 190:Core/Src/radio/radio.c ****     packet->dribbler_speed = rawPacket.dribbler & 0x3FFF;        // Bottom 14 bits
+ 1321              		.loc 1 190 57 view .LVU507
+ 1322 008e 9B0B     		lsrs	r3, r3, #14
+ 1323 0090 0B74     		strb	r3, [r1, #16]
+ 191:Core/Src/radio/radio.c ****     
+ 1324              		.loc 1 191 5 is_stmt 1 view .LVU508
+ 191:Core/Src/radio/radio.c ****     
+ 1325              		.loc 1 191 39 is_stmt 0 view .LVU509
+ 1326 0092 B2F807C0 		ldrh	ip, [r2, #7]	@ unaligned
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 35
+
+
+ 194:Core/Src/radio/radio.c ****     packet->lower_kicker = rawPacket.kickers & 0x0F;         // Lower 4 bits
+ 1327              		.loc 1 194 38 view .LVU510
+ 1328 0096 507A     		ldrb	r0, [r2, #9]	@ zero_extendqisi2
+ 1329              		.loc 1 195 37 view .LVU511
+ 1330 0098 537A     		ldrb	r3, [r2, #9]	@ zero_extendqisi2
+ 191:Core/Src/radio/radio.c ****     
+ 1331              		.loc 1 191 49 view .LVU512
+ 1332 009a CCF30D0C 		ubfx	ip, ip, #0, #14
+ 194:Core/Src/radio/radio.c ****     packet->lower_kicker = rawPacket.kickers & 0x0F;         // Lower 4 bits
+ 1333              		.loc 1 194 53 view .LVU513
+ 1334 009e 0209     		lsrs	r2, r0, #4
+ 1335              		.loc 1 195 46 view .LVU514
+ 1336 00a0 03F00F03 		and	r3, r3, #15
+ 191:Core/Src/radio/radio.c ****     
+ 1337              		.loc 1 191 28 view .LVU515
+ 1338 00a4 A1F812C0 		strh	ip, [r1, #18]	@ movhi
+ 194:Core/Src/radio/radio.c ****     packet->lower_kicker = rawPacket.kickers & 0x0F;         // Lower 4 bits
+ 1339              		.loc 1 194 5 is_stmt 1 view .LVU516
+ 194:Core/Src/radio/radio.c ****     packet->lower_kicker = rawPacket.kickers & 0x0F;         // Lower 4 bits
+ 1340              		.loc 1 194 26 is_stmt 0 view .LVU517
+ 1341 00a8 0A75     		strb	r2, [r1, #20]
+ 1342              		.loc 1 195 5 is_stmt 1 view .LVU518
+ 1343              		.loc 1 195 26 is_stmt 0 view .LVU519
+ 1344 00aa 4B75     		strb	r3, [r1, #21]
+ 196:Core/Src/radio/radio.c **** }
+ 1345              		.loc 1 196 1 view .LVU520
+ 1346 00ac 10BD     		pop	{r4, pc}
+ 1347              	.LVL178:
+ 1348              	.L107:
+ 1349              	.LBB89:
+ 1350              	.LBB87:
+ 139:Core/Src/radio/radio.c ****         // Inf or NaN
+ 1351              		.loc 1 139 12 is_stmt 1 view .LVU521
+ 139:Core/Src/radio/radio.c ****         // Inf or NaN
+ 1352              		.loc 1 139 15 is_stmt 0 view .LVU522
+ 1353 00ae BEF11F0F 		cmp	lr, #31
+ 1354 00b2 40D0     		beq	.L133
+ 145:Core/Src/radio/radio.c ****         f32_mantissa = mantissa << 13;
+ 1355              		.loc 1 145 9 is_stmt 1 view .LVU523
+ 1356              	.LVL179:
+ 146:Core/Src/radio/radio.c ****     }
+ 1357              		.loc 1 146 9 view .LVU524
+ 145:Core/Src/radio/radio.c ****         f32_mantissa = mantissa << 13;
+ 1358              		.loc 1 145 39 is_stmt 0 view .LVU525
+ 1359 00b4 0EF1700E 		add	lr, lr, #112
+ 1360              	.LVL180:
+ 149:Core/Src/radio/radio.c **** 
+ 1361              		.loc 1 149 14 view .LVU526
+ 1362 00b8 40EA4330 		orr	r0, r0, r3, lsl #13
+ 1363              	.LVL181:
+ 149:Core/Src/radio/radio.c **** 
+ 1364              		.loc 1 149 14 view .LVU527
+ 1365 00bc 40EACE50 		orr	r0, r0, lr, lsl #23
+ 1366 00c0 E2E7     		b	.L108
+ 1367              	.LVL182:
+ 1368              	.L102:
+ 149:Core/Src/radio/radio.c **** 
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 36
+
+
+ 1369              		.loc 1 149 14 view .LVU528
+ 1370              	.LBE87:
+ 1371              	.LBE89:
+ 1372              	.LBB90:
+ 1373              	.LBB81:
+ 139:Core/Src/radio/radio.c ****         // Inf or NaN
+ 1374              		.loc 1 139 12 is_stmt 1 view .LVU529
+ 139:Core/Src/radio/radio.c ****         // Inf or NaN
+ 1375              		.loc 1 139 15 is_stmt 0 view .LVU530
+ 1376 00c2 BEF11F0F 		cmp	lr, #31
+ 1377 00c6 3CD0     		beq	.L134
+ 145:Core/Src/radio/radio.c ****         f32_mantissa = mantissa << 13;
+ 1378              		.loc 1 145 9 is_stmt 1 view .LVU531
+ 1379              	.LVL183:
+ 146:Core/Src/radio/radio.c ****     }
+ 1380              		.loc 1 146 9 view .LVU532
+ 145:Core/Src/radio/radio.c ****         f32_mantissa = mantissa << 13;
+ 1381              		.loc 1 145 39 is_stmt 0 view .LVU533
+ 1382 00c8 0EF1700E 		add	lr, lr, #112
+ 1383              	.LVL184:
+ 149:Core/Src/radio/radio.c **** 
+ 1384              		.loc 1 149 14 view .LVU534
+ 1385 00cc 40EA4330 		orr	r0, r0, r3, lsl #13
+ 1386              	.LVL185:
+ 149:Core/Src/radio/radio.c **** 
+ 1387              		.loc 1 149 14 view .LVU535
+ 1388 00d0 40EACE50 		orr	r0, r0, lr, lsl #23
+ 1389 00d4 B7E7     		b	.L103
+ 1390              	.LVL186:
+ 1391              	.L97:
+ 149:Core/Src/radio/radio.c **** 
+ 1392              		.loc 1 149 14 view .LVU536
+ 1393              	.LBE81:
+ 1394              	.LBE90:
+ 1395              	.LBB91:
+ 1396              	.LBB75:
+ 139:Core/Src/radio/radio.c ****         // Inf or NaN
+ 1397              		.loc 1 139 12 is_stmt 1 view .LVU537
+ 139:Core/Src/radio/radio.c ****         // Inf or NaN
+ 1398              		.loc 1 139 15 is_stmt 0 view .LVU538
+ 1399 00d6 BEF11F0F 		cmp	lr, #31
+ 1400 00da 38D0     		beq	.L135
+ 145:Core/Src/radio/radio.c ****         f32_mantissa = mantissa << 13;
+ 1401              		.loc 1 145 9 is_stmt 1 view .LVU539
+ 1402              	.LVL187:
+ 146:Core/Src/radio/radio.c ****     }
+ 1403              		.loc 1 146 9 view .LVU540
+ 145:Core/Src/radio/radio.c ****         f32_mantissa = mantissa << 13;
+ 1404              		.loc 1 145 39 is_stmt 0 view .LVU541
+ 1405 00dc 0EF1700E 		add	lr, lr, #112
+ 1406              	.LVL188:
+ 149:Core/Src/radio/radio.c **** 
+ 1407              		.loc 1 149 14 view .LVU542
+ 1408 00e0 40EA4330 		orr	r0, r0, r3, lsl #13
+ 1409              	.LVL189:
+ 149:Core/Src/radio/radio.c **** 
+ 1410              		.loc 1 149 14 view .LVU543
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 37
+
+
+ 1411 00e4 40EACE50 		orr	r0, r0, lr, lsl #23
+ 1412 00e8 9DE7     		b	.L98
+ 1413              	.LVL190:
+ 1414              	.L132:
+ 149:Core/Src/radio/radio.c **** 
+ 1415              		.loc 1 149 14 view .LVU544
+ 1416              	.LBE75:
+ 1417              	.LBE91:
+ 1418              	.LBB92:
+ 1419              	.LBB82:
+ 1420              	.LBB80:
+ 128:Core/Src/radio/radio.c ****             uint32_t m = mantissa;
+ 1421              		.loc 1 128 17 view .LVU545
+ 1422 00ea 4FF0FF3C 		mov	ip, #-1
+ 1423              	.LVL191:
+ 1424              	.L104:
+ 131:Core/Src/radio/radio.c ****                 e--;
+ 1425              		.loc 1 131 17 is_stmt 1 view .LVU546
+ 1426 00ee 1C46     		mov	r4, r3
+ 1427              	.LVL192:
+ 131:Core/Src/radio/radio.c ****                 e--;
+ 1428              		.loc 1 131 19 is_stmt 0 view .LVU547
+ 1429 00f0 5B00     		lsls	r3, r3, #1
+ 1430              	.LVL193:
+ 132:Core/Src/radio/radio.c ****             }
+ 1431              		.loc 1 132 17 is_stmt 1 view .LVU548
+ 1432 00f2 E646     		mov	lr, ip
+ 132:Core/Src/radio/radio.c ****             }
+ 1433              		.loc 1 132 18 is_stmt 0 view .LVU549
+ 1434 00f4 0CF1FF3C 		add	ip, ip, #-1
+ 1435              	.LVL194:
+ 130:Core/Src/radio/radio.c ****                 m <<= 1;
+ 1436              		.loc 1 130 32 is_stmt 1 view .LVU550
+ 1437 00f8 13F4806F 		tst	r3, #1024
+ 1438 00fc F7D0     		beq	.L104
+ 134:Core/Src/radio/radio.c **** 
+ 1439              		.loc 1 134 13 view .LVU551
+ 1440              	.LVL195:
+ 136:Core/Src/radio/radio.c ****             f32_mantissa = m << 13;
+ 1441              		.loc 1 136 13 view .LVU552
+ 137:Core/Src/radio/radio.c ****         }
+ 1442              		.loc 1 137 13 view .LVU553
+ 137:Core/Src/radio/radio.c ****         }
+ 1443              		.loc 1 137 26 is_stmt 0 view .LVU554
+ 1444 00fe 184B     		ldr	r3, .L136+4
+ 1445              	.LVL196:
+ 136:Core/Src/radio/radio.c ****             f32_mantissa = m << 13;
+ 1446              		.loc 1 136 38 view .LVU555
+ 1447 0100 0EF16F0E 		add	lr, lr, #111
+ 1448              	.LVL197:
+ 137:Core/Src/radio/radio.c ****         }
+ 1449              		.loc 1 137 26 view .LVU556
+ 1450 0104 03EA8433 		and	r3, r3, r4, lsl #14
+ 1451              	.LVL198:
+ 137:Core/Src/radio/radio.c ****         }
+ 1452              		.loc 1 137 26 view .LVU557
+ 1453              	.LBE80:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 38
+
+
+ 149:Core/Src/radio/radio.c **** 
+ 1454              		.loc 1 149 14 view .LVU558
+ 1455 0108 1843     		orrs	r0, r0, r3
+ 1456              	.LVL199:
+ 149:Core/Src/radio/radio.c **** 
+ 1457              		.loc 1 149 14 view .LVU559
+ 1458 010a 40EACE50 		orr	r0, r0, lr, lsl #23
+ 1459 010e 9AE7     		b	.L103
+ 1460              	.LVL200:
+ 1461              	.L131:
+ 149:Core/Src/radio/radio.c **** 
+ 1462              		.loc 1 149 14 view .LVU560
+ 1463              	.LBE82:
+ 1464              	.LBE92:
+ 1465              	.LBB93:
+ 1466              	.LBB76:
+ 1467              	.LBB74:
+ 128:Core/Src/radio/radio.c ****             uint32_t m = mantissa;
+ 1468              		.loc 1 128 17 view .LVU561
+ 1469 0110 4FF0FF3C 		mov	ip, #-1
+ 1470              	.LVL201:
+ 1471              	.L99:
+ 131:Core/Src/radio/radio.c ****                 e--;
+ 1472              		.loc 1 131 17 is_stmt 1 view .LVU562
+ 1473 0114 1C46     		mov	r4, r3
+ 1474              	.LVL202:
+ 131:Core/Src/radio/radio.c ****                 e--;
+ 1475              		.loc 1 131 19 is_stmt 0 view .LVU563
+ 1476 0116 5B00     		lsls	r3, r3, #1
+ 1477              	.LVL203:
+ 132:Core/Src/radio/radio.c ****             }
+ 1478              		.loc 1 132 17 is_stmt 1 view .LVU564
+ 1479 0118 E646     		mov	lr, ip
+ 132:Core/Src/radio/radio.c ****             }
+ 1480              		.loc 1 132 18 is_stmt 0 view .LVU565
+ 1481 011a 0CF1FF3C 		add	ip, ip, #-1
+ 1482              	.LVL204:
+ 130:Core/Src/radio/radio.c ****                 m <<= 1;
+ 1483              		.loc 1 130 32 is_stmt 1 view .LVU566
+ 1484 011e 13F4806F 		tst	r3, #1024
+ 1485 0122 F7D0     		beq	.L99
+ 134:Core/Src/radio/radio.c **** 
+ 1486              		.loc 1 134 13 view .LVU567
+ 1487              	.LVL205:
+ 136:Core/Src/radio/radio.c ****             f32_mantissa = m << 13;
+ 1488              		.loc 1 136 13 view .LVU568
+ 137:Core/Src/radio/radio.c ****         }
+ 1489              		.loc 1 137 13 view .LVU569
+ 137:Core/Src/radio/radio.c ****         }
+ 1490              		.loc 1 137 26 is_stmt 0 view .LVU570
+ 1491 0124 0E4B     		ldr	r3, .L136+4
+ 1492              	.LVL206:
+ 136:Core/Src/radio/radio.c ****             f32_mantissa = m << 13;
+ 1493              		.loc 1 136 38 view .LVU571
+ 1494 0126 0EF16F0E 		add	lr, lr, #111
+ 1495              	.LVL207:
+ 137:Core/Src/radio/radio.c ****         }
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 39
+
+
+ 1496              		.loc 1 137 26 view .LVU572
+ 1497 012a 03EA8433 		and	r3, r3, r4, lsl #14
+ 1498              	.LVL208:
+ 137:Core/Src/radio/radio.c ****         }
+ 1499              		.loc 1 137 26 view .LVU573
+ 1500              	.LBE74:
+ 149:Core/Src/radio/radio.c **** 
+ 1501              		.loc 1 149 14 view .LVU574
+ 1502 012e 1843     		orrs	r0, r0, r3
+ 1503              	.LVL209:
+ 149:Core/Src/radio/radio.c **** 
+ 1504              		.loc 1 149 14 view .LVU575
+ 1505 0130 40EACE50 		orr	r0, r0, lr, lsl #23
+ 1506 0134 77E7     		b	.L98
+ 1507              	.LVL210:
+ 1508              	.L133:
+ 149:Core/Src/radio/radio.c **** 
+ 1509              		.loc 1 149 14 view .LVU576
+ 1510              	.LBE76:
+ 1511              	.LBE93:
+ 1512              	.LBB94:
+ 1513              	.LBB88:
+ 141:Core/Src/radio/radio.c ****         f32_mantissa = mantissa ? (mantissa << 13) : 0;
+ 1514              		.loc 1 141 9 is_stmt 1 view .LVU577
+ 142:Core/Src/radio/radio.c ****     } else {
+ 1515              		.loc 1 142 9 view .LVU578
+ 142:Core/Src/radio/radio.c ****     } else {
+ 1516              		.loc 1 142 52 is_stmt 0 view .LVU579
+ 1517 0136 0BB1     		cbz	r3, .L130
+ 149:Core/Src/radio/radio.c **** 
+ 1518              		.loc 1 149 14 view .LVU580
+ 1519 0138 40EA4330 		orr	r0, r0, r3, lsl #13
+ 1520              	.LVL211:
+ 1521              	.L130:
+ 149:Core/Src/radio/radio.c **** 
+ 1522              		.loc 1 149 14 view .LVU581
+ 1523 013c 40F0FF40 		orr	r0, r0, #2139095040
+ 1524 0140 A2E7     		b	.L108
+ 1525              	.LVL212:
+ 1526              	.L134:
+ 149:Core/Src/radio/radio.c **** 
+ 1527              		.loc 1 149 14 view .LVU582
+ 1528              	.LBE88:
+ 1529              	.LBE94:
+ 1530              	.LBB95:
+ 1531              	.LBB83:
+ 141:Core/Src/radio/radio.c ****         f32_mantissa = mantissa ? (mantissa << 13) : 0;
+ 1532              		.loc 1 141 9 is_stmt 1 view .LVU583
+ 142:Core/Src/radio/radio.c ****     } else {
+ 1533              		.loc 1 142 9 view .LVU584
+ 142:Core/Src/radio/radio.c ****     } else {
+ 1534              		.loc 1 142 52 is_stmt 0 view .LVU585
+ 1535 0142 0BB1     		cbz	r3, .L129
+ 149:Core/Src/radio/radio.c **** 
+ 1536              		.loc 1 149 14 view .LVU586
+ 1537 0144 40EA4330 		orr	r0, r0, r3, lsl #13
+ 1538              	.LVL213:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 40
+
+
+ 1539              	.L129:
+ 149:Core/Src/radio/radio.c **** 
+ 1540              		.loc 1 149 14 view .LVU587
+ 1541 0148 40F0FF40 		orr	r0, r0, #2139095040
+ 1542 014c 7BE7     		b	.L103
+ 1543              	.LVL214:
+ 1544              	.L135:
+ 149:Core/Src/radio/radio.c **** 
+ 1545              		.loc 1 149 14 view .LVU588
+ 1546              	.LBE83:
+ 1547              	.LBE95:
+ 1548              	.LBB96:
+ 1549              	.LBB77:
+ 141:Core/Src/radio/radio.c ****         f32_mantissa = mantissa ? (mantissa << 13) : 0;
+ 1550              		.loc 1 141 9 is_stmt 1 view .LVU589
+ 142:Core/Src/radio/radio.c ****     } else {
+ 1551              		.loc 1 142 9 view .LVU590
+ 142:Core/Src/radio/radio.c ****     } else {
+ 1552              		.loc 1 142 52 is_stmt 0 view .LVU591
+ 1553 014e 0BB1     		cbz	r3, .L128
+ 149:Core/Src/radio/radio.c **** 
+ 1554              		.loc 1 149 14 view .LVU592
+ 1555 0150 40EA4330 		orr	r0, r0, r3, lsl #13
+ 1556              	.LVL215:
+ 1557              	.L128:
+ 149:Core/Src/radio/radio.c **** 
+ 1558              		.loc 1 149 14 view .LVU593
+ 1559 0154 40F0FF40 		orr	r0, r0, #2139095040
+ 1560 0158 65E7     		b	.L98
+ 1561              	.L137:
+ 1562 015a 00BF     		.align	2
+ 1563              	.L136:
+ 1564 015c 00000000 		.word	rawPacket
+ 1565 0160 00E07F00 		.word	8380416
+ 1566              	.LBE77:
+ 1567              	.LBE96:
+ 1568              		.cfi_endproc
+ 1569              	.LFE155:
+ 1571              		.section	.rodata.radio.str1.4,"aMS",%progbits,1
+ 1572              		.align	2
+ 1573              	.LC0:
+ 1574 0000 65646F4E 		.ascii	"edoN1\000"
+ 1574      3100
+ 1575              		.section	.text.radio,"ax",%progbits
+ 1576              		.align	1
+ 1577              		.p2align 2,,3
+ 1578              		.global	radio
+ 1579              		.syntax unified
+ 1580              		.thumb
+ 1581              		.thumb_func
+ 1583              	radio:
+ 1584              	.LVL216:
+ 1585              	.LFB156:
+ 197:Core/Src/radio/radio.c **** 
+ 198:Core/Src/radio/radio.c **** void radio(NRF24_TypeDef *nrf) {
+ 1586              		.loc 1 198 32 is_stmt 1 view -0
+ 1587              		.cfi_startproc
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 41
+
+
+ 1588              		@ args = 0, pretend = 0, frame = 8
+ 1589              		@ frame_needed = 0, uses_anonymous_args = 0
+ 199:Core/Src/radio/radio.c ****     // RX/TX disabled
+ 200:Core/Src/radio/radio.c ****     nRF24_CE_L(nrf);
+ 1590              		.loc 1 200 5 view .LVU595
+ 198:Core/Src/radio/radio.c ****     // RX/TX disabled
+ 1591              		.loc 1 198 32 is_stmt 0 view .LVU596
+ 1592 0000 30B5     		push	{r4, r5, lr}
+ 1593              	.LCFI9:
+ 1594              		.cfi_def_cfa_offset 12
+ 1595              		.cfi_offset 4, -12
+ 1596              		.cfi_offset 5, -8
+ 1597              		.cfi_offset 14, -4
+ 1598              	.LBB97:
+ 1599              	.LBB98:
+ 1600              		.file 2 "Core/Src/radio/../../Inc/radio/support.h"
+   1:Core/Src/radio/../../Inc/radio/support.h **** #ifndef __SUPPORT_H
+   2:Core/Src/radio/../../Inc/radio/support.h **** #define __SUPPORT_H
+   3:Core/Src/radio/../../Inc/radio/support.h **** 
+   4:Core/Src/radio/../../Inc/radio/support.h **** #include "main.h"
+   5:Core/Src/radio/../../Inc/radio/support.h **** 
+   6:Core/Src/radio/../../Inc/radio/support.h **** typedef struct {
+   7:Core/Src/radio/../../Inc/radio/support.h ****     SPI_HandleTypeDef *hspi;
+   8:Core/Src/radio/../../Inc/radio/support.h ****     GPIO_TypeDef *cePort;
+   9:Core/Src/radio/../../Inc/radio/support.h ****     uint16_t cePin;
+  10:Core/Src/radio/../../Inc/radio/support.h ****     GPIO_TypeDef *csPort;
+  11:Core/Src/radio/../../Inc/radio/support.h ****     uint16_t csPin;
+  12:Core/Src/radio/../../Inc/radio/support.h **** } NRF24_TypeDef;
+  13:Core/Src/radio/../../Inc/radio/support.h **** 
+  14:Core/Src/radio/../../Inc/radio/support.h **** extern SPI_HandleTypeDef hspi1;
+  15:Core/Src/radio/../../Inc/radio/support.h **** extern SPI_HandleTypeDef hspi2;
+  16:Core/Src/radio/../../Inc/radio/support.h **** 
+  17:Core/Src/radio/../../Inc/radio/support.h **** 
+  18:Core/Src/radio/../../Inc/radio/support.h **** 
+  19:Core/Src/radio/../../Inc/radio/support.h **** static inline void nRF24_CE_L(const NRF24_TypeDef *nrf) {
+  20:Core/Src/radio/../../Inc/radio/support.h ****     HAL_GPIO_WritePin(nrf->cePort, nrf->cePin, GPIO_PIN_RESET);
+ 1601              		.loc 2 20 5 view .LVU597
+ 1602 0002 0189     		ldrh	r1, [r0, #8]
+ 1603              	.LBE98:
+ 1604              	.LBE97:
+ 198:Core/Src/radio/radio.c ****     // RX/TX disabled
+ 1605              		.loc 1 198 32 view .LVU598
+ 1606 0004 0546     		mov	r5, r0
+ 1607              	.LVL217:
+ 1608              	.LBB102:
+ 1609              	.LBI97:
+  19:Core/Src/radio/../../Inc/radio/support.h ****     HAL_GPIO_WritePin(nrf->cePort, nrf->cePin, GPIO_PIN_RESET);
+ 1610              		.loc 2 19 20 is_stmt 1 view .LVU599
+ 1611              	.LBB99:
+ 1612              		.loc 2 20 5 view .LVU600
+ 1613              	.LBE99:
+ 1614              	.LBE102:
+ 198:Core/Src/radio/radio.c ****     // RX/TX disabled
+ 1615              		.loc 1 198 32 is_stmt 0 view .LVU601
+ 1616 0006 83B0     		sub	sp, sp, #12
+ 1617              	.LCFI10:
+ 1618              		.cfi_def_cfa_offset 24
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 42
+
+
+ 1619              	.LBB103:
+ 1620              	.LBB100:
+ 1621              		.loc 2 20 5 view .LVU602
+ 1622 0008 0022     		movs	r2, #0
+ 1623 000a 4068     		ldr	r0, [r0, #4]
+ 1624              	.LVL218:
+ 1625              		.loc 2 20 5 view .LVU603
+ 1626              	.LBE100:
+ 1627              	.LBE103:
+ 201:Core/Src/radio/radio.c **** 
+ 202:Core/Src/radio/radio.c ****     // Only test once, and go to error handler if failed
+ 203:Core/Src/radio/radio.c ****     uint8_t checks = 0;
+ 204:Core/Src/radio/radio.c ****     while (!nRF24_Check(nrf)) {
+ 1628              		.loc 1 204 11 view .LVU604
+ 1629 000c 0C24     		movs	r4, #12
+ 1630              	.LBB104:
+ 1631              	.LBB101:
+ 1632              		.loc 2 20 5 view .LVU605
+ 1633 000e FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 1634              	.LVL219:
+ 1635              		.loc 2 20 5 view .LVU606
+ 1636              	.LBE101:
+ 1637              	.LBE104:
+ 203:Core/Src/radio/radio.c ****     while (!nRF24_Check(nrf)) {
+ 1638              		.loc 1 203 5 is_stmt 1 view .LVU607
+ 1639              		.loc 1 204 5 view .LVU608
+ 1640              		.loc 1 204 11 is_stmt 0 view .LVU609
+ 1641 0012 01E0     		b	.L139
+ 1642              	.LVL220:
+ 1643              	.L140:
+ 205:Core/Src/radio/radio.c ****         if (checks > 10) {
+ 206:Core/Src/radio/radio.c ****             Error_Handler();
+ 207:Core/Src/radio/radio.c ****             return;
+ 208:Core/Src/radio/radio.c ****         }
+ 209:Core/Src/radio/radio.c ****         HAL_Delay(10);
+ 1644              		.loc 1 209 9 view .LVU610
+ 1645 0014 FFF7FEFF 		bl	HAL_Delay
+ 1646              	.LVL221:
+ 210:Core/Src/radio/radio.c ****         checks++;
+ 1647              		.loc 1 210 9 is_stmt 1 view .LVU611
+ 1648              	.L139:
+ 204:Core/Src/radio/radio.c ****         if (checks > 10) {
+ 1649              		.loc 1 204 12 view .LVU612
+ 204:Core/Src/radio/radio.c ****         if (checks > 10) {
+ 1650              		.loc 1 204 13 is_stmt 0 view .LVU613
+ 1651 0018 2846     		mov	r0, r5
+ 1652 001a FFF7FEFF 		bl	nRF24_Check
+ 1653              	.LVL222:
+ 205:Core/Src/radio/radio.c ****         if (checks > 10) {
+ 1654              		.loc 1 205 9 is_stmt 1 view .LVU614
+ 209:Core/Src/radio/radio.c ****         checks++;
+ 1655              		.loc 1 209 9 view .LVU615
+ 204:Core/Src/radio/radio.c ****         if (checks > 10) {
+ 1656              		.loc 1 204 13 is_stmt 0 view .LVU616
+ 1657 001e 0246     		mov	r2, r0
+ 205:Core/Src/radio/radio.c ****             Error_Handler();
+ 1658              		.loc 1 205 12 view .LVU617
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 43
+
+
+ 1659 0020 631E     		subs	r3, r4, #1
+ 209:Core/Src/radio/radio.c ****         checks++;
+ 1660              		.loc 1 209 9 view .LVU618
+ 1661 0022 0A20     		movs	r0, #10
+ 204:Core/Src/radio/radio.c ****         if (checks > 10) {
+ 1662              		.loc 1 204 12 view .LVU619
+ 1663 0024 3AB9     		cbnz	r2, .L143
+ 205:Core/Src/radio/radio.c ****             Error_Handler();
+ 1664              		.loc 1 205 12 view .LVU620
+ 1665 0026 13F0FF04 		ands	r4, r3, #255
+ 1666 002a F3D1     		bne	.L140
+ 206:Core/Src/radio/radio.c ****             return;
+ 1667              		.loc 1 206 13 is_stmt 1 view .LVU621
+ 211:Core/Src/radio/radio.c ****     }
+ 212:Core/Src/radio/radio.c **** 
+ 213:Core/Src/radio/radio.c **** 
+ 214:Core/Src/radio/radio.c ****     // Initialize the nRF24L01 to its default state
+ 215:Core/Src/radio/radio.c ****     nRF24_Init(nrf);
+ 216:Core/Src/radio/radio.c ****     // This is simple receiver with Enhanced ShockBurst:
+ 217:Core/Src/radio/radio.c ****     //   - RX address: 'ESB'
+ 218:Core/Src/radio/radio.c ****     //   - payload: 10 bytes
+ 219:Core/Src/radio/radio.c ****     //   - RF channel: 40 (2440MHz)
+ 220:Core/Src/radio/radio.c ****     //   - data rate: 2Mbps
+ 221:Core/Src/radio/radio.c ****     //   - CRC scheme: 2 byte
+ 222:Core/Src/radio/radio.c ****     //
+ 223:Core/Src/radio/radio.c ****     // The transmitter sends a 10-byte packets to the address 'ESB' with Auto-ACK (ShockBurst enabl
+ 224:Core/Src/radio/radio.c **** 
+ 225:Core/Src/radio/radio.c ****     nRF24_EnableAA(nrf, 0xFF);
+ 226:Core/Src/radio/radio.c ****     nRF24_SetRFChannel(nrf, 76);
+ 227:Core/Src/radio/radio.c ****     nRF24_SetDataRate(nrf, nRF24_DR_1Mbps);
+ 228:Core/Src/radio/radio.c **** 
+ 229:Core/Src/radio/radio.c ****     nRF24_SetCRCScheme(nrf, nRF24_CRC_2byte);
+ 230:Core/Src/radio/radio.c **** 
+ 231:Core/Src/radio/radio.c ****     nRF24_SetAddrWidth(nrf, 5);
+ 232:Core/Src/radio/radio.c ****     nRF24_SetTXPower(nrf, nRF24_TXPWR_12dBm);
+ 233:Core/Src/radio/radio.c **** 
+ 234:Core/Src/radio/radio.c **** 
+ 235:Core/Src/radio/radio.c ****     uint8_t nRF24_ADDR[] = "edoN1";
+ 236:Core/Src/radio/radio.c ****     nRF24_SetTxAddr(nrf, nRF24_ADDR, 5);
+ 237:Core/Src/radio/radio.c ****     nRF24_SetAddr(nrf, nRF24_PIPE1, nRF24_ADDR); // Program address for RX pipe #1
+ 238:Core/Src/radio/radio.c ****     nRF24_SetRXPipe(nrf, nRF24_PIPE1, nRF24_AA_ON, 10); // Auto-ACK: enabled, payload length: 10 by
+ 239:Core/Src/radio/radio.c ****     nRF24_ActivateFeatures(nrf);
+ 240:Core/Src/radio/radio.c ****     // Set operational mode (PRX == receiver)
+ 241:Core/Src/radio/radio.c ****     nRF24_SetOperationalMode(nrf, nRF24_MODE_RX);
+ 242:Core/Src/radio/radio.c ****     nRF24_SetDynamicPayloadLength(nrf, nRF24_DPL_ON);
+ 243:Core/Src/radio/radio.c ****     nRF24_SetPayloadWithAck(nrf, 1);
+ 244:Core/Src/radio/radio.c **** 
+ 245:Core/Src/radio/radio.c ****     HAL_Delay(10);
+ 246:Core/Src/radio/radio.c **** 
+ 247:Core/Src/radio/radio.c ****     // Wake the transceiver
+ 248:Core/Src/radio/radio.c ****     nRF24_SetPowerMode(nrf, nRF24_PWR_UP);
+ 249:Core/Src/radio/radio.c ****     
+ 250:Core/Src/radio/radio.c **** 
+ 251:Core/Src/radio/radio.c ****     nRF24_CE_L(nrf);
+ 252:Core/Src/radio/radio.c ****     HAL_Delay(10);
+ 253:Core/Src/radio/radio.c ****     nRF24_PrettyPrint(nrf);
+ 254:Core/Src/radio/radio.c ****     HAL_Delay(5000);
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 44
+
+
+ 255:Core/Src/radio/radio.c **** 
+ 256:Core/Src/radio/radio.c ****     // The main loop
+ 257:Core/Src/radio/radio.c ****     nRF24_CE_H(nrf);
+ 258:Core/Src/radio/radio.c **** }
+ 1668              		.loc 1 258 1 is_stmt 0 view .LVU622
+ 1669 002c 03B0     		add	sp, sp, #12
+ 1670              	.LCFI11:
+ 1671              		.cfi_remember_state
+ 1672              		.cfi_def_cfa_offset 12
+ 1673              		@ sp needed
+ 1674 002e BDE83040 		pop	{r4, r5, lr}
+ 1675              	.LCFI12:
+ 1676              		.cfi_restore 14
+ 1677              		.cfi_restore 5
+ 1678              		.cfi_restore 4
+ 1679              		.cfi_def_cfa_offset 0
+ 1680              	.LVL223:
+ 206:Core/Src/radio/radio.c ****             return;
+ 1681              		.loc 1 206 13 view .LVU623
+ 1682 0032 FFF7FEBF 		b	Error_Handler
+ 1683              	.LVL224:
+ 1684              	.L143:
+ 1685              	.LCFI13:
+ 1686              		.cfi_restore_state
+ 215:Core/Src/radio/radio.c ****     // This is simple receiver with Enhanced ShockBurst:
+ 1687              		.loc 1 215 5 is_stmt 1 view .LVU624
+ 1688 0036 2846     		mov	r0, r5
+ 1689 0038 FFF7FEFF 		bl	nRF24_Init
+ 1690              	.LVL225:
+ 225:Core/Src/radio/radio.c ****     nRF24_SetRFChannel(nrf, 76);
+ 1691              		.loc 1 225 5 view .LVU625
+ 1692 003c 2846     		mov	r0, r5
+ 1693 003e FF21     		movs	r1, #255
+ 1694 0040 FFF7FEFF 		bl	nRF24_EnableAA
+ 1695              	.LVL226:
+ 226:Core/Src/radio/radio.c ****     nRF24_SetDataRate(nrf, nRF24_DR_1Mbps);
+ 1696              		.loc 1 226 5 view .LVU626
+ 1697 0044 2846     		mov	r0, r5
+ 1698 0046 4C21     		movs	r1, #76
+ 1699 0048 FFF7FEFF 		bl	nRF24_SetRFChannel
+ 1700              	.LVL227:
+ 227:Core/Src/radio/radio.c **** 
+ 1701              		.loc 1 227 5 view .LVU627
+ 1702 004c 2846     		mov	r0, r5
+ 1703 004e 0021     		movs	r1, #0
+ 1704 0050 FFF7FEFF 		bl	nRF24_SetDataRate
+ 1705              	.LVL228:
+ 229:Core/Src/radio/radio.c **** 
+ 1706              		.loc 1 229 5 view .LVU628
+ 1707 0054 2846     		mov	r0, r5
+ 1708 0056 0C21     		movs	r1, #12
+ 1709 0058 FFF7FEFF 		bl	nRF24_SetCRCScheme
+ 1710              	.LVL229:
+ 231:Core/Src/radio/radio.c ****     nRF24_SetTXPower(nrf, nRF24_TXPWR_12dBm);
+ 1711              		.loc 1 231 5 view .LVU629
+ 1712 005c 2846     		mov	r0, r5
+ 1713 005e 0521     		movs	r1, #5
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 45
+
+
+ 1714 0060 FFF7FEFF 		bl	nRF24_SetAddrWidth
+ 1715              	.LVL230:
+ 232:Core/Src/radio/radio.c **** 
+ 1716              		.loc 1 232 5 view .LVU630
+ 1717 0064 2846     		mov	r0, r5
+ 1718 0066 0221     		movs	r1, #2
+ 1719 0068 FFF7FEFF 		bl	nRF24_SetTXPower
+ 1720              	.LVL231:
+ 235:Core/Src/radio/radio.c ****     nRF24_SetTxAddr(nrf, nRF24_ADDR, 5);
+ 1721              		.loc 1 235 5 view .LVU631
+ 235:Core/Src/radio/radio.c ****     nRF24_SetTxAddr(nrf, nRF24_ADDR, 5);
+ 1722              		.loc 1 235 13 is_stmt 0 view .LVU632
+ 1723 006c 204B     		ldr	r3, .L144
+ 236:Core/Src/radio/radio.c ****     nRF24_SetAddr(nrf, nRF24_PIPE1, nRF24_ADDR); // Program address for RX pipe #1
+ 1724              		.loc 1 236 5 view .LVU633
+ 1725 006e 0522     		movs	r2, #5
+ 235:Core/Src/radio/radio.c ****     nRF24_SetTxAddr(nrf, nRF24_ADDR, 5);
+ 1726              		.loc 1 235 13 view .LVU634
+ 1727 0070 93E80300 		ldm	r3, {r0, r1}
+ 1728 0074 0090     		str	r0, [sp]
+ 236:Core/Src/radio/radio.c ****     nRF24_SetAddr(nrf, nRF24_PIPE1, nRF24_ADDR); // Program address for RX pipe #1
+ 1729              		.loc 1 236 5 view .LVU635
+ 1730 0076 2846     		mov	r0, r5
+ 235:Core/Src/radio/radio.c ****     nRF24_SetTxAddr(nrf, nRF24_ADDR, 5);
+ 1731              		.loc 1 235 13 view .LVU636
+ 1732 0078 ADF80410 		strh	r1, [sp, #4]	@ movhi
+ 236:Core/Src/radio/radio.c ****     nRF24_SetAddr(nrf, nRF24_PIPE1, nRF24_ADDR); // Program address for RX pipe #1
+ 1733              		.loc 1 236 5 is_stmt 1 view .LVU637
+ 1734 007c 6946     		mov	r1, sp
+ 1735 007e FFF7FEFF 		bl	nRF24_SetTxAddr
+ 1736              	.LVL232:
+ 237:Core/Src/radio/radio.c ****     nRF24_SetRXPipe(nrf, nRF24_PIPE1, nRF24_AA_ON, 10); // Auto-ACK: enabled, payload length: 10 by
+ 1737              		.loc 1 237 5 view .LVU638
+ 1738 0082 6A46     		mov	r2, sp
+ 1739 0084 2846     		mov	r0, r5
+ 1740 0086 0121     		movs	r1, #1
+ 1741 0088 FFF7FEFF 		bl	nRF24_SetAddr
+ 1742              	.LVL233:
+ 238:Core/Src/radio/radio.c ****     nRF24_ActivateFeatures(nrf);
+ 1743              		.loc 1 238 5 view .LVU639
+ 1744 008c 0122     		movs	r2, #1
+ 1745 008e 0A23     		movs	r3, #10
+ 1746 0090 2846     		mov	r0, r5
+ 1747 0092 1146     		mov	r1, r2
+ 1748 0094 FFF7FEFF 		bl	nRF24_SetRXPipe
+ 1749              	.LVL234:
+ 239:Core/Src/radio/radio.c ****     // Set operational mode (PRX == receiver)
+ 1750              		.loc 1 239 5 view .LVU640
+ 1751 0098 2846     		mov	r0, r5
+ 1752 009a FFF7FEFF 		bl	nRF24_ActivateFeatures
+ 1753              	.LVL235:
+ 241:Core/Src/radio/radio.c ****     nRF24_SetDynamicPayloadLength(nrf, nRF24_DPL_ON);
+ 1754              		.loc 1 241 5 view .LVU641
+ 1755 009e 2846     		mov	r0, r5
+ 1756 00a0 0121     		movs	r1, #1
+ 1757 00a2 FFF7FEFF 		bl	nRF24_SetOperationalMode
+ 1758              	.LVL236:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 46
+
+
+ 242:Core/Src/radio/radio.c ****     nRF24_SetPayloadWithAck(nrf, 1);
+ 1759              		.loc 1 242 5 view .LVU642
+ 1760 00a6 2846     		mov	r0, r5
+ 1761 00a8 0121     		movs	r1, #1
+ 1762 00aa FFF7FEFF 		bl	nRF24_SetDynamicPayloadLength
+ 1763              	.LVL237:
+ 243:Core/Src/radio/radio.c **** 
+ 1764              		.loc 1 243 5 view .LVU643
+ 1765 00ae 0121     		movs	r1, #1
+ 1766 00b0 2846     		mov	r0, r5
+ 1767 00b2 FFF7FEFF 		bl	nRF24_SetPayloadWithAck
+ 1768              	.LVL238:
+ 245:Core/Src/radio/radio.c **** 
+ 1769              		.loc 1 245 5 view .LVU644
+ 1770 00b6 0A20     		movs	r0, #10
+ 1771 00b8 FFF7FEFF 		bl	HAL_Delay
+ 1772              	.LVL239:
+ 248:Core/Src/radio/radio.c ****     
+ 1773              		.loc 1 248 5 view .LVU645
+ 1774 00bc 2846     		mov	r0, r5
+ 1775 00be 0221     		movs	r1, #2
+ 1776 00c0 FFF7FEFF 		bl	nRF24_SetPowerMode
+ 1777              	.LVL240:
+ 251:Core/Src/radio/radio.c ****     HAL_Delay(10);
+ 1778              		.loc 1 251 5 view .LVU646
+ 1779              	.LBB105:
+ 1780              	.LBI105:
+  19:Core/Src/radio/../../Inc/radio/support.h ****     HAL_GPIO_WritePin(nrf->cePort, nrf->cePin, GPIO_PIN_RESET);
+ 1781              		.loc 2 19 20 view .LVU647
+ 1782              	.LBB106:
+ 1783              		.loc 2 20 5 view .LVU648
+ 1784 00c4 2989     		ldrh	r1, [r5, #8]
+ 1785 00c6 0022     		movs	r2, #0
+ 1786 00c8 6868     		ldr	r0, [r5, #4]
+ 1787 00ca FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 1788              	.LVL241:
+ 1789              		.loc 2 20 5 is_stmt 0 view .LVU649
+ 1790              	.LBE106:
+ 1791              	.LBE105:
+ 252:Core/Src/radio/radio.c ****     nRF24_PrettyPrint(nrf);
+ 1792              		.loc 1 252 5 is_stmt 1 view .LVU650
+ 1793 00ce 0A20     		movs	r0, #10
+ 1794 00d0 FFF7FEFF 		bl	HAL_Delay
+ 1795              	.LVL242:
+ 253:Core/Src/radio/radio.c ****     HAL_Delay(5000);
+ 1796              		.loc 1 253 5 view .LVU651
+ 1797 00d4 2846     		mov	r0, r5
+ 1798 00d6 FFF7FEFF 		bl	nRF24_PrettyPrint
+ 1799              	.LVL243:
+ 254:Core/Src/radio/radio.c **** 
+ 1800              		.loc 1 254 5 view .LVU652
+ 1801 00da 41F28830 		movw	r0, #5000
+ 1802 00de FFF7FEFF 		bl	HAL_Delay
+ 1803              	.LVL244:
+ 257:Core/Src/radio/radio.c **** }
+ 1804              		.loc 1 257 5 view .LVU653
+ 1805              	.LBB107:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 47
+
+
+ 1806              	.LBI107:
+  21:Core/Src/radio/../../Inc/radio/support.h **** }
+  22:Core/Src/radio/../../Inc/radio/support.h **** 
+  23:Core/Src/radio/../../Inc/radio/support.h **** static inline void nRF24_CE_H(const NRF24_TypeDef *nrf) {
+ 1807              		.loc 2 23 20 view .LVU654
+ 1808              	.LBB108:
+  24:Core/Src/radio/../../Inc/radio/support.h ****     HAL_GPIO_WritePin(nrf->cePort, nrf->cePin, GPIO_PIN_SET);
+ 1809              		.loc 2 24 5 view .LVU655
+ 1810 00e2 0122     		movs	r2, #1
+ 1811 00e4 2989     		ldrh	r1, [r5, #8]
+ 1812 00e6 6868     		ldr	r0, [r5, #4]
+ 1813 00e8 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 1814              	.LVL245:
+ 1815              		.loc 2 24 5 is_stmt 0 view .LVU656
+ 1816              	.LBE108:
+ 1817              	.LBE107:
+ 1818              		.loc 1 258 1 view .LVU657
+ 1819 00ec 03B0     		add	sp, sp, #12
+ 1820              	.LCFI14:
+ 1821              		.cfi_def_cfa_offset 12
+ 1822              		@ sp needed
+ 1823 00ee 30BD     		pop	{r4, r5, pc}
+ 1824              	.LVL246:
+ 1825              	.L145:
+ 1826              		.loc 1 258 1 view .LVU658
+ 1827              		.align	2
+ 1828              	.L144:
+ 1829 00f0 00000000 		.word	.LC0
+ 1830              		.cfi_endproc
+ 1831              	.LFE156:
+ 1833              		.section	.text.half_to_float,"ax",%progbits
+ 1834              		.align	1
+ 1835              		.p2align 2,,3
+ 1836              		.global	half_to_float
+ 1837              		.syntax unified
+ 1838              		.thumb
+ 1839              		.thumb_func
+ 1841              	half_to_float:
+ 1842              	.LVL247:
+ 1843              	.LFB157:
+ 259:Core/Src/radio/radio.c **** 
+ 260:Core/Src/radio/radio.c **** float half_to_float(uint16_t half) {
+ 1844              		.loc 1 260 36 is_stmt 1 view -0
+ 1845              		.cfi_startproc
+ 1846              		@ args = 0, pretend = 0, frame = 0
+ 1847              		@ frame_needed = 0, uses_anonymous_args = 0
+ 261:Core/Src/radio/radio.c ****     int sign = (half >> 15) & 0x1;
+ 1848              		.loc 1 261 5 view .LVU660
+ 1849 0000 C0F38423 		ubfx	r3, r0, #10, #5
+ 1850 0004 C0F30902 		ubfx	r2, r0, #0, #10
+ 262:Core/Src/radio/radio.c ****     int exponent = (half >> 10) & 0x1F;
+ 263:Core/Src/radio/radio.c ****     int fraction = half & 0x3FF;
+ 264:Core/Src/radio/radio.c **** 
+ 265:Core/Src/radio/radio.c ****     if (exponent == 0 && fraction == 0) {
+ 1851              		.loc 1 265 8 is_stmt 0 view .LVU661
+ 1852 0008 53EA0201 		orrs	r1, r3, r2
+ 260:Core/Src/radio/radio.c ****     int sign = (half >> 15) & 0x1;
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 48
+
+
+ 1853              		.loc 1 260 36 view .LVU662
+ 1854 000c 10B5     		push	{r4, lr}
+ 1855              	.LCFI15:
+ 1856              		.cfi_def_cfa_offset 8
+ 1857              		.cfi_offset 4, -8
+ 1858              		.cfi_offset 14, -4
+ 261:Core/Src/radio/radio.c ****     int sign = (half >> 15) & 0x1;
+ 1859              		.loc 1 261 29 view .LVU663
+ 1860 000e 4FEAD034 		lsr	r4, r0, #15
+ 1861              	.LVL248:
+ 262:Core/Src/radio/radio.c ****     int exponent = (half >> 10) & 0x1F;
+ 1862              		.loc 1 262 5 is_stmt 1 view .LVU664
+ 263:Core/Src/radio/radio.c **** 
+ 1863              		.loc 1 263 5 view .LVU665
+ 1864              		.loc 1 265 5 view .LVU666
+ 1865              		.loc 1 265 8 is_stmt 0 view .LVU667
+ 1866 0012 19D0     		beq	.L159
+ 266:Core/Src/radio/radio.c ****         return sign ? -0.0f : 0.0f;
+ 267:Core/Src/radio/radio.c ****     }
+ 268:Core/Src/radio/radio.c ****     if (exponent == 0x1F) {
+ 1867              		.loc 1 268 5 is_stmt 1 view .LVU668
+ 1868              		.loc 1 268 8 is_stmt 0 view .LVU669
+ 1869 0014 1F2B     		cmp	r3, #31
+ 1870 0016 1FD0     		beq	.L160
+ 269:Core/Src/radio/radio.c ****         return fraction ? NAN : (sign ? -INFINITY : INFINITY);
+ 270:Core/Src/radio/radio.c ****     }
+ 271:Core/Src/radio/radio.c ****     float result;
+ 1871              		.loc 1 271 5 is_stmt 1 view .LVU670
+ 272:Core/Src/radio/radio.c ****     if (exponent == 0) {
+ 1872              		.loc 1 272 5 view .LVU671
+ 1873              		.loc 1 272 8 is_stmt 0 view .LVU672
+ 1874 0018 5BB9     		cbnz	r3, .L150
+ 273:Core/Src/radio/radio.c ****         result = ldexpf((float)fraction, -24);
+ 1875              		.loc 1 273 9 is_stmt 1 view .LVU673
+ 1876              		.loc 1 273 18 is_stmt 0 view .LVU674
+ 1877 001a 07EE902A 		vmov	s15, r2	@ int
+ 1878 001e 6FF01700 		mvn	r0, #23
+ 1879              	.LVL249:
+ 1880              		.loc 1 273 18 view .LVU675
+ 1881 0022 B8EEE70A 		vcvt.f32.s32	s0, s15
+ 1882 0026 FFF7FEFF 		bl	ldexpf
+ 1883              	.LVL250:
+ 1884              	.L151:
+ 274:Core/Src/radio/radio.c ****     } else {
+ 275:Core/Src/radio/radio.c ****         result = ldexpf((float)(fraction | 0x400), exponent - 15 - 10);
+ 276:Core/Src/radio/radio.c ****     }
+ 277:Core/Src/radio/radio.c ****     return sign ? -result : result;
+ 1885              		.loc 1 277 5 is_stmt 1 view .LVU676
+ 1886              		.loc 1 277 27 is_stmt 0 view .LVU677
+ 1887 002a 0CB1     		cbz	r4, .L146
+ 1888              		.loc 1 277 27 discriminator 1 view .LVU678
+ 1889 002c B1EE400A 		vneg.f32	s0, s0
+ 1890              	.LVL251:
+ 1891              	.L146:
+ 278:Core/Src/radio/radio.c **** }
+ 1892              		.loc 1 278 1 view .LVU679
+ 1893 0030 10BD     		pop	{r4, pc}
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 49
+
+
+ 1894              	.LVL252:
+ 1895              	.L150:
+ 275:Core/Src/radio/radio.c ****     }
+ 1896              		.loc 1 275 9 is_stmt 1 view .LVU680
+ 275:Core/Src/radio/radio.c ****     }
+ 1897              		.loc 1 275 42 is_stmt 0 view .LVU681
+ 1898 0032 42F48062 		orr	r2, r2, #1024
+ 1899              	.LVL253:
+ 275:Core/Src/radio/radio.c ****     }
+ 1900              		.loc 1 275 18 view .LVU682
+ 1901 0036 A3F11900 		sub	r0, r3, #25
+ 1902              	.LVL254:
+ 275:Core/Src/radio/radio.c ****     }
+ 1903              		.loc 1 275 42 view .LVU683
+ 1904 003a 00EE102A 		vmov	s0, r2	@ int
+ 275:Core/Src/radio/radio.c ****     }
+ 1905              		.loc 1 275 18 view .LVU684
+ 1906 003e B8EEC00A 		vcvt.f32.s32	s0, s0
+ 1907 0042 FFF7FEFF 		bl	ldexpf
+ 1908              	.LVL255:
+ 275:Core/Src/radio/radio.c ****     }
+ 1909              		.loc 1 275 18 view .LVU685
+ 1910 0046 F0E7     		b	.L151
+ 1911              	.LVL256:
+ 1912              	.L159:
+ 266:Core/Src/radio/radio.c ****     }
+ 1913              		.loc 1 266 9 is_stmt 1 view .LVU686
+ 266:Core/Src/radio/radio.c ****     }
+ 1914              		.loc 1 266 29 is_stmt 0 view .LVU687
+ 1915 0048 DFED097A 		vldr.32	s15, .L161
+ 1916 004c 002C     		cmp	r4, #0
+ 1917 004e 9FED090A 		vldr.32	s0, .L161+4
+ 1918 0052 00FE270A 		vseleq.f32	s0, s0, s15
+ 1919              		.loc 1 278 1 view .LVU688
+ 1920 0056 10BD     		pop	{r4, pc}
+ 1921              	.LVL257:
+ 1922              	.L160:
+ 269:Core/Src/radio/radio.c ****     }
+ 1923              		.loc 1 269 9 is_stmt 1 view .LVU689
+ 269:Core/Src/radio/radio.c ****     }
+ 1924              		.loc 1 269 31 is_stmt 0 view .LVU690
+ 1925 0058 3AB9     		cbnz	r2, .L153
+ 269:Core/Src/radio/radio.c ****     }
+ 1926              		.loc 1 269 51 discriminator 1 view .LVU691
+ 1927 005a DFED077A 		vldr.32	s15, .L161+8
+ 1928 005e 002C     		cmp	r4, #0
+ 1929 0060 9FED060A 		vldr.32	s0, .L161+12
+ 1930 0064 00FE270A 		vseleq.f32	s0, s0, s15
+ 1931              		.loc 1 278 1 discriminator 1 view .LVU692
+ 1932 0068 10BD     		pop	{r4, pc}
+ 1933              	.LVL258:
+ 1934              	.L153:
+ 269:Core/Src/radio/radio.c ****     }
+ 1935              		.loc 1 269 31 view .LVU693
+ 1936 006a 9FED050A 		vldr.32	s0, .L161+16
+ 1937              		.loc 1 278 1 view .LVU694
+ 1938 006e 10BD     		pop	{r4, pc}
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 50
+
+
+ 1939              	.LVL259:
+ 1940              	.L162:
+ 1941              		.loc 1 278 1 view .LVU695
+ 1942              		.align	2
+ 1943              	.L161:
+ 1944 0070 00000080 		.word	-2147483648
+ 1945 0074 00000000 		.word	0
+ 1946 0078 000080FF 		.word	-8388608
+ 1947 007c 0000807F 		.word	2139095040
+ 1948 0080 0000C07F 		.word	2143289344
+ 1949              		.cfi_endproc
+ 1950              	.LFE157:
+ 1952              		.global	rawPacket
+ 1953              		.section	.bss.rawPacket,"aw",%nobits
+ 1954              		.align	2
+ 1957              	rawPacket:
+ 1958 0000 00000000 		.space	10
+ 1958      00000000 
+ 1958      0000
+ 1959              		.global	currentPacket
+ 1960              		.section	.bss.currentPacket,"aw",%nobits
+ 1961              		.align	2
+ 1964              	currentPacket:
+ 1965 0000 00000000 		.space	24
+ 1965      00000000 
+ 1965      00000000 
+ 1965      00000000 
+ 1965      00000000 
+ 1966              		.text
+ 1967              	.Letext0:
+ 1968              		.file 3 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\machine\\_default_types.h"
+ 1969              		.file 4 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\sys\\_stdint.h"
+ 1970              		.file 5 "Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h723xx.h"
+ 1971              		.file 6 "c:\\msys64\\mingw64\\lib\\gcc\\arm-none-eabi\\12.2.0\\include\\stddef.h"
+ 1972              		.file 7 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
+ 1973              		.file 8 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_gpio.h"
+ 1974              		.file 9 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h"
+ 1975              		.file 10 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_spi.h"
+ 1976              		.file 11 "Core/Src/radio/../../Inc/radio/nrf24.h"
+ 1977              		.file 12 "Core/Src/radio/../../Inc/radio/radio.h"
+ 1978              		.file 13 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\math.h"
+ 1979              		.file 14 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h"
+ 1980              		.file 15 "Core/Inc/main.h"
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s 			page 51
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 radio.c
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:20     .text.compute_crc:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:27     .text.compute_crc:00000000 compute_crc
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:357    .text.RTT_PrintFloatWithLabel:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:364    .text.RTT_PrintFloatWithLabel:00000000 RTT_PrintFloatWithLabel
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:378    .text.RTT_PrintBool:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:385    .text.RTT_PrintBool:00000000 RTT_PrintBool
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:399    .text.float16_to_float32:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:406    .text.float16_to_float32:00000000 float16_to_float32
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:536    .text.float16_to_float32:00000060 $d
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:541    .text.poll:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:548    .text.poll:00000000 poll
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:1110   .text.poll:000001a4 $d
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:1957   .bss.rawPacket:00000000 rawPacket
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:1964   .bss.currentPacket:00000000 currentPacket
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:1123   .text.parsePacket:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:1130   .text.parsePacket:00000000 parsePacket
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:1564   .text.parsePacket:0000015c $d
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:1572   .rodata.radio.str1.4:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:1576   .text.radio:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:1583   .text.radio:00000000 radio
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:1829   .text.radio:000000f0 $d
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:1834   .text.half_to_float:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:1841   .text.half_to_float:00000000 half_to_float
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:1944   .text.half_to_float:00000070 $d
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:1954   .bss.rawPacket:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccqIOeKk.s:1961   .bss.currentPacket:00000000 $d
+
+UNDEFINED SYMBOLS
+nRF24_GetStatus_RXFIFO
+nRF24_ClearIRQFlags
+nRF24_ReadPayload
+HAL_GPIO_ReadPin
+nRF24_WriteAckPayload
+HAL_GPIO_WritePin
+HAL_Delay
+nRF24_Check
+Error_Handler
+nRF24_Init
+nRF24_EnableAA
+nRF24_SetRFChannel
+nRF24_SetDataRate
+nRF24_SetCRCScheme
+nRF24_SetAddrWidth
+nRF24_SetTXPower
+nRF24_SetTxAddr
+nRF24_SetAddr
+nRF24_SetRXPipe
+nRF24_ActivateFeatures
+nRF24_SetOperationalMode
+nRF24_SetDynamicPayloadLength
+nRF24_SetPayloadWithAck
+nRF24_SetPowerMode
+nRF24_PrettyPrint
+ldexpf

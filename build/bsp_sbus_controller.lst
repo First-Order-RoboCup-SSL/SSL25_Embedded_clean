@@ -1,0 +1,2174 @@
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 2
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"bsp_sbus_controller.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "Bsp/Src/bsp_sbus_controller.c"
+  19              		.section	.text.BSP_SBUS_Init,"ax",%progbits
+  20              		.align	1
+  21              		.p2align 2,,3
+  22              		.global	BSP_SBUS_Init
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	BSP_SBUS_Init:
+  28              	.LFB145:
+   1:Bsp/Src/bsp_sbus_controller.c **** #include "bsp_sbus_controller.h"
+   2:Bsp/Src/bsp_sbus_controller.c **** #include <string.h>
+   3:Bsp/Src/bsp_sbus_controller.c **** 
+   4:Bsp/Src/bsp_sbus_controller.c **** // Global channel data arrays with debug visibility
+   5:Bsp/Src/bsp_sbus_controller.c **** #if defined(__GNUC__)
+   6:Bsp/Src/bsp_sbus_controller.c **** __attribute__((section(".data")))
+   7:Bsp/Src/bsp_sbus_controller.c **** __attribute__((used))
+   8:Bsp/Src/bsp_sbus_controller.c **** #endif
+   9:Bsp/Src/bsp_sbus_controller.c **** volatile int16_t sbus_channels[SBUS_NUM_CHANNELS] = {0};
+  10:Bsp/Src/bsp_sbus_controller.c **** 
+  11:Bsp/Src/bsp_sbus_controller.c **** #if defined(__GNUC__)
+  12:Bsp/Src/bsp_sbus_controller.c **** __attribute__((section(".data")))
+  13:Bsp/Src/bsp_sbus_controller.c **** __attribute__((used))
+  14:Bsp/Src/bsp_sbus_controller.c **** #endif
+  15:Bsp/Src/bsp_sbus_controller.c **** volatile int16_t sbus_channels_mapped[SBUS_NUM_CHANNELS] = {0};
+  16:Bsp/Src/bsp_sbus_controller.c **** 
+  17:Bsp/Src/bsp_sbus_controller.c **** // Signal status variables
+  18:Bsp/Src/bsp_sbus_controller.c **** volatile uint32_t sbus_last_update = 0;
+  19:Bsp/Src/bsp_sbus_controller.c **** volatile bool sbus_signal_lost = true;
+  20:Bsp/Src/bsp_sbus_controller.c **** 
+  21:Bsp/Src/bsp_sbus_controller.c **** // Static variables for internal state
+  22:Bsp/Src/bsp_sbus_controller.c **** static volatile bool frame_complete = false;
+  23:Bsp/Src/bsp_sbus_controller.c **** static volatile int16_t frame_index = 0;
+  24:Bsp/Src/bsp_sbus_controller.c **** static volatile uint8_t sbus_frame[SBUS_FRAME_LENGTH] = {0};
+  25:Bsp/Src/bsp_sbus_controller.c **** static volatile uint8_t sbus_rx_byte = 0;
+  26:Bsp/Src/bsp_sbus_controller.c **** 
+  27:Bsp/Src/bsp_sbus_controller.c **** // Linear mapping function (internal use)
+  28:Bsp/Src/bsp_sbus_controller.c **** static inline int16_t map_value(int16_t x, int16_t in_min, int16_t in_max, int16_t out_min, int16_t
+  29:Bsp/Src/bsp_sbus_controller.c ****     // Handle edge cases to prevent overflow
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 2
+
+
+  31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+  32:Bsp/Src/bsp_sbus_controller.c ****     
+  33:Bsp/Src/bsp_sbus_controller.c ****     // Perform linear mapping
+  34:Bsp/Src/bsp_sbus_controller.c ****     int32_t temp = (int32_t)(x - in_min) * (out_max - out_min);
+  35:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+  36:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+  37:Bsp/Src/bsp_sbus_controller.c **** }
+  38:Bsp/Src/bsp_sbus_controller.c **** 
+  39:Bsp/Src/bsp_sbus_controller.c **** void BSP_SBUS_Init(void)
+  40:Bsp/Src/bsp_sbus_controller.c **** {
+  29              		.loc 1 40 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  41:Bsp/Src/bsp_sbus_controller.c ****     frame_index = 0;
+  33              		.loc 1 41 5 view .LVU1
+  40:Bsp/Src/bsp_sbus_controller.c ****     frame_index = 0;
+  34              		.loc 1 40 1 is_stmt 0 view .LVU2
+  35 0000 38B5     		push	{r3, r4, r5, lr}
+  36              	.LCFI0:
+  37              		.cfi_def_cfa_offset 16
+  38              		.cfi_offset 3, -16
+  39              		.cfi_offset 4, -12
+  40              		.cfi_offset 5, -8
+  41              		.cfi_offset 14, -4
+  42:Bsp/Src/bsp_sbus_controller.c ****     frame_complete = false;
+  42              		.loc 1 42 20 view .LVU3
+  43 0002 0D49     		ldr	r1, .L4
+  41:Bsp/Src/bsp_sbus_controller.c ****     frame_index = 0;
+  44              		.loc 1 41 17 view .LVU4
+  45 0004 0024     		movs	r4, #0
+  43:Bsp/Src/bsp_sbus_controller.c ****     sbus_signal_lost = true;
+  46              		.loc 1 43 22 view .LVU5
+  47 0006 0D4B     		ldr	r3, .L4+4
+  48 0008 0122     		movs	r2, #1
+  41:Bsp/Src/bsp_sbus_controller.c ****     frame_complete = false;
+  49              		.loc 1 41 17 view .LVU6
+  50 000a 0D48     		ldr	r0, .L4+8
+  44:Bsp/Src/bsp_sbus_controller.c ****     sbus_last_update = HAL_GetTick();
+  51              		.loc 1 44 22 view .LVU7
+  52 000c 0D4D     		ldr	r5, .L4+12
+  41:Bsp/Src/bsp_sbus_controller.c ****     frame_complete = false;
+  53              		.loc 1 41 17 view .LVU8
+  54 000e 0480     		strh	r4, [r0]	@ movhi
+  42:Bsp/Src/bsp_sbus_controller.c ****     sbus_signal_lost = true;
+  55              		.loc 1 42 5 is_stmt 1 view .LVU9
+  42:Bsp/Src/bsp_sbus_controller.c ****     sbus_signal_lost = true;
+  56              		.loc 1 42 20 is_stmt 0 view .LVU10
+  57 0010 0C70     		strb	r4, [r1]
+  43:Bsp/Src/bsp_sbus_controller.c ****     sbus_last_update = HAL_GetTick();
+  58              		.loc 1 43 5 is_stmt 1 view .LVU11
+  43:Bsp/Src/bsp_sbus_controller.c ****     sbus_last_update = HAL_GetTick();
+  59              		.loc 1 43 22 is_stmt 0 view .LVU12
+  60 0012 1A70     		strb	r2, [r3]
+  61              		.loc 1 44 5 is_stmt 1 view .LVU13
+  62              		.loc 1 44 24 is_stmt 0 view .LVU14
+  63 0014 FFF7FEFF 		bl	HAL_GetTick
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 3
+
+
+  64              	.LVL0:
+  45:Bsp/Src/bsp_sbus_controller.c ****     memset((void*)sbus_channels, 0, sizeof(sbus_channels));
+  46:Bsp/Src/bsp_sbus_controller.c ****     memset((void*)sbus_channels_mapped, 0, sizeof(sbus_channels_mapped));
+  47:Bsp/Src/bsp_sbus_controller.c ****     memset((void*)sbus_frame, 0, sizeof(sbus_frame));
+  65              		.loc 1 47 5 view .LVU15
+  66 0018 0B4B     		ldr	r3, .L4+16
+  45:Bsp/Src/bsp_sbus_controller.c ****     memset((void*)sbus_channels, 0, sizeof(sbus_channels));
+  67              		.loc 1 45 5 view .LVU16
+  68 001a 0C49     		ldr	r1, .L4+20
+  46:Bsp/Src/bsp_sbus_controller.c ****     memset((void*)sbus_frame, 0, sizeof(sbus_frame));
+  69              		.loc 1 46 5 view .LVU17
+  70 001c 0C4A     		ldr	r2, .L4+24
+  44:Bsp/Src/bsp_sbus_controller.c ****     memset((void*)sbus_channels, 0, sizeof(sbus_channels));
+  71              		.loc 1 44 22 view .LVU18
+  72 001e 2860     		str	r0, [r5]
+  45:Bsp/Src/bsp_sbus_controller.c ****     memset((void*)sbus_channels, 0, sizeof(sbus_channels));
+  73              		.loc 1 45 5 is_stmt 1 view .LVU19
+  74 0020 0C60     		str	r4, [r1]
+  75 0022 4C60     		str	r4, [r1, #4]
+  46:Bsp/Src/bsp_sbus_controller.c ****     memset((void*)sbus_frame, 0, sizeof(sbus_frame));
+  76              		.loc 1 46 5 view .LVU20
+  77 0024 1460     		str	r4, [r2]
+  78 0026 5460     		str	r4, [r2, #4]
+  79              		.loc 1 47 5 view .LVU21
+  80 0028 1C60     		str	r4, [r3]
+  81 002a 5C60     		str	r4, [r3, #4]
+  82 002c 9C60     		str	r4, [r3, #8]
+  83 002e DC60     		str	r4, [r3, #12]
+  84 0030 1C61     		str	r4, [r3, #16]
+  85 0032 5C61     		str	r4, [r3, #20]
+  86 0034 1C76     		strb	r4, [r3, #24]
+  48:Bsp/Src/bsp_sbus_controller.c **** }
+  87              		.loc 1 48 1 is_stmt 0 view .LVU22
+  88 0036 38BD     		pop	{r3, r4, r5, pc}
+  89              	.L5:
+  90              		.align	2
+  91              	.L4:
+  92 0038 00000000 		.word	frame_complete
+  93 003c 00000000 		.word	sbus_signal_lost
+  94 0040 00000000 		.word	frame_index
+  95 0044 00000000 		.word	sbus_last_update
+  96 0048 00000000 		.word	sbus_frame
+  97 004c 00000000 		.word	sbus_channels
+  98 0050 00000000 		.word	sbus_channels_mapped
+  99              		.cfi_endproc
+ 100              	.LFE145:
+ 102              		.section	.text.BSP_SBUS_IsSignalValid,"ax",%progbits
+ 103              		.align	1
+ 104              		.p2align 2,,3
+ 105              		.global	BSP_SBUS_IsSignalValid
+ 106              		.syntax unified
+ 107              		.thumb
+ 108              		.thumb_func
+ 110              	BSP_SBUS_IsSignalValid:
+ 111              	.LFB146:
+  49:Bsp/Src/bsp_sbus_controller.c **** 
+  50:Bsp/Src/bsp_sbus_controller.c **** bool BSP_SBUS_IsSignalValid(void)
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 4
+
+
+  51:Bsp/Src/bsp_sbus_controller.c **** {
+ 112              		.loc 1 51 1 is_stmt 1 view -0
+ 113              		.cfi_startproc
+ 114              		@ args = 0, pretend = 0, frame = 0
+ 115              		@ frame_needed = 0, uses_anonymous_args = 0
+  52:Bsp/Src/bsp_sbus_controller.c ****     // Check if we've received a valid frame recently
+  53:Bsp/Src/bsp_sbus_controller.c ****     uint32_t current_time = HAL_GetTick();
+ 116              		.loc 1 53 5 view .LVU24
+  51:Bsp/Src/bsp_sbus_controller.c ****     // Check if we've received a valid frame recently
+ 117              		.loc 1 51 1 is_stmt 0 view .LVU25
+ 118 0000 08B5     		push	{r3, lr}
+ 119              	.LCFI1:
+ 120              		.cfi_def_cfa_offset 8
+ 121              		.cfi_offset 3, -8
+ 122              		.cfi_offset 14, -4
+ 123              		.loc 1 53 29 view .LVU26
+ 124 0002 FFF7FEFF 		bl	HAL_GetTick
+ 125              	.LVL1:
+  54:Bsp/Src/bsp_sbus_controller.c ****     if (current_time - sbus_last_update > SBUS_TIMEOUT_MS) {
+ 126              		.loc 1 54 5 is_stmt 1 view .LVU27
+ 127              		.loc 1 54 22 is_stmt 0 view .LVU28
+ 128 0006 134B     		ldr	r3, .L11
+ 129 0008 1B68     		ldr	r3, [r3]
+ 130 000a C01A     		subs	r0, r0, r3
+ 131              	.LVL2:
+ 132              		.loc 1 54 8 view .LVU29
+ 133 000c B0F5FA7F 		cmp	r0, #500
+ 134 0010 04D8     		bhi	.L9
+  55:Bsp/Src/bsp_sbus_controller.c ****         sbus_signal_lost = true;
+  56:Bsp/Src/bsp_sbus_controller.c ****         // Set all channels to failsafe value
+  57:Bsp/Src/bsp_sbus_controller.c ****         for (int i = 0; i < SBUS_NUM_CHANNELS; i++) {
+  58:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[i] = SBUS_FAILSAFE_VALUE;
+  59:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels_mapped[i] = MAPPED_MAX_VALUE / 2; // Center position
+  60:Bsp/Src/bsp_sbus_controller.c ****         }
+  61:Bsp/Src/bsp_sbus_controller.c ****     }
+  62:Bsp/Src/bsp_sbus_controller.c ****     return !sbus_signal_lost;
+ 135              		.loc 1 62 5 is_stmt 1 view .LVU30
+ 136 0012 114B     		ldr	r3, .L11+4
+ 137 0014 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+  63:Bsp/Src/bsp_sbus_controller.c **** }
+ 138              		.loc 1 63 1 is_stmt 0 view .LVU31
+ 139 0016 80F00100 		eor	r0, r0, #1
+ 140 001a 08BD     		pop	{r3, pc}
+ 141              	.L9:
+  55:Bsp/Src/bsp_sbus_controller.c ****         sbus_signal_lost = true;
+ 142              		.loc 1 55 9 is_stmt 1 view .LVU32
+ 143              	.LBB8:
+  58:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels_mapped[i] = MAPPED_MAX_VALUE / 2; // Center position
+ 144              		.loc 1 58 30 is_stmt 0 view .LVU33
+ 145 001c 0F48     		ldr	r0, .L11+8
+ 146 001e 4FF4006C 		mov	ip, #2048
+  59:Bsp/Src/bsp_sbus_controller.c ****         }
+ 147              		.loc 1 59 37 view .LVU34
+ 148 0022 0F4A     		ldr	r2, .L11+12
+ 149 0024 40F2FF71 		movw	r1, #2047
+ 150              	.LBE8:
+  55:Bsp/Src/bsp_sbus_controller.c ****         // Set all channels to failsafe value
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 5
+
+
+ 151              		.loc 1 55 26 view .LVU35
+ 152 0028 0B4B     		ldr	r3, .L11+4
+ 153 002a 4FF0010E 		mov	lr, #1
+ 154 002e 83F800E0 		strb	lr, [r3]
+  57:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[i] = SBUS_FAILSAFE_VALUE;
+ 155              		.loc 1 57 9 is_stmt 1 view .LVU36
+ 156              	.LBB9:
+  57:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[i] = SBUS_FAILSAFE_VALUE;
+ 157              		.loc 1 57 14 view .LVU37
+ 158              	.LVL3:
+  57:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[i] = SBUS_FAILSAFE_VALUE;
+ 159              		.loc 1 57 27 view .LVU38
+  58:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels_mapped[i] = MAPPED_MAX_VALUE / 2; // Center position
+ 160              		.loc 1 58 13 view .LVU39
+  58:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels_mapped[i] = MAPPED_MAX_VALUE / 2; // Center position
+ 161              		.loc 1 58 30 is_stmt 0 view .LVU40
+ 162 0032 A0F800C0 		strh	ip, [r0]	@ movhi
+  59:Bsp/Src/bsp_sbus_controller.c ****         }
+ 163              		.loc 1 59 13 is_stmt 1 view .LVU41
+  59:Bsp/Src/bsp_sbus_controller.c ****         }
+ 164              		.loc 1 59 37 is_stmt 0 view .LVU42
+ 165 0036 1180     		strh	r1, [r2]	@ movhi
+  57:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[i] = SBUS_FAILSAFE_VALUE;
+ 166              		.loc 1 57 49 is_stmt 1 view .LVU43
+ 167              	.LVL4:
+  57:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[i] = SBUS_FAILSAFE_VALUE;
+ 168              		.loc 1 57 27 view .LVU44
+  58:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels_mapped[i] = MAPPED_MAX_VALUE / 2; // Center position
+ 169              		.loc 1 58 13 view .LVU45
+  58:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels_mapped[i] = MAPPED_MAX_VALUE / 2; // Center position
+ 170              		.loc 1 58 30 is_stmt 0 view .LVU46
+ 171 0038 A0F802C0 		strh	ip, [r0, #2]	@ movhi
+  59:Bsp/Src/bsp_sbus_controller.c ****         }
+ 172              		.loc 1 59 13 is_stmt 1 view .LVU47
+  59:Bsp/Src/bsp_sbus_controller.c ****         }
+ 173              		.loc 1 59 37 is_stmt 0 view .LVU48
+ 174 003c 5180     		strh	r1, [r2, #2]	@ movhi
+  57:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[i] = SBUS_FAILSAFE_VALUE;
+ 175              		.loc 1 57 49 is_stmt 1 view .LVU49
+ 176              	.LVL5:
+  57:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[i] = SBUS_FAILSAFE_VALUE;
+ 177              		.loc 1 57 27 view .LVU50
+  58:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels_mapped[i] = MAPPED_MAX_VALUE / 2; // Center position
+ 178              		.loc 1 58 13 view .LVU51
+  58:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels_mapped[i] = MAPPED_MAX_VALUE / 2; // Center position
+ 179              		.loc 1 58 30 is_stmt 0 view .LVU52
+ 180 003e A0F804C0 		strh	ip, [r0, #4]	@ movhi
+  59:Bsp/Src/bsp_sbus_controller.c ****         }
+ 181              		.loc 1 59 13 is_stmt 1 view .LVU53
+  59:Bsp/Src/bsp_sbus_controller.c ****         }
+ 182              		.loc 1 59 37 is_stmt 0 view .LVU54
+ 183 0042 9180     		strh	r1, [r2, #4]	@ movhi
+  57:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[i] = SBUS_FAILSAFE_VALUE;
+ 184              		.loc 1 57 49 is_stmt 1 view .LVU55
+ 185              	.LVL6:
+  57:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[i] = SBUS_FAILSAFE_VALUE;
+ 186              		.loc 1 57 27 view .LVU56
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 6
+
+
+  58:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels_mapped[i] = MAPPED_MAX_VALUE / 2; // Center position
+ 187              		.loc 1 58 13 view .LVU57
+  58:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels_mapped[i] = MAPPED_MAX_VALUE / 2; // Center position
+ 188              		.loc 1 58 30 is_stmt 0 view .LVU58
+ 189 0044 A0F806C0 		strh	ip, [r0, #6]	@ movhi
+  59:Bsp/Src/bsp_sbus_controller.c ****         }
+ 190              		.loc 1 59 13 is_stmt 1 view .LVU59
+  59:Bsp/Src/bsp_sbus_controller.c ****         }
+ 191              		.loc 1 59 37 is_stmt 0 view .LVU60
+ 192 0048 D180     		strh	r1, [r2, #6]	@ movhi
+  57:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[i] = SBUS_FAILSAFE_VALUE;
+ 193              		.loc 1 57 49 is_stmt 1 view .LVU61
+ 194              	.LVL7:
+  57:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[i] = SBUS_FAILSAFE_VALUE;
+ 195              		.loc 1 57 27 view .LVU62
+ 196              	.LBE9:
+  62:Bsp/Src/bsp_sbus_controller.c **** }
+ 197              		.loc 1 62 5 view .LVU63
+ 198 004a 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 199              		.loc 1 63 1 is_stmt 0 view .LVU64
+ 200 004c 80F00100 		eor	r0, r0, #1
+ 201 0050 08BD     		pop	{r3, pc}
+ 202              	.L12:
+ 203 0052 00BF     		.align	2
+ 204              	.L11:
+ 205 0054 00000000 		.word	sbus_last_update
+ 206 0058 00000000 		.word	sbus_signal_lost
+ 207 005c 00000000 		.word	sbus_channels
+ 208 0060 00000000 		.word	sbus_channels_mapped
+ 209              		.cfi_endproc
+ 210              	.LFE146:
+ 212              		.section	.text.BSP_SBUS_ProcessData,"ax",%progbits
+ 213              		.align	1
+ 214              		.p2align 2,,3
+ 215              		.global	BSP_SBUS_ProcessData
+ 216              		.syntax unified
+ 217              		.thumb
+ 218              		.thumb_func
+ 220              	BSP_SBUS_ProcessData:
+ 221              	.LVL8:
+ 222              	.LFB147:
+  64:Bsp/Src/bsp_sbus_controller.c **** 
+  65:Bsp/Src/bsp_sbus_controller.c **** void BSP_SBUS_ProcessData(uint8_t byte)
+  66:Bsp/Src/bsp_sbus_controller.c **** {
+ 223              		.loc 1 66 1 is_stmt 1 view -0
+ 224              		.cfi_startproc
+ 225              		@ args = 0, pretend = 0, frame = 0
+ 226              		@ frame_needed = 0, uses_anonymous_args = 0
+  67:Bsp/Src/bsp_sbus_controller.c ****     // If the first byte is not SBUS start byte, discard and restart
+  68:Bsp/Src/bsp_sbus_controller.c ****     if (frame_index == 0 && byte != SBUS_START_BYTE) {
+ 227              		.loc 1 68 5 view .LVU66
+ 228              		.loc 1 68 21 is_stmt 0 view .LVU67
+ 229 0000 6E4B     		ldr	r3, .L48
+ 230              		.loc 1 68 26 view .LVU68
+ 231 0002 0F28     		cmp	r0, #15
+ 232              		.loc 1 68 21 view .LVU69
+ 233 0004 1A88     		ldrh	r2, [r3]
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 7
+
+
+ 234              		.loc 1 68 26 view .LVU70
+ 235 0006 01D0     		beq	.L37
+ 236 0008 12B2     		sxth	r2, r2
+ 237 000a 62B1     		cbz	r2, .L45
+ 238              	.L37:
+  69:Bsp/Src/bsp_sbus_controller.c ****         return;
+  70:Bsp/Src/bsp_sbus_controller.c ****     }
+  71:Bsp/Src/bsp_sbus_controller.c ****     
+  72:Bsp/Src/bsp_sbus_controller.c **** 
+  73:Bsp/Src/bsp_sbus_controller.c ****     sbus_frame[frame_index++] = byte;
+ 239              		.loc 1 73 5 is_stmt 1 view .LVU71
+ 240              		.loc 1 73 27 is_stmt 0 view .LVU72
+ 241 000c 1A88     		ldrh	r2, [r3]
+ 242 000e 511C     		adds	r1, r2, #1
+ 243 0010 12B2     		sxth	r2, r2
+  66:Bsp/Src/bsp_sbus_controller.c ****     // If the first byte is not SBUS start byte, discard and restart
+ 244              		.loc 1 66 1 view .LVU73
+ 245 0012 10B5     		push	{r4, lr}
+ 246              	.LCFI2:
+ 247              		.cfi_def_cfa_offset 8
+ 248              		.cfi_offset 4, -8
+ 249              		.cfi_offset 14, -4
+ 250              		.loc 1 73 27 view .LVU74
+ 251 0014 09B2     		sxth	r1, r1
+ 252              		.loc 1 73 31 view .LVU75
+ 253 0016 6A4C     		ldr	r4, .L48+4
+ 254              		.loc 1 73 27 view .LVU76
+ 255 0018 1980     		strh	r1, [r3]	@ movhi
+ 256              		.loc 1 73 31 view .LVU77
+ 257 001a A054     		strb	r0, [r4, r2]
+  74:Bsp/Src/bsp_sbus_controller.c **** 
+  75:Bsp/Src/bsp_sbus_controller.c ****     // Consider a frame complete when full frame is received
+  76:Bsp/Src/bsp_sbus_controller.c ****     if (frame_index == SBUS_FRAME_LENGTH) {
+ 258              		.loc 1 76 5 is_stmt 1 view .LVU78
+ 259              		.loc 1 76 21 is_stmt 0 view .LVU79
+ 260 001c 1A88     		ldrh	r2, [r3]
+ 261 001e 12B2     		sxth	r2, r2
+ 262              		.loc 1 76 8 view .LVU80
+ 263 0020 192A     		cmp	r2, #25
+ 264 0022 01D0     		beq	.L47
+ 265              	.LVL9:
+ 266              	.L13:
+  77:Bsp/Src/bsp_sbus_controller.c ****         frame_complete = true;
+  78:Bsp/Src/bsp_sbus_controller.c ****         frame_index = 0;
+  79:Bsp/Src/bsp_sbus_controller.c **** 
+  80:Bsp/Src/bsp_sbus_controller.c ****         // Verify the end byte
+  81:Bsp/Src/bsp_sbus_controller.c ****         if (sbus_frame[24] == SBUS_END_BYTE || sbus_frame[24] == SBUS_END_BYTE_ALT) {
+  82:Bsp/Src/bsp_sbus_controller.c ****             // Update signal status
+  83:Bsp/Src/bsp_sbus_controller.c ****             sbus_last_update = HAL_GetTick();
+  84:Bsp/Src/bsp_sbus_controller.c ****             sbus_signal_lost = false;
+  85:Bsp/Src/bsp_sbus_controller.c **** 
+  86:Bsp/Src/bsp_sbus_controller.c ****             // Parse channel data according to SBUS protocol
+  87:Bsp/Src/bsp_sbus_controller.c ****             // Each channel is 11 bits, packed across bytes
+  88:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[0] = ((sbus_frame[1]      | sbus_frame[2] << 8)                          
+  89:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[1] = ((sbus_frame[2] >> 3 | sbus_frame[3] << 5)                          
+  90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
+  91:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[3] = ((sbus_frame[5] >> 1 | sbus_frame[6] << 7)                          
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 8
+
+
+  92:Bsp/Src/bsp_sbus_controller.c **** 
+  93:Bsp/Src/bsp_sbus_controller.c ****             // Map each channel value to 0-4095 range
+  94:Bsp/Src/bsp_sbus_controller.c ****             for (int i = 0; i < SBUS_NUM_CHANNELS; i++) {
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+  97:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+  98:Bsp/Src/bsp_sbus_controller.c ****                                                   SBUS_MIN_VALUE, 
+  99:Bsp/Src/bsp_sbus_controller.c ****                                                   SBUS_MAX_VALUE, 
+ 100:Bsp/Src/bsp_sbus_controller.c ****                                                   MAPPED_MIN_VALUE, 
+ 101:Bsp/Src/bsp_sbus_controller.c ****                                                   MAPPED_MAX_VALUE);
+ 102:Bsp/Src/bsp_sbus_controller.c ****             }
+ 103:Bsp/Src/bsp_sbus_controller.c ****         }
+ 104:Bsp/Src/bsp_sbus_controller.c ****     }
+ 105:Bsp/Src/bsp_sbus_controller.c **** }
+ 267              		.loc 1 105 1 view .LVU81
+ 268 0024 10BD     		pop	{r4, pc}
+ 269              	.LVL10:
+ 270              	.L45:
+ 271              	.LCFI3:
+ 272              		.cfi_def_cfa_offset 0
+ 273              		.cfi_restore 4
+ 274              		.cfi_restore 14
+ 275              		.loc 1 105 1 view .LVU82
+ 276 0026 7047     		bx	lr
+ 277              	.L47:
+ 278              	.LCFI4:
+ 279              		.cfi_def_cfa_offset 8
+ 280              		.cfi_offset 4, -8
+ 281              		.cfi_offset 14, -4
+  77:Bsp/Src/bsp_sbus_controller.c ****         frame_complete = true;
+ 282              		.loc 1 77 9 is_stmt 1 view .LVU83
+  77:Bsp/Src/bsp_sbus_controller.c ****         frame_complete = true;
+ 283              		.loc 1 77 24 is_stmt 0 view .LVU84
+ 284 0028 6649     		ldr	r1, .L48+8
+ 285 002a 0120     		movs	r0, #1
+ 286              	.LVL11:
+  78:Bsp/Src/bsp_sbus_controller.c **** 
+ 287              		.loc 1 78 21 view .LVU85
+ 288 002c 0022     		movs	r2, #0
+  77:Bsp/Src/bsp_sbus_controller.c ****         frame_complete = true;
+ 289              		.loc 1 77 24 view .LVU86
+ 290 002e 0870     		strb	r0, [r1]
+  78:Bsp/Src/bsp_sbus_controller.c **** 
+ 291              		.loc 1 78 9 is_stmt 1 view .LVU87
+  78:Bsp/Src/bsp_sbus_controller.c **** 
+ 292              		.loc 1 78 21 is_stmt 0 view .LVU88
+ 293 0030 1A80     		strh	r2, [r3]	@ movhi
+  81:Bsp/Src/bsp_sbus_controller.c ****             // Update signal status
+ 294              		.loc 1 81 9 is_stmt 1 view .LVU89
+  81:Bsp/Src/bsp_sbus_controller.c ****             // Update signal status
+ 295              		.loc 1 81 23 is_stmt 0 view .LVU90
+ 296 0032 237E     		ldrb	r3, [r4, #24]	@ zero_extendqisi2
+  81:Bsp/Src/bsp_sbus_controller.c ****             // Update signal status
+ 297              		.loc 1 81 12 view .LVU91
+ 298 0034 13B1     		cbz	r3, .L16
+  81:Bsp/Src/bsp_sbus_controller.c ****             // Update signal status
+ 299              		.loc 1 81 58 discriminator 1 view .LVU92
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 9
+
+
+ 300 0036 237E     		ldrb	r3, [r4, #24]	@ zero_extendqisi2
+  81:Bsp/Src/bsp_sbus_controller.c ****             // Update signal status
+ 301              		.loc 1 81 45 discriminator 1 view .LVU93
+ 302 0038 042B     		cmp	r3, #4
+ 303 003a F3D1     		bne	.L13
+ 304              	.L16:
+ 305              	.LBB17:
+ 306              	.LBI17:
+  65:Bsp/Src/bsp_sbus_controller.c **** {
+ 307              		.loc 1 65 6 is_stmt 1 view .LVU94
+ 308              	.LVL12:
+ 309              	.LBB18:
+  83:Bsp/Src/bsp_sbus_controller.c ****             sbus_signal_lost = false;
+ 310              		.loc 1 83 13 view .LVU95
+  83:Bsp/Src/bsp_sbus_controller.c ****             sbus_signal_lost = false;
+ 311              		.loc 1 83 32 is_stmt 0 view .LVU96
+ 312 003c FFF7FEFF 		bl	HAL_GetTick
+ 313              	.LVL13:
+  83:Bsp/Src/bsp_sbus_controller.c ****             sbus_signal_lost = false;
+ 314              		.loc 1 83 30 view .LVU97
+ 315 0040 6149     		ldr	r1, .L48+12
+  84:Bsp/Src/bsp_sbus_controller.c **** 
+ 316              		.loc 1 84 30 view .LVU98
+ 317 0042 624B     		ldr	r3, .L48+16
+ 318 0044 0022     		movs	r2, #0
+  83:Bsp/Src/bsp_sbus_controller.c ****             sbus_signal_lost = false;
+ 319              		.loc 1 83 30 view .LVU99
+ 320 0046 0860     		str	r0, [r1]
+  84:Bsp/Src/bsp_sbus_controller.c **** 
+ 321              		.loc 1 84 13 is_stmt 1 view .LVU100
+  84:Bsp/Src/bsp_sbus_controller.c **** 
+ 322              		.loc 1 84 30 is_stmt 0 view .LVU101
+ 323 0048 1A70     		strb	r2, [r3]
+  88:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[1] = ((sbus_frame[2] >> 3 | sbus_frame[3] << 5)                          
+ 324              		.loc 1 88 13 is_stmt 1 view .LVU102
+  88:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[1] = ((sbus_frame[2] >> 3 | sbus_frame[3] << 5)                          
+ 325              		.loc 1 88 44 is_stmt 0 view .LVU103
+ 326 004a 6278     		ldrb	r2, [r4, #1]	@ zero_extendqisi2
+  88:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[1] = ((sbus_frame[2] >> 3 | sbus_frame[3] << 5)                          
+ 327              		.loc 1 88 65 view .LVU104
+ 328 004c A178     		ldrb	r1, [r4, #2]	@ zero_extendqisi2
+  88:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[1] = ((sbus_frame[2] >> 3 | sbus_frame[3] << 5)                          
+ 329              		.loc 1 88 30 view .LVU105
+ 330 004e 604B     		ldr	r3, .L48+20
+  88:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[1] = ((sbus_frame[2] >> 3 | sbus_frame[3] << 5)                          
+ 331              		.loc 1 88 53 view .LVU106
+ 332 0050 42EA0122 		orr	r2, r2, r1, lsl #8
+  88:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[1] = ((sbus_frame[2] >> 3 | sbus_frame[3] << 5)                          
+ 333              		.loc 1 88 101 view .LVU107
+ 334 0054 C2F30A02 		ubfx	r2, r2, #0, #11
+  88:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[1] = ((sbus_frame[2] >> 3 | sbus_frame[3] << 5)                          
+ 335              		.loc 1 88 30 view .LVU108
+ 336 0058 1A80     		strh	r2, [r3]	@ movhi
+  89:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
+ 337              		.loc 1 89 13 is_stmt 1 view .LVU109
+  89:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
+ 338              		.loc 1 89 44 is_stmt 0 view .LVU110
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 10
+
+
+ 339 005a A178     		ldrb	r1, [r4, #2]	@ zero_extendqisi2
+  89:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
+ 340              		.loc 1 89 65 view .LVU111
+ 341 005c E278     		ldrb	r2, [r4, #3]	@ zero_extendqisi2
+  89:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
+ 342              		.loc 1 89 69 view .LVU112
+ 343 005e 5201     		lsls	r2, r2, #5
+  89:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
+ 344              		.loc 1 89 53 view .LVU113
+ 345 0060 42EAD102 		orr	r2, r2, r1, lsr #3
+  89:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
+ 346              		.loc 1 89 101 view .LVU114
+ 347 0064 C2F30A02 		ubfx	r2, r2, #0, #11
+  89:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
+ 348              		.loc 1 89 30 view .LVU115
+ 349 0068 5A80     		strh	r2, [r3, #2]	@ movhi
+  90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[3] = ((sbus_frame[5] >> 1 | sbus_frame[6] << 7)                          
+ 350              		.loc 1 90 13 is_stmt 1 view .LVU116
+  90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[3] = ((sbus_frame[5] >> 1 | sbus_frame[6] << 7)                          
+ 351              		.loc 1 90 44 is_stmt 0 view .LVU117
+ 352 006a E178     		ldrb	r1, [r4, #3]	@ zero_extendqisi2
+  90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[3] = ((sbus_frame[5] >> 1 | sbus_frame[6] << 7)                          
+ 353              		.loc 1 90 65 view .LVU118
+ 354 006c 2079     		ldrb	r0, [r4, #4]	@ zero_extendqisi2
+  90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[3] = ((sbus_frame[5] >> 1 | sbus_frame[6] << 7)                          
+ 355              		.loc 1 90 86 view .LVU119
+ 356 006e 6279     		ldrb	r2, [r4, #5]	@ zero_extendqisi2
+  90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[3] = ((sbus_frame[5] >> 1 | sbus_frame[6] << 7)                          
+ 357              		.loc 1 90 90 view .LVU120
+ 358 0070 9202     		lsls	r2, r2, #10
+  90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[3] = ((sbus_frame[5] >> 1 | sbus_frame[6] << 7)                          
+ 359              		.loc 1 90 74 view .LVU121
+ 360 0072 42EA8002 		orr	r2, r2, r0, lsl #2
+ 361 0076 42EA9112 		orr	r2, r2, r1, lsr #6
+  90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[3] = ((sbus_frame[5] >> 1 | sbus_frame[6] << 7)                          
+ 362              		.loc 1 90 100 view .LVU122
+ 363 007a C2F30A02 		ubfx	r2, r2, #0, #11
+  90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[3] = ((sbus_frame[5] >> 1 | sbus_frame[6] << 7)                          
+ 364              		.loc 1 90 30 view .LVU123
+ 365 007e 9A80     		strh	r2, [r3, #4]	@ movhi
+  91:Bsp/Src/bsp_sbus_controller.c **** 
+ 366              		.loc 1 91 13 is_stmt 1 view .LVU124
+  91:Bsp/Src/bsp_sbus_controller.c **** 
+ 367              		.loc 1 91 44 is_stmt 0 view .LVU125
+ 368 0080 6179     		ldrb	r1, [r4, #5]	@ zero_extendqisi2
+  91:Bsp/Src/bsp_sbus_controller.c **** 
+ 369              		.loc 1 91 65 view .LVU126
+ 370 0082 A279     		ldrb	r2, [r4, #6]	@ zero_extendqisi2
+  91:Bsp/Src/bsp_sbus_controller.c **** 
+ 371              		.loc 1 91 69 view .LVU127
+ 372 0084 D201     		lsls	r2, r2, #7
+  91:Bsp/Src/bsp_sbus_controller.c **** 
+ 373              		.loc 1 91 53 view .LVU128
+ 374 0086 42EA5102 		orr	r2, r2, r1, lsr #1
+  91:Bsp/Src/bsp_sbus_controller.c **** 
+ 375              		.loc 1 91 101 view .LVU129
+ 376 008a C2F30A02 		ubfx	r2, r2, #0, #11
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 11
+
+
+  91:Bsp/Src/bsp_sbus_controller.c **** 
+ 377              		.loc 1 91 30 view .LVU130
+ 378 008e DA80     		strh	r2, [r3, #6]	@ movhi
+  94:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 379              		.loc 1 94 13 is_stmt 1 view .LVU131
+ 380              	.LBB19:
+  94:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 381              		.loc 1 94 18 view .LVU132
+ 382              	.LVL14:
+  94:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 383              		.loc 1 94 31 view .LVU133
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 384              		.loc 1 95 17 view .LVU134
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 385              		.loc 1 95 34 is_stmt 0 view .LVU135
+ 386 0090 1A88     		ldrh	r2, [r3]
+ 387 0092 12B2     		sxth	r2, r2
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 388              		.loc 1 95 20 view .LVU136
+ 389 0094 EF2A     		cmp	r2, #239
+ 390 0096 01DC     		bgt	.L17
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 391              		.loc 1 95 56 is_stmt 1 view .LVU137
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 392              		.loc 1 95 73 is_stmt 0 view .LVU138
+ 393 0098 F022     		movs	r2, #240
+ 394 009a 1A80     		strh	r2, [r3]	@ movhi
+ 395              	.L17:
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 396              		.loc 1 96 17 is_stmt 1 view .LVU139
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 397              		.loc 1 96 34 is_stmt 0 view .LVU140
+ 398 009c 1A88     		ldrh	r2, [r3]
+ 399 009e 12B2     		sxth	r2, r2
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 400              		.loc 1 96 20 view .LVU141
+ 401 00a0 B2F5E26F 		cmp	r2, #1808
+ 402 00a4 02DB     		blt	.L18
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 403              		.loc 1 96 56 is_stmt 1 view .LVU142
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 404              		.loc 1 96 73 is_stmt 0 view .LVU143
+ 405 00a6 40F20F72 		movw	r2, #1807
+ 406 00aa 1A80     		strh	r2, [r3]	@ movhi
+ 407              	.L18:
+  97:Bsp/Src/bsp_sbus_controller.c ****                                                   SBUS_MIN_VALUE, 
+ 408              		.loc 1 97 17 is_stmt 1 view .LVU144
+  97:Bsp/Src/bsp_sbus_controller.c ****                                                   SBUS_MIN_VALUE, 
+ 409              		.loc 1 97 66 is_stmt 0 view .LVU145
+ 410 00ac 1A88     		ldrh	r2, [r3]
+ 411 00ae 12B2     		sxth	r2, r2
+ 412              	.LVL15:
+ 413              	.LBB20:
+ 414              	.LBI20:
+  28:Bsp/Src/bsp_sbus_controller.c ****     // Handle edge cases to prevent overflow
+ 415              		.loc 1 28 23 is_stmt 1 view .LVU146
+ 416              	.LBB21:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 12
+
+
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 417              		.loc 1 30 5 view .LVU147
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 418              		.loc 1 30 8 is_stmt 0 view .LVU148
+ 419 00b0 F02A     		cmp	r2, #240
+ 420 00b2 6FDD     		ble	.L29
+  31:Bsp/Src/bsp_sbus_controller.c ****     
+ 421              		.loc 1 31 5 is_stmt 1 view .LVU149
+  31:Bsp/Src/bsp_sbus_controller.c ****     
+ 422              		.loc 1 31 8 is_stmt 0 view .LVU150
+ 423 00b4 40F20E71 		movw	r1, #1806
+ 424 00b8 8A42     		cmp	r2, r1
+ 425 00ba 76DC     		bgt	.L30
+  34:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 426              		.loc 1 34 5 is_stmt 1 view .LVU151
+  34:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 427              		.loc 1 34 13 is_stmt 0 view .LVU152
+ 428 00bc F03A     		subs	r2, r2, #240
+ 429              	.LVL16:
+  35:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 430              		.loc 1 35 10 view .LVU153
+ 431 00be 4549     		ldr	r1, .L48+24
+  34:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 432              		.loc 1 34 13 view .LVU154
+ 433 00c0 12B2     		sxth	r2, r2
+ 434              	.LVL17:
+  34:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 435              		.loc 1 34 13 view .LVU155
+ 436 00c2 C2EB0232 		rsb	r2, r2, r2, lsl #12
+ 437              	.LVL18:
+  35:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 438              		.loc 1 35 5 is_stmt 1 view .LVU156
+  36:Bsp/Src/bsp_sbus_controller.c **** }
+ 439              		.loc 1 36 5 view .LVU157
+  35:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 440              		.loc 1 35 10 is_stmt 0 view .LVU158
+ 441 00c6 A1FB0212 		umull	r1, r2, r1, r2
+ 442              	.LVL19:
+  36:Bsp/Src/bsp_sbus_controller.c **** }
+ 443              		.loc 1 36 12 view .LVU159
+ 444 00ca 42F3CF12 		sbfx	r2, r2, #7, #16
+ 445              	.LVL20:
+ 446              	.L19:
+  36:Bsp/Src/bsp_sbus_controller.c **** }
+ 447              		.loc 1 36 12 view .LVU160
+ 448              	.LBE21:
+ 449              	.LBE20:
+  97:Bsp/Src/bsp_sbus_controller.c ****                                                   SBUS_MIN_VALUE, 
+ 450              		.loc 1 97 41 view .LVU161
+ 451 00ce 4249     		ldr	r1, .L48+28
+ 452 00d0 0A80     		strh	r2, [r1]	@ movhi
+  94:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 453              		.loc 1 94 53 is_stmt 1 view .LVU162
+ 454              	.LVL21:
+  94:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 455              		.loc 1 94 31 view .LVU163
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 13
+
+
+ 456              		.loc 1 95 17 view .LVU164
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 457              		.loc 1 95 34 is_stmt 0 view .LVU165
+ 458 00d2 5A88     		ldrh	r2, [r3, #2]
+ 459 00d4 12B2     		sxth	r2, r2
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 460              		.loc 1 95 20 view .LVU166
+ 461 00d6 EF2A     		cmp	r2, #239
+ 462 00d8 01DC     		bgt	.L20
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 463              		.loc 1 95 56 is_stmt 1 view .LVU167
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 464              		.loc 1 95 73 is_stmt 0 view .LVU168
+ 465 00da F022     		movs	r2, #240
+ 466 00dc 5A80     		strh	r2, [r3, #2]	@ movhi
+ 467              	.L20:
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 468              		.loc 1 96 17 is_stmt 1 view .LVU169
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 469              		.loc 1 96 34 is_stmt 0 view .LVU170
+ 470 00de 5A88     		ldrh	r2, [r3, #2]
+ 471 00e0 12B2     		sxth	r2, r2
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 472              		.loc 1 96 20 view .LVU171
+ 473 00e2 B2F5E26F 		cmp	r2, #1808
+ 474 00e6 02DB     		blt	.L21
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 475              		.loc 1 96 56 is_stmt 1 view .LVU172
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 476              		.loc 1 96 73 is_stmt 0 view .LVU173
+ 477 00e8 40F20F72 		movw	r2, #1807
+ 478 00ec 5A80     		strh	r2, [r3, #2]	@ movhi
+ 479              	.L21:
+  97:Bsp/Src/bsp_sbus_controller.c ****                                                   SBUS_MIN_VALUE, 
+ 480              		.loc 1 97 17 is_stmt 1 view .LVU174
+  97:Bsp/Src/bsp_sbus_controller.c ****                                                   SBUS_MIN_VALUE, 
+ 481              		.loc 1 97 66 is_stmt 0 view .LVU175
+ 482 00ee 5A88     		ldrh	r2, [r3, #2]
+ 483 00f0 12B2     		sxth	r2, r2
+ 484              	.LVL22:
+ 485              	.LBB26:
+  28:Bsp/Src/bsp_sbus_controller.c ****     // Handle edge cases to prevent overflow
+ 486              		.loc 1 28 23 is_stmt 1 view .LVU176
+ 487              	.LBB22:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 488              		.loc 1 30 5 view .LVU177
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 489              		.loc 1 30 8 is_stmt 0 view .LVU178
+ 490 00f2 F02A     		cmp	r2, #240
+ 491 00f4 54DD     		ble	.L31
+  31:Bsp/Src/bsp_sbus_controller.c ****     
+ 492              		.loc 1 31 5 is_stmt 1 view .LVU179
+  31:Bsp/Src/bsp_sbus_controller.c ****     
+ 493              		.loc 1 31 8 is_stmt 0 view .LVU180
+ 494 00f6 40F20E70 		movw	r0, #1806
+ 495 00fa 8242     		cmp	r2, r0
+ 496 00fc 52DC     		bgt	.L32
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 14
+
+
+  34:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 497              		.loc 1 34 5 is_stmt 1 view .LVU181
+  34:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 498              		.loc 1 34 13 is_stmt 0 view .LVU182
+ 499 00fe F03A     		subs	r2, r2, #240
+ 500              	.LVL23:
+  35:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 501              		.loc 1 35 10 view .LVU183
+ 502 0100 3448     		ldr	r0, .L48+24
+  34:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 503              		.loc 1 34 13 view .LVU184
+ 504 0102 12B2     		sxth	r2, r2
+ 505              	.LVL24:
+  34:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 506              		.loc 1 34 13 view .LVU185
+ 507 0104 C2EB0232 		rsb	r2, r2, r2, lsl #12
+ 508              	.LVL25:
+  35:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 509              		.loc 1 35 5 is_stmt 1 view .LVU186
+  36:Bsp/Src/bsp_sbus_controller.c **** }
+ 510              		.loc 1 36 5 view .LVU187
+  35:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 511              		.loc 1 35 10 is_stmt 0 view .LVU188
+ 512 0108 A0FB0202 		umull	r0, r2, r0, r2
+ 513              	.LVL26:
+  36:Bsp/Src/bsp_sbus_controller.c **** }
+ 514              		.loc 1 36 12 view .LVU189
+ 515 010c 42F3CF12 		sbfx	r2, r2, #7, #16
+ 516              	.LVL27:
+ 517              	.L22:
+  36:Bsp/Src/bsp_sbus_controller.c **** }
+ 518              		.loc 1 36 12 view .LVU190
+ 519              	.LBE22:
+ 520              	.LBE26:
+  97:Bsp/Src/bsp_sbus_controller.c ****                                                   SBUS_MIN_VALUE, 
+ 521              		.loc 1 97 41 view .LVU191
+ 522 0110 4A80     		strh	r2, [r1, #2]	@ movhi
+  94:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 523              		.loc 1 94 53 is_stmt 1 view .LVU192
+ 524              	.LVL28:
+  94:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 525              		.loc 1 94 31 view .LVU193
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 526              		.loc 1 95 17 view .LVU194
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 527              		.loc 1 95 34 is_stmt 0 view .LVU195
+ 528 0112 9A88     		ldrh	r2, [r3, #4]
+ 529 0114 12B2     		sxth	r2, r2
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 530              		.loc 1 95 20 view .LVU196
+ 531 0116 EF2A     		cmp	r2, #239
+ 532 0118 01DC     		bgt	.L23
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 533              		.loc 1 95 56 is_stmt 1 view .LVU197
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 534              		.loc 1 95 73 is_stmt 0 view .LVU198
+ 535 011a F022     		movs	r2, #240
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 15
+
+
+ 536 011c 9A80     		strh	r2, [r3, #4]	@ movhi
+ 537              	.L23:
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 538              		.loc 1 96 17 is_stmt 1 view .LVU199
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 539              		.loc 1 96 34 is_stmt 0 view .LVU200
+ 540 011e 9A88     		ldrh	r2, [r3, #4]
+ 541 0120 12B2     		sxth	r2, r2
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 542              		.loc 1 96 20 view .LVU201
+ 543 0122 B2F5E26F 		cmp	r2, #1808
+ 544 0126 02DB     		blt	.L24
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 545              		.loc 1 96 56 is_stmt 1 view .LVU202
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 546              		.loc 1 96 73 is_stmt 0 view .LVU203
+ 547 0128 40F20F72 		movw	r2, #1807
+ 548 012c 9A80     		strh	r2, [r3, #4]	@ movhi
+ 549              	.L24:
+  97:Bsp/Src/bsp_sbus_controller.c ****                                                   SBUS_MIN_VALUE, 
+ 550              		.loc 1 97 17 is_stmt 1 view .LVU204
+  97:Bsp/Src/bsp_sbus_controller.c ****                                                   SBUS_MIN_VALUE, 
+ 551              		.loc 1 97 66 is_stmt 0 view .LVU205
+ 552 012e 9A88     		ldrh	r2, [r3, #4]
+ 553 0130 12B2     		sxth	r2, r2
+ 554              	.LVL29:
+ 555              	.LBB27:
+  28:Bsp/Src/bsp_sbus_controller.c ****     // Handle edge cases to prevent overflow
+ 556              		.loc 1 28 23 is_stmt 1 view .LVU206
+ 557              	.LBB23:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 558              		.loc 1 30 5 view .LVU207
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 559              		.loc 1 30 8 is_stmt 0 view .LVU208
+ 560 0132 F02A     		cmp	r2, #240
+ 561 0134 32DD     		ble	.L33
+  31:Bsp/Src/bsp_sbus_controller.c ****     
+ 562              		.loc 1 31 5 is_stmt 1 view .LVU209
+  31:Bsp/Src/bsp_sbus_controller.c ****     
+ 563              		.loc 1 31 8 is_stmt 0 view .LVU210
+ 564 0136 40F20E70 		movw	r0, #1806
+ 565 013a 8242     		cmp	r2, r0
+ 566 013c 3BDC     		bgt	.L34
+  34:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 567              		.loc 1 34 5 is_stmt 1 view .LVU211
+  34:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 568              		.loc 1 34 13 is_stmt 0 view .LVU212
+ 569 013e F03A     		subs	r2, r2, #240
+ 570              	.LVL30:
+  35:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 571              		.loc 1 35 10 view .LVU213
+ 572 0140 2448     		ldr	r0, .L48+24
+  34:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 573              		.loc 1 34 13 view .LVU214
+ 574 0142 12B2     		sxth	r2, r2
+ 575              	.LVL31:
+  34:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 16
+
+
+ 576              		.loc 1 34 13 view .LVU215
+ 577 0144 C2EB0232 		rsb	r2, r2, r2, lsl #12
+ 578              	.LVL32:
+  35:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 579              		.loc 1 35 5 is_stmt 1 view .LVU216
+  36:Bsp/Src/bsp_sbus_controller.c **** }
+ 580              		.loc 1 36 5 view .LVU217
+  35:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 581              		.loc 1 35 10 is_stmt 0 view .LVU218
+ 582 0148 A0FB0202 		umull	r0, r2, r0, r2
+ 583              	.LVL33:
+  36:Bsp/Src/bsp_sbus_controller.c **** }
+ 584              		.loc 1 36 12 view .LVU219
+ 585 014c 42F3CF12 		sbfx	r2, r2, #7, #16
+ 586              	.LVL34:
+ 587              	.L25:
+  36:Bsp/Src/bsp_sbus_controller.c **** }
+ 588              		.loc 1 36 12 view .LVU220
+ 589              	.LBE23:
+ 590              	.LBE27:
+  97:Bsp/Src/bsp_sbus_controller.c ****                                                   SBUS_MIN_VALUE, 
+ 591              		.loc 1 97 41 view .LVU221
+ 592 0150 8A80     		strh	r2, [r1, #4]	@ movhi
+  94:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 593              		.loc 1 94 53 is_stmt 1 view .LVU222
+ 594              	.LVL35:
+  94:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 595              		.loc 1 94 31 view .LVU223
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 596              		.loc 1 95 17 view .LVU224
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 597              		.loc 1 95 34 is_stmt 0 view .LVU225
+ 598 0152 DA88     		ldrh	r2, [r3, #6]
+ 599 0154 12B2     		sxth	r2, r2
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 600              		.loc 1 95 20 view .LVU226
+ 601 0156 EF2A     		cmp	r2, #239
+ 602 0158 01DC     		bgt	.L26
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 603              		.loc 1 95 56 is_stmt 1 view .LVU227
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 604              		.loc 1 95 73 is_stmt 0 view .LVU228
+ 605 015a F022     		movs	r2, #240
+ 606 015c DA80     		strh	r2, [r3, #6]	@ movhi
+ 607              	.L26:
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 608              		.loc 1 96 17 is_stmt 1 view .LVU229
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 609              		.loc 1 96 34 is_stmt 0 view .LVU230
+ 610 015e DA88     		ldrh	r2, [r3, #6]
+ 611 0160 12B2     		sxth	r2, r2
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 612              		.loc 1 96 20 view .LVU231
+ 613 0162 B2F5E26F 		cmp	r2, #1808
+ 614 0166 02DB     		blt	.L27
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 615              		.loc 1 96 56 is_stmt 1 view .LVU232
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 17
+
+
+  96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 616              		.loc 1 96 73 is_stmt 0 view .LVU233
+ 617 0168 40F20F72 		movw	r2, #1807
+ 618 016c DA80     		strh	r2, [r3, #6]	@ movhi
+ 619              	.L27:
+  97:Bsp/Src/bsp_sbus_controller.c ****                                                   SBUS_MIN_VALUE, 
+ 620              		.loc 1 97 17 is_stmt 1 view .LVU234
+  97:Bsp/Src/bsp_sbus_controller.c ****                                                   SBUS_MIN_VALUE, 
+ 621              		.loc 1 97 66 is_stmt 0 view .LVU235
+ 622 016e DB88     		ldrh	r3, [r3, #6]
+ 623 0170 1BB2     		sxth	r3, r3
+ 624              	.LVL36:
+ 625              	.LBB28:
+  28:Bsp/Src/bsp_sbus_controller.c ****     // Handle edge cases to prevent overflow
+ 626              		.loc 1 28 23 is_stmt 1 view .LVU236
+ 627              	.LBB24:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 628              		.loc 1 30 5 view .LVU237
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 629              		.loc 1 30 8 is_stmt 0 view .LVU238
+ 630 0172 F02B     		cmp	r3, #240
+ 631 0174 10DD     		ble	.L35
+  31:Bsp/Src/bsp_sbus_controller.c ****     
+ 632              		.loc 1 31 5 is_stmt 1 view .LVU239
+  31:Bsp/Src/bsp_sbus_controller.c ****     
+ 633              		.loc 1 31 8 is_stmt 0 view .LVU240
+ 634 0176 40F20E72 		movw	r2, #1806
+ 635 017a 9342     		cmp	r3, r2
+ 636 017c 18DC     		bgt	.L36
+  34:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 637              		.loc 1 34 5 is_stmt 1 view .LVU241
+  34:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 638              		.loc 1 34 13 is_stmt 0 view .LVU242
+ 639 017e F03B     		subs	r3, r3, #240
+ 640              	.LVL37:
+  35:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 641              		.loc 1 35 10 view .LVU243
+ 642 0180 144A     		ldr	r2, .L48+24
+  34:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 643              		.loc 1 34 13 view .LVU244
+ 644 0182 1BB2     		sxth	r3, r3
+ 645              	.LVL38:
+  34:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 646              		.loc 1 34 13 view .LVU245
+ 647 0184 C3EB0333 		rsb	r3, r3, r3, lsl #12
+ 648              	.LVL39:
+  35:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 649              		.loc 1 35 5 is_stmt 1 view .LVU246
+  36:Bsp/Src/bsp_sbus_controller.c **** }
+ 650              		.loc 1 36 5 view .LVU247
+  35:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 651              		.loc 1 35 10 is_stmt 0 view .LVU248
+ 652 0188 A2FB0323 		umull	r2, r3, r2, r3
+ 653              	.LVL40:
+  36:Bsp/Src/bsp_sbus_controller.c **** }
+ 654              		.loc 1 36 12 view .LVU249
+ 655 018c 43F3CF13 		sbfx	r3, r3, #7, #16
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 18
+
+
+ 656              	.LVL41:
+ 657              	.L28:
+  36:Bsp/Src/bsp_sbus_controller.c **** }
+ 658              		.loc 1 36 12 view .LVU250
+ 659              	.LBE24:
+ 660              	.LBE28:
+  97:Bsp/Src/bsp_sbus_controller.c ****                                                   SBUS_MIN_VALUE, 
+ 661              		.loc 1 97 41 view .LVU251
+ 662 0190 CB80     		strh	r3, [r1, #6]	@ movhi
+  94:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 663              		.loc 1 94 53 is_stmt 1 view .LVU252
+ 664              	.LVL42:
+  94:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 665              		.loc 1 94 31 view .LVU253
+  94:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 666              		.loc 1 94 31 is_stmt 0 view .LVU254
+ 667              	.LBE19:
+ 668              	.LBE18:
+ 669              	.LBE17:
+ 670              		.loc 1 105 1 view .LVU255
+ 671 0192 10BD     		pop	{r4, pc}
+ 672              	.LVL43:
+ 673              	.L29:
+ 674              	.LBB32:
+ 675              	.LBB31:
+ 676              	.LBB30:
+ 677              	.LBB29:
+ 678              	.LBB25:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 679              		.loc 1 30 29 view .LVU256
+ 680 0194 0022     		movs	r2, #0
+ 681              	.LVL44:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 682              		.loc 1 30 29 view .LVU257
+ 683 0196 9AE7     		b	.L19
+ 684              	.LVL45:
+ 685              	.L35:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 686              		.loc 1 30 29 view .LVU258
+ 687 0198 0023     		movs	r3, #0
+ 688              	.LVL46:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 689              		.loc 1 30 29 view .LVU259
+ 690 019a F9E7     		b	.L28
+ 691              	.LVL47:
+ 692              	.L33:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 693              		.loc 1 30 29 view .LVU260
+ 694 019c 0022     		movs	r2, #0
+ 695              	.LVL48:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 696              		.loc 1 30 29 view .LVU261
+ 697 019e D7E7     		b	.L25
+ 698              	.LVL49:
+ 699              	.L31:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 700              		.loc 1 30 29 view .LVU262
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 19
+
+
+ 701 01a0 0022     		movs	r2, #0
+ 702              	.LVL50:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 703              		.loc 1 30 29 view .LVU263
+ 704 01a2 B5E7     		b	.L22
+ 705              	.LVL51:
+ 706              	.L32:
+  31:Bsp/Src/bsp_sbus_controller.c ****     
+ 707              		.loc 1 31 29 view .LVU264
+ 708 01a4 40F6FF72 		movw	r2, #4095
+ 709              	.LVL52:
+  31:Bsp/Src/bsp_sbus_controller.c ****     
+ 710              		.loc 1 31 29 view .LVU265
+ 711 01a8 B2E7     		b	.L22
+ 712              	.LVL53:
+ 713              	.L30:
+  31:Bsp/Src/bsp_sbus_controller.c ****     
+ 714              		.loc 1 31 29 view .LVU266
+ 715 01aa 40F6FF72 		movw	r2, #4095
+ 716              	.LVL54:
+  31:Bsp/Src/bsp_sbus_controller.c ****     
+ 717              		.loc 1 31 29 view .LVU267
+ 718 01ae 8EE7     		b	.L19
+ 719              	.LVL55:
+ 720              	.L36:
+  31:Bsp/Src/bsp_sbus_controller.c ****     
+ 721              		.loc 1 31 29 view .LVU268
+ 722 01b0 40F6FF73 		movw	r3, #4095
+ 723              	.LVL56:
+  31:Bsp/Src/bsp_sbus_controller.c ****     
+ 724              		.loc 1 31 29 view .LVU269
+ 725 01b4 ECE7     		b	.L28
+ 726              	.LVL57:
+ 727              	.L34:
+  31:Bsp/Src/bsp_sbus_controller.c ****     
+ 728              		.loc 1 31 29 view .LVU270
+ 729 01b6 40F6FF72 		movw	r2, #4095
+ 730              	.LVL58:
+  31:Bsp/Src/bsp_sbus_controller.c ****     
+ 731              		.loc 1 31 29 view .LVU271
+ 732 01ba C9E7     		b	.L25
+ 733              	.L49:
+ 734              		.align	2
+ 735              	.L48:
+ 736 01bc 00000000 		.word	frame_index
+ 737 01c0 00000000 		.word	sbus_frame
+ 738 01c4 00000000 		.word	frame_complete
+ 739 01c8 00000000 		.word	sbus_last_update
+ 740 01cc 00000000 		.word	sbus_signal_lost
+ 741 01d0 00000000 		.word	sbus_channels
+ 742 01d4 A94AE914 		.word	350833321
+ 743 01d8 00000000 		.word	sbus_channels_mapped
+ 744              	.LBE25:
+ 745              	.LBE29:
+ 746              	.LBE30:
+ 747              	.LBE31:
+ 748              	.LBE32:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 20
+
+
+ 749              		.cfi_endproc
+ 750              	.LFE147:
+ 752              		.section	.text.BSP_SBUS_GetChannels,"ax",%progbits
+ 753              		.align	1
+ 754              		.p2align 2,,3
+ 755              		.global	BSP_SBUS_GetChannels
+ 756              		.syntax unified
+ 757              		.thumb
+ 758              		.thumb_func
+ 760              	BSP_SBUS_GetChannels:
+ 761              	.LFB148:
+ 106:Bsp/Src/bsp_sbus_controller.c **** 
+ 107:Bsp/Src/bsp_sbus_controller.c **** int16_t* BSP_SBUS_GetChannels(void)
+ 108:Bsp/Src/bsp_sbus_controller.c **** {
+ 762              		.loc 1 108 1 is_stmt 1 view -0
+ 763              		.cfi_startproc
+ 764              		@ args = 0, pretend = 0, frame = 0
+ 765              		@ frame_needed = 0, uses_anonymous_args = 0
+ 766              		@ link register save eliminated.
+ 109:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t*)sbus_channels;
+ 767              		.loc 1 109 5 view .LVU273
+ 110:Bsp/Src/bsp_sbus_controller.c **** }
+ 768              		.loc 1 110 1 is_stmt 0 view .LVU274
+ 769 0000 0048     		ldr	r0, .L51
+ 770 0002 7047     		bx	lr
+ 771              	.L52:
+ 772              		.align	2
+ 773              	.L51:
+ 774 0004 00000000 		.word	sbus_channels
+ 775              		.cfi_endproc
+ 776              	.LFE148:
+ 778              		.section	.text.BSP_SBUS_GetMappedChannels,"ax",%progbits
+ 779              		.align	1
+ 780              		.p2align 2,,3
+ 781              		.global	BSP_SBUS_GetMappedChannels
+ 782              		.syntax unified
+ 783              		.thumb
+ 784              		.thumb_func
+ 786              	BSP_SBUS_GetMappedChannels:
+ 787              	.LFB149:
+ 111:Bsp/Src/bsp_sbus_controller.c **** 
+ 112:Bsp/Src/bsp_sbus_controller.c **** int16_t* BSP_SBUS_GetMappedChannels(void)
+ 113:Bsp/Src/bsp_sbus_controller.c **** {
+ 788              		.loc 1 113 1 is_stmt 1 view -0
+ 789              		.cfi_startproc
+ 790              		@ args = 0, pretend = 0, frame = 0
+ 791              		@ frame_needed = 0, uses_anonymous_args = 0
+ 792              		@ link register save eliminated.
+ 114:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t*)sbus_channels_mapped;
+ 793              		.loc 1 114 5 view .LVU276
+ 115:Bsp/Src/bsp_sbus_controller.c **** }
+ 794              		.loc 1 115 1 is_stmt 0 view .LVU277
+ 795 0000 0048     		ldr	r0, .L54
+ 796 0002 7047     		bx	lr
+ 797              	.L55:
+ 798              		.align	2
+ 799              	.L54:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 21
+
+
+ 800 0004 00000000 		.word	sbus_channels_mapped
+ 801              		.cfi_endproc
+ 802              	.LFE149:
+ 804              		.section	.text.BSP_SBUS_UART_StartReceive,"ax",%progbits
+ 805              		.align	1
+ 806              		.p2align 2,,3
+ 807              		.global	BSP_SBUS_UART_StartReceive
+ 808              		.syntax unified
+ 809              		.thumb
+ 810              		.thumb_func
+ 812              	BSP_SBUS_UART_StartReceive:
+ 813              	.LFB150:
+ 116:Bsp/Src/bsp_sbus_controller.c **** 
+ 117:Bsp/Src/bsp_sbus_controller.c **** void BSP_SBUS_UART_StartReceive(void)
+ 118:Bsp/Src/bsp_sbus_controller.c **** {
+ 814              		.loc 1 118 1 is_stmt 1 view -0
+ 815              		.cfi_startproc
+ 816              		@ args = 0, pretend = 0, frame = 0
+ 817              		@ frame_needed = 0, uses_anonymous_args = 0
+ 818              		@ link register save eliminated.
+ 119:Bsp/Src/bsp_sbus_controller.c ****     // Start UART5 interrupt reception (1 byte at a time)
+ 120:Bsp/Src/bsp_sbus_controller.c ****     extern UART_HandleTypeDef huart5;
+ 819              		.loc 1 120 5 view .LVU279
+ 121:Bsp/Src/bsp_sbus_controller.c ****     HAL_UART_Receive_IT(&huart5, (uint8_t*)&sbus_rx_byte, 1);
+ 820              		.loc 1 121 5 view .LVU280
+ 821 0000 0122     		movs	r2, #1
+ 822 0002 0249     		ldr	r1, .L57
+ 823 0004 0248     		ldr	r0, .L57+4
+ 824 0006 FFF7FEBF 		b	HAL_UART_Receive_IT
+ 825              	.LVL59:
+ 826              	.L58:
+ 827 000a 00BF     		.align	2
+ 828              	.L57:
+ 829 000c 00000000 		.word	sbus_rx_byte
+ 830 0010 00000000 		.word	huart5
+ 831              		.cfi_endproc
+ 832              	.LFE150:
+ 834              		.section	.text.BSP_SBUS_UART_RxCpltCallback,"ax",%progbits
+ 835              		.align	1
+ 836              		.p2align 2,,3
+ 837              		.global	BSP_SBUS_UART_RxCpltCallback
+ 838              		.syntax unified
+ 839              		.thumb
+ 840              		.thumb_func
+ 842              	BSP_SBUS_UART_RxCpltCallback:
+ 843              	.LVL60:
+ 844              	.LFB151:
+ 122:Bsp/Src/bsp_sbus_controller.c **** }
+ 123:Bsp/Src/bsp_sbus_controller.c **** 
+ 124:Bsp/Src/bsp_sbus_controller.c **** void BSP_SBUS_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+ 125:Bsp/Src/bsp_sbus_controller.c **** {
+ 845              		.loc 1 125 1 view -0
+ 846              		.cfi_startproc
+ 847              		@ args = 0, pretend = 0, frame = 0
+ 848              		@ frame_needed = 0, uses_anonymous_args = 0
+ 126:Bsp/Src/bsp_sbus_controller.c ****     if (huart->Instance == UART5) {
+ 849              		.loc 1 126 5 view .LVU282
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 22
+
+
+ 850              		.loc 1 126 8 is_stmt 0 view .LVU283
+ 851 0000 0268     		ldr	r2, [r0]
+ 125:Bsp/Src/bsp_sbus_controller.c ****     if (huart->Instance == UART5) {
+ 852              		.loc 1 125 1 view .LVU284
+ 853 0002 38B5     		push	{r3, r4, r5, lr}
+ 854              	.LCFI5:
+ 855              		.cfi_def_cfa_offset 16
+ 856              		.cfi_offset 3, -16
+ 857              		.cfi_offset 4, -12
+ 858              		.cfi_offset 5, -8
+ 859              		.cfi_offset 14, -4
+ 860              		.loc 1 126 8 view .LVU285
+ 861 0004 744B     		ldr	r3, .L94
+ 862 0006 9A42     		cmp	r2, r3
+ 863 0008 00D0     		beq	.L92
+ 127:Bsp/Src/bsp_sbus_controller.c ****         // Process the received byte
+ 128:Bsp/Src/bsp_sbus_controller.c ****         BSP_SBUS_ProcessData(sbus_rx_byte);
+ 129:Bsp/Src/bsp_sbus_controller.c ****         
+ 130:Bsp/Src/bsp_sbus_controller.c ****         // Continue receiving the next byte
+ 131:Bsp/Src/bsp_sbus_controller.c ****         HAL_UART_Receive_IT(huart, (uint8_t*)&sbus_rx_byte, 1);
+ 132:Bsp/Src/bsp_sbus_controller.c ****     }
+ 133:Bsp/Src/bsp_sbus_controller.c **** } ...
+ 864              		.loc 1 133 1 view .LVU286
+ 865 000a 38BD     		pop	{r3, r4, r5, pc}
+ 866              	.L92:
+ 128:Bsp/Src/bsp_sbus_controller.c ****         BSP_SBUS_ProcessData(sbus_rx_byte);
+ 867              		.loc 1 128 9 is_stmt 1 view .LVU287
+ 868 000c 734B     		ldr	r3, .L94+4
+ 869 000e 0446     		mov	r4, r0
+ 870              	.LBB41:
+ 871              	.LBB42:
+  68:Bsp/Src/bsp_sbus_controller.c ****     if (frame_index == 0 && byte != SBUS_START_BYTE) {
+ 872              		.loc 1 68 21 is_stmt 0 view .LVU288
+ 873 0010 734A     		ldr	r2, .L94+8
+ 874              	.LBE42:
+ 875              	.LBE41:
+ 128:Bsp/Src/bsp_sbus_controller.c ****         BSP_SBUS_ProcessData(sbus_rx_byte);
+ 876              		.loc 1 128 9 view .LVU289
+ 877 0012 1978     		ldrb	r1, [r3]	@ zero_extendqisi2
+ 878              	.LBB59:
+ 879              	.LBB56:
+  68:Bsp/Src/bsp_sbus_controller.c ****     if (frame_index == 0 && byte != SBUS_START_BYTE) {
+ 880              		.loc 1 68 21 view .LVU290
+ 881 0014 1388     		ldrh	r3, [r2]
+  68:Bsp/Src/bsp_sbus_controller.c ****     if (frame_index == 0 && byte != SBUS_START_BYTE) {
+ 882              		.loc 1 68 26 view .LVU291
+ 883 0016 0F29     		cmp	r1, #15
+ 884              	.LBE56:
+ 885              	.LBE59:
+ 128:Bsp/Src/bsp_sbus_controller.c ****         BSP_SBUS_ProcessData(sbus_rx_byte);
+ 886              		.loc 1 128 9 view .LVU292
+ 887 0018 C8B2     		uxtb	r0, r1
+ 888              	.LVL61:
+ 889              	.LBB60:
+ 890              	.LBI41:
+  65:Bsp/Src/bsp_sbus_controller.c **** void BSP_SBUS_ProcessData(uint8_t byte)
+ 891              		.loc 1 65 6 is_stmt 1 view .LVU293
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 23
+
+
+ 892              	.LBB57:
+  68:Bsp/Src/bsp_sbus_controller.c ****     if (frame_index == 0 && byte != SBUS_START_BYTE) {
+ 893              		.loc 1 68 5 view .LVU294
+  68:Bsp/Src/bsp_sbus_controller.c ****     if (frame_index == 0 && byte != SBUS_START_BYTE) {
+ 894              		.loc 1 68 21 is_stmt 0 view .LVU295
+ 895 001a 1BB2     		sxth	r3, r3
+  68:Bsp/Src/bsp_sbus_controller.c ****     if (frame_index == 0 && byte != SBUS_START_BYTE) {
+ 896              		.loc 1 68 26 view .LVU296
+ 897 001c 00D0     		beq	.L84
+  68:Bsp/Src/bsp_sbus_controller.c ****     if (frame_index == 0 && byte != SBUS_START_BYTE) {
+ 898              		.loc 1 68 26 view .LVU297
+ 899 001e 53B1     		cbz	r3, .L61
+ 900              	.L84:
+  73:Bsp/Src/bsp_sbus_controller.c ****     sbus_frame[frame_index++] = byte;
+ 901              		.loc 1 73 5 is_stmt 1 view .LVU298
+  73:Bsp/Src/bsp_sbus_controller.c ****     sbus_frame[frame_index++] = byte;
+ 902              		.loc 1 73 27 is_stmt 0 view .LVU299
+ 903 0020 1388     		ldrh	r3, [r2]
+  73:Bsp/Src/bsp_sbus_controller.c ****     sbus_frame[frame_index++] = byte;
+ 904              		.loc 1 73 31 view .LVU300
+ 905 0022 704D     		ldr	r5, .L94+12
+  73:Bsp/Src/bsp_sbus_controller.c ****     sbus_frame[frame_index++] = byte;
+ 906              		.loc 1 73 27 view .LVU301
+ 907 0024 19B2     		sxth	r1, r3
+ 908 0026 0133     		adds	r3, r3, #1
+ 909 0028 1BB2     		sxth	r3, r3
+ 910 002a 1380     		strh	r3, [r2]	@ movhi
+  73:Bsp/Src/bsp_sbus_controller.c ****     sbus_frame[frame_index++] = byte;
+ 911              		.loc 1 73 31 view .LVU302
+ 912 002c 6854     		strb	r0, [r5, r1]
+  76:Bsp/Src/bsp_sbus_controller.c ****     if (frame_index == SBUS_FRAME_LENGTH) {
+ 913              		.loc 1 76 5 is_stmt 1 view .LVU303
+  76:Bsp/Src/bsp_sbus_controller.c ****     if (frame_index == SBUS_FRAME_LENGTH) {
+ 914              		.loc 1 76 21 is_stmt 0 view .LVU304
+ 915 002e 1388     		ldrh	r3, [r2]
+ 916 0030 1BB2     		sxth	r3, r3
+  76:Bsp/Src/bsp_sbus_controller.c ****     if (frame_index == SBUS_FRAME_LENGTH) {
+ 917              		.loc 1 76 8 view .LVU305
+ 918 0032 192B     		cmp	r3, #25
+ 919 0034 06D0     		beq	.L93
+ 920              	.LVL62:
+ 921              	.L61:
+  76:Bsp/Src/bsp_sbus_controller.c ****     if (frame_index == SBUS_FRAME_LENGTH) {
+ 922              		.loc 1 76 8 view .LVU306
+ 923              	.LBE57:
+ 924              	.LBE60:
+ 131:Bsp/Src/bsp_sbus_controller.c ****         HAL_UART_Receive_IT(huart, (uint8_t*)&sbus_rx_byte, 1);
+ 925              		.loc 1 131 9 is_stmt 1 view .LVU307
+ 926 0036 2046     		mov	r0, r4
+ 927 0038 0122     		movs	r2, #1
+ 928 003a 6849     		ldr	r1, .L94+4
+ 929              		.loc 1 133 1 is_stmt 0 view .LVU308
+ 930 003c BDE83840 		pop	{r3, r4, r5, lr}
+ 931              	.LCFI6:
+ 932              		.cfi_remember_state
+ 933              		.cfi_restore 14
+ 934              		.cfi_restore 5
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 24
+
+
+ 935              		.cfi_restore 4
+ 936              		.cfi_restore 3
+ 937              		.cfi_def_cfa_offset 0
+ 938              	.LVL63:
+ 131:Bsp/Src/bsp_sbus_controller.c ****         HAL_UART_Receive_IT(huart, (uint8_t*)&sbus_rx_byte, 1);
+ 939              		.loc 1 131 9 view .LVU309
+ 940 0040 FFF7FEBF 		b	HAL_UART_Receive_IT
+ 941              	.LVL64:
+ 942              	.L93:
+ 943              	.LCFI7:
+ 944              		.cfi_restore_state
+ 945              	.LBB61:
+ 946              	.LBB58:
+  77:Bsp/Src/bsp_sbus_controller.c ****         frame_complete = true;
+ 947              		.loc 1 77 9 is_stmt 1 view .LVU310
+  77:Bsp/Src/bsp_sbus_controller.c ****         frame_complete = true;
+ 948              		.loc 1 77 24 is_stmt 0 view .LVU311
+ 949 0044 684B     		ldr	r3, .L94+16
+ 950 0046 0121     		movs	r1, #1
+ 951 0048 1970     		strb	r1, [r3]
+  78:Bsp/Src/bsp_sbus_controller.c ****         frame_index = 0;
+ 952              		.loc 1 78 9 is_stmt 1 view .LVU312
+  78:Bsp/Src/bsp_sbus_controller.c ****         frame_index = 0;
+ 953              		.loc 1 78 21 is_stmt 0 view .LVU313
+ 954 004a 0023     		movs	r3, #0
+ 955 004c 1380     		strh	r3, [r2]	@ movhi
+  81:Bsp/Src/bsp_sbus_controller.c ****         if (sbus_frame[24] == SBUS_END_BYTE || sbus_frame[24] == SBUS_END_BYTE_ALT) {
+ 956              		.loc 1 81 9 is_stmt 1 view .LVU314
+  81:Bsp/Src/bsp_sbus_controller.c ****         if (sbus_frame[24] == SBUS_END_BYTE || sbus_frame[24] == SBUS_END_BYTE_ALT) {
+ 957              		.loc 1 81 23 is_stmt 0 view .LVU315
+ 958 004e 2B7E     		ldrb	r3, [r5, #24]	@ zero_extendqisi2
+  81:Bsp/Src/bsp_sbus_controller.c ****         if (sbus_frame[24] == SBUS_END_BYTE || sbus_frame[24] == SBUS_END_BYTE_ALT) {
+ 959              		.loc 1 81 12 view .LVU316
+ 960 0050 13B1     		cbz	r3, .L63
+  81:Bsp/Src/bsp_sbus_controller.c ****         if (sbus_frame[24] == SBUS_END_BYTE || sbus_frame[24] == SBUS_END_BYTE_ALT) {
+ 961              		.loc 1 81 58 view .LVU317
+ 962 0052 2B7E     		ldrb	r3, [r5, #24]	@ zero_extendqisi2
+  81:Bsp/Src/bsp_sbus_controller.c ****         if (sbus_frame[24] == SBUS_END_BYTE || sbus_frame[24] == SBUS_END_BYTE_ALT) {
+ 963              		.loc 1 81 45 view .LVU318
+ 964 0054 042B     		cmp	r3, #4
+ 965 0056 EED1     		bne	.L61
+ 966              	.L63:
+ 967              	.LBB43:
+ 968              	.LBI43:
+  65:Bsp/Src/bsp_sbus_controller.c **** void BSP_SBUS_ProcessData(uint8_t byte)
+ 969              		.loc 1 65 6 is_stmt 1 view .LVU319
+ 970              	.LVL65:
+ 971              	.LBB44:
+  83:Bsp/Src/bsp_sbus_controller.c ****             sbus_last_update = HAL_GetTick();
+ 972              		.loc 1 83 13 view .LVU320
+  83:Bsp/Src/bsp_sbus_controller.c ****             sbus_last_update = HAL_GetTick();
+ 973              		.loc 1 83 32 is_stmt 0 view .LVU321
+ 974 0058 FFF7FEFF 		bl	HAL_GetTick
+ 975              	.LVL66:
+  83:Bsp/Src/bsp_sbus_controller.c ****             sbus_last_update = HAL_GetTick();
+ 976              		.loc 1 83 30 view .LVU322
+ 977 005c 634B     		ldr	r3, .L94+20
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 25
+
+
+  84:Bsp/Src/bsp_sbus_controller.c ****             sbus_signal_lost = false;
+ 978              		.loc 1 84 30 view .LVU323
+ 979 005e 644A     		ldr	r2, .L94+24
+ 980 0060 0021     		movs	r1, #0
+  83:Bsp/Src/bsp_sbus_controller.c ****             sbus_last_update = HAL_GetTick();
+ 981              		.loc 1 83 30 view .LVU324
+ 982 0062 1860     		str	r0, [r3]
+  84:Bsp/Src/bsp_sbus_controller.c ****             sbus_signal_lost = false;
+ 983              		.loc 1 84 13 is_stmt 1 view .LVU325
+  84:Bsp/Src/bsp_sbus_controller.c ****             sbus_signal_lost = false;
+ 984              		.loc 1 84 30 is_stmt 0 view .LVU326
+ 985 0064 1170     		strb	r1, [r2]
+  88:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[0] = ((sbus_frame[1]      | sbus_frame[2] << 8)                          
+ 986              		.loc 1 88 13 is_stmt 1 view .LVU327
+  88:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[0] = ((sbus_frame[1]      | sbus_frame[2] << 8)                          
+ 987              		.loc 1 88 44 is_stmt 0 view .LVU328
+ 988 0066 6A78     		ldrb	r2, [r5, #1]	@ zero_extendqisi2
+  88:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[0] = ((sbus_frame[1]      | sbus_frame[2] << 8)                          
+ 989              		.loc 1 88 65 view .LVU329
+ 990 0068 A978     		ldrb	r1, [r5, #2]	@ zero_extendqisi2
+  88:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[0] = ((sbus_frame[1]      | sbus_frame[2] << 8)                          
+ 991              		.loc 1 88 30 view .LVU330
+ 992 006a 624B     		ldr	r3, .L94+28
+  88:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[0] = ((sbus_frame[1]      | sbus_frame[2] << 8)                          
+ 993              		.loc 1 88 53 view .LVU331
+ 994 006c 42EA0122 		orr	r2, r2, r1, lsl #8
+  88:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[0] = ((sbus_frame[1]      | sbus_frame[2] << 8)                          
+ 995              		.loc 1 88 101 view .LVU332
+ 996 0070 C2F30A02 		ubfx	r2, r2, #0, #11
+  88:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[0] = ((sbus_frame[1]      | sbus_frame[2] << 8)                          
+ 997              		.loc 1 88 30 view .LVU333
+ 998 0074 1A80     		strh	r2, [r3]	@ movhi
+  89:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[1] = ((sbus_frame[2] >> 3 | sbus_frame[3] << 5)                          
+ 999              		.loc 1 89 13 is_stmt 1 view .LVU334
+  89:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[1] = ((sbus_frame[2] >> 3 | sbus_frame[3] << 5)                          
+ 1000              		.loc 1 89 44 is_stmt 0 view .LVU335
+ 1001 0076 A978     		ldrb	r1, [r5, #2]	@ zero_extendqisi2
+  89:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[1] = ((sbus_frame[2] >> 3 | sbus_frame[3] << 5)                          
+ 1002              		.loc 1 89 65 view .LVU336
+ 1003 0078 EA78     		ldrb	r2, [r5, #3]	@ zero_extendqisi2
+  89:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[1] = ((sbus_frame[2] >> 3 | sbus_frame[3] << 5)                          
+ 1004              		.loc 1 89 69 view .LVU337
+ 1005 007a 5201     		lsls	r2, r2, #5
+  89:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[1] = ((sbus_frame[2] >> 3 | sbus_frame[3] << 5)                          
+ 1006              		.loc 1 89 53 view .LVU338
+ 1007 007c 42EAD102 		orr	r2, r2, r1, lsr #3
+  89:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[1] = ((sbus_frame[2] >> 3 | sbus_frame[3] << 5)                          
+ 1008              		.loc 1 89 101 view .LVU339
+ 1009 0080 C2F30A02 		ubfx	r2, r2, #0, #11
+  89:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[1] = ((sbus_frame[2] >> 3 | sbus_frame[3] << 5)                          
+ 1010              		.loc 1 89 30 view .LVU340
+ 1011 0084 5A80     		strh	r2, [r3, #2]	@ movhi
+  90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
+ 1012              		.loc 1 90 13 is_stmt 1 view .LVU341
+  90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
+ 1013              		.loc 1 90 44 is_stmt 0 view .LVU342
+ 1014 0086 E978     		ldrb	r1, [r5, #3]	@ zero_extendqisi2
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 26
+
+
+  90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
+ 1015              		.loc 1 90 65 view .LVU343
+ 1016 0088 2879     		ldrb	r0, [r5, #4]	@ zero_extendqisi2
+  90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
+ 1017              		.loc 1 90 86 view .LVU344
+ 1018 008a 6A79     		ldrb	r2, [r5, #5]	@ zero_extendqisi2
+  90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
+ 1019              		.loc 1 90 90 view .LVU345
+ 1020 008c 9202     		lsls	r2, r2, #10
+  90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
+ 1021              		.loc 1 90 74 view .LVU346
+ 1022 008e 42EA8002 		orr	r2, r2, r0, lsl #2
+ 1023 0092 42EA9112 		orr	r2, r2, r1, lsr #6
+  90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
+ 1024              		.loc 1 90 100 view .LVU347
+ 1025 0096 C2F30A02 		ubfx	r2, r2, #0, #11
+  90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
+ 1026              		.loc 1 90 30 view .LVU348
+ 1027 009a 9A80     		strh	r2, [r3, #4]	@ movhi
+  91:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[3] = ((sbus_frame[5] >> 1 | sbus_frame[6] << 7)                          
+ 1028              		.loc 1 91 13 is_stmt 1 view .LVU349
+  91:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[3] = ((sbus_frame[5] >> 1 | sbus_frame[6] << 7)                          
+ 1029              		.loc 1 91 44 is_stmt 0 view .LVU350
+ 1030 009c 6979     		ldrb	r1, [r5, #5]	@ zero_extendqisi2
+  91:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[3] = ((sbus_frame[5] >> 1 | sbus_frame[6] << 7)                          
+ 1031              		.loc 1 91 65 view .LVU351
+ 1032 009e AA79     		ldrb	r2, [r5, #6]	@ zero_extendqisi2
+  91:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[3] = ((sbus_frame[5] >> 1 | sbus_frame[6] << 7)                          
+ 1033              		.loc 1 91 69 view .LVU352
+ 1034 00a0 D201     		lsls	r2, r2, #7
+  91:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[3] = ((sbus_frame[5] >> 1 | sbus_frame[6] << 7)                          
+ 1035              		.loc 1 91 53 view .LVU353
+ 1036 00a2 42EA5102 		orr	r2, r2, r1, lsr #1
+  91:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[3] = ((sbus_frame[5] >> 1 | sbus_frame[6] << 7)                          
+ 1037              		.loc 1 91 101 view .LVU354
+ 1038 00a6 C2F30A02 		ubfx	r2, r2, #0, #11
+  91:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[3] = ((sbus_frame[5] >> 1 | sbus_frame[6] << 7)                          
+ 1039              		.loc 1 91 30 view .LVU355
+ 1040 00aa DA80     		strh	r2, [r3, #6]	@ movhi
+  94:Bsp/Src/bsp_sbus_controller.c ****             for (int i = 0; i < SBUS_NUM_CHANNELS; i++) {
+ 1041              		.loc 1 94 13 is_stmt 1 view .LVU356
+ 1042              	.LBB45:
+  94:Bsp/Src/bsp_sbus_controller.c ****             for (int i = 0; i < SBUS_NUM_CHANNELS; i++) {
+ 1043              		.loc 1 94 18 view .LVU357
+ 1044              	.LVL67:
+  94:Bsp/Src/bsp_sbus_controller.c ****             for (int i = 0; i < SBUS_NUM_CHANNELS; i++) {
+ 1045              		.loc 1 94 31 view .LVU358
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1046              		.loc 1 95 17 view .LVU359
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1047              		.loc 1 95 34 is_stmt 0 view .LVU360
+ 1048 00ac 1A88     		ldrh	r2, [r3]
+ 1049 00ae 12B2     		sxth	r2, r2
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1050              		.loc 1 95 20 view .LVU361
+ 1051 00b0 EF2A     		cmp	r2, #239
+ 1052 00b2 01DC     		bgt	.L64
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 27
+
+
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1053              		.loc 1 95 56 is_stmt 1 view .LVU362
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1054              		.loc 1 95 73 is_stmt 0 view .LVU363
+ 1055 00b4 F022     		movs	r2, #240
+ 1056 00b6 1A80     		strh	r2, [r3]	@ movhi
+ 1057              	.L64:
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1058              		.loc 1 96 17 is_stmt 1 view .LVU364
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1059              		.loc 1 96 34 is_stmt 0 view .LVU365
+ 1060 00b8 1A88     		ldrh	r2, [r3]
+ 1061 00ba 12B2     		sxth	r2, r2
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1062              		.loc 1 96 20 view .LVU366
+ 1063 00bc B2F5E26F 		cmp	r2, #1808
+ 1064 00c0 02DB     		blt	.L65
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1065              		.loc 1 96 56 is_stmt 1 view .LVU367
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1066              		.loc 1 96 73 is_stmt 0 view .LVU368
+ 1067 00c2 40F20F72 		movw	r2, #1807
+ 1068 00c6 1A80     		strh	r2, [r3]	@ movhi
+ 1069              	.L65:
+  97:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 1070              		.loc 1 97 17 is_stmt 1 view .LVU369
+  97:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 1071              		.loc 1 97 66 is_stmt 0 view .LVU370
+ 1072 00c8 1A88     		ldrh	r2, [r3]
+ 1073 00ca 12B2     		sxth	r2, r2
+ 1074              	.LVL68:
+ 1075              	.LBB46:
+ 1076              	.LBI46:
+  28:Bsp/Src/bsp_sbus_controller.c **** static inline int16_t map_value(int16_t x, int16_t in_min, int16_t in_max, int16_t out_min, int16_t
+ 1077              		.loc 1 28 23 is_stmt 1 view .LVU371
+ 1078              	.LBB47:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
+ 1079              		.loc 1 30 5 view .LVU372
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
+ 1080              		.loc 1 30 8 is_stmt 0 view .LVU373
+ 1081 00cc F02A     		cmp	r2, #240
+ 1082 00ce 75DD     		ble	.L76
+  31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 1083              		.loc 1 31 5 is_stmt 1 view .LVU374
+  31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 1084              		.loc 1 31 8 is_stmt 0 view .LVU375
+ 1085 00d0 40F20E71 		movw	r1, #1806
+ 1086 00d4 8A42     		cmp	r2, r1
+ 1087 00d6 76DC     		bgt	.L77
+  34:Bsp/Src/bsp_sbus_controller.c ****     int32_t temp = (int32_t)(x - in_min) * (out_max - out_min);
+ 1088              		.loc 1 34 5 is_stmt 1 view .LVU376
+  34:Bsp/Src/bsp_sbus_controller.c ****     int32_t temp = (int32_t)(x - in_min) * (out_max - out_min);
+ 1089              		.loc 1 34 13 is_stmt 0 view .LVU377
+ 1090 00d8 F03A     		subs	r2, r2, #240
+ 1091              	.LVL69:
+  35:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 1092              		.loc 1 35 10 view .LVU378
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 28
+
+
+ 1093 00da 4749     		ldr	r1, .L94+32
+  34:Bsp/Src/bsp_sbus_controller.c ****     int32_t temp = (int32_t)(x - in_min) * (out_max - out_min);
+ 1094              		.loc 1 34 13 view .LVU379
+ 1095 00dc 12B2     		sxth	r2, r2
+ 1096              	.LVL70:
+  34:Bsp/Src/bsp_sbus_controller.c ****     int32_t temp = (int32_t)(x - in_min) * (out_max - out_min);
+ 1097              		.loc 1 34 13 view .LVU380
+ 1098 00de C2EB0232 		rsb	r2, r2, r2, lsl #12
+ 1099              	.LVL71:
+  35:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 1100              		.loc 1 35 5 is_stmt 1 view .LVU381
+  36:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 1101              		.loc 1 36 5 view .LVU382
+  35:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 1102              		.loc 1 35 10 is_stmt 0 view .LVU383
+ 1103 00e2 A1FB0212 		umull	r1, r2, r1, r2
+ 1104              	.LVL72:
+  36:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 1105              		.loc 1 36 12 view .LVU384
+ 1106 00e6 42F3CF12 		sbfx	r2, r2, #7, #16
+ 1107              	.LVL73:
+ 1108              	.L66:
+  36:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 1109              		.loc 1 36 12 view .LVU385
+ 1110              	.LBE47:
+ 1111              	.LBE46:
+  97:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 1112              		.loc 1 97 41 view .LVU386
+ 1113 00ea 4449     		ldr	r1, .L94+36
+ 1114 00ec 0A80     		strh	r2, [r1]	@ movhi
+  94:Bsp/Src/bsp_sbus_controller.c ****             for (int i = 0; i < SBUS_NUM_CHANNELS; i++) {
+ 1115              		.loc 1 94 53 is_stmt 1 view .LVU387
+ 1116              	.LVL74:
+  94:Bsp/Src/bsp_sbus_controller.c ****             for (int i = 0; i < SBUS_NUM_CHANNELS; i++) {
+ 1117              		.loc 1 94 31 view .LVU388
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1118              		.loc 1 95 17 view .LVU389
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1119              		.loc 1 95 34 is_stmt 0 view .LVU390
+ 1120 00ee 5A88     		ldrh	r2, [r3, #2]
+ 1121 00f0 12B2     		sxth	r2, r2
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1122              		.loc 1 95 20 view .LVU391
+ 1123 00f2 EF2A     		cmp	r2, #239
+ 1124 00f4 01DC     		bgt	.L67
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1125              		.loc 1 95 56 is_stmt 1 view .LVU392
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1126              		.loc 1 95 73 is_stmt 0 view .LVU393
+ 1127 00f6 F022     		movs	r2, #240
+ 1128 00f8 5A80     		strh	r2, [r3, #2]	@ movhi
+ 1129              	.L67:
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1130              		.loc 1 96 17 is_stmt 1 view .LVU394
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1131              		.loc 1 96 34 is_stmt 0 view .LVU395
+ 1132 00fa 5A88     		ldrh	r2, [r3, #2]
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 29
+
+
+ 1133 00fc 12B2     		sxth	r2, r2
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1134              		.loc 1 96 20 view .LVU396
+ 1135 00fe B2F5E26F 		cmp	r2, #1808
+ 1136 0102 02DB     		blt	.L68
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1137              		.loc 1 96 56 is_stmt 1 view .LVU397
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1138              		.loc 1 96 73 is_stmt 0 view .LVU398
+ 1139 0104 40F20F72 		movw	r2, #1807
+ 1140 0108 5A80     		strh	r2, [r3, #2]	@ movhi
+ 1141              	.L68:
+  97:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 1142              		.loc 1 97 17 is_stmt 1 view .LVU399
+  97:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 1143              		.loc 1 97 66 is_stmt 0 view .LVU400
+ 1144 010a 5A88     		ldrh	r2, [r3, #2]
+ 1145 010c 12B2     		sxth	r2, r2
+ 1146              	.LVL75:
+ 1147              	.LBB52:
+  28:Bsp/Src/bsp_sbus_controller.c **** static inline int16_t map_value(int16_t x, int16_t in_min, int16_t in_max, int16_t out_min, int16_t
+ 1148              		.loc 1 28 23 is_stmt 1 view .LVU401
+ 1149              	.LBB48:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
+ 1150              		.loc 1 30 5 view .LVU402
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
+ 1151              		.loc 1 30 8 is_stmt 0 view .LVU403
+ 1152 010e F02A     		cmp	r2, #240
+ 1153 0110 52DD     		ble	.L78
+  31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 1154              		.loc 1 31 5 is_stmt 1 view .LVU404
+  31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 1155              		.loc 1 31 8 is_stmt 0 view .LVU405
+ 1156 0112 40F20E70 		movw	r0, #1806
+ 1157 0116 8242     		cmp	r2, r0
+ 1158 0118 52DC     		bgt	.L79
+  34:Bsp/Src/bsp_sbus_controller.c ****     int32_t temp = (int32_t)(x - in_min) * (out_max - out_min);
+ 1159              		.loc 1 34 5 is_stmt 1 view .LVU406
+  34:Bsp/Src/bsp_sbus_controller.c ****     int32_t temp = (int32_t)(x - in_min) * (out_max - out_min);
+ 1160              		.loc 1 34 13 is_stmt 0 view .LVU407
+ 1161 011a F03A     		subs	r2, r2, #240
+ 1162              	.LVL76:
+  35:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 1163              		.loc 1 35 10 view .LVU408
+ 1164 011c 3648     		ldr	r0, .L94+32
+  34:Bsp/Src/bsp_sbus_controller.c ****     int32_t temp = (int32_t)(x - in_min) * (out_max - out_min);
+ 1165              		.loc 1 34 13 view .LVU409
+ 1166 011e 12B2     		sxth	r2, r2
+ 1167              	.LVL77:
+  34:Bsp/Src/bsp_sbus_controller.c ****     int32_t temp = (int32_t)(x - in_min) * (out_max - out_min);
+ 1168              		.loc 1 34 13 view .LVU410
+ 1169 0120 C2EB0232 		rsb	r2, r2, r2, lsl #12
+ 1170              	.LVL78:
+  35:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 1171              		.loc 1 35 5 is_stmt 1 view .LVU411
+  36:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 1172              		.loc 1 36 5 view .LVU412
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 30
+
+
+  35:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 1173              		.loc 1 35 10 is_stmt 0 view .LVU413
+ 1174 0124 A0FB0202 		umull	r0, r2, r0, r2
+ 1175              	.LVL79:
+  36:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 1176              		.loc 1 36 12 view .LVU414
+ 1177 0128 42F3CF12 		sbfx	r2, r2, #7, #16
+ 1178              	.LVL80:
+ 1179              	.L69:
+  36:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 1180              		.loc 1 36 12 view .LVU415
+ 1181              	.LBE48:
+ 1182              	.LBE52:
+  97:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 1183              		.loc 1 97 41 view .LVU416
+ 1184 012c 4A80     		strh	r2, [r1, #2]	@ movhi
+  94:Bsp/Src/bsp_sbus_controller.c ****             for (int i = 0; i < SBUS_NUM_CHANNELS; i++) {
+ 1185              		.loc 1 94 53 is_stmt 1 view .LVU417
+ 1186              	.LVL81:
+  94:Bsp/Src/bsp_sbus_controller.c ****             for (int i = 0; i < SBUS_NUM_CHANNELS; i++) {
+ 1187              		.loc 1 94 31 view .LVU418
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1188              		.loc 1 95 17 view .LVU419
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1189              		.loc 1 95 34 is_stmt 0 view .LVU420
+ 1190 012e 9A88     		ldrh	r2, [r3, #4]
+ 1191 0130 12B2     		sxth	r2, r2
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1192              		.loc 1 95 20 view .LVU421
+ 1193 0132 EF2A     		cmp	r2, #239
+ 1194 0134 01DC     		bgt	.L70
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1195              		.loc 1 95 56 is_stmt 1 view .LVU422
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1196              		.loc 1 95 73 is_stmt 0 view .LVU423
+ 1197 0136 F022     		movs	r2, #240
+ 1198 0138 9A80     		strh	r2, [r3, #4]	@ movhi
+ 1199              	.L70:
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1200              		.loc 1 96 17 is_stmt 1 view .LVU424
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1201              		.loc 1 96 34 is_stmt 0 view .LVU425
+ 1202 013a 9A88     		ldrh	r2, [r3, #4]
+ 1203 013c 12B2     		sxth	r2, r2
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1204              		.loc 1 96 20 view .LVU426
+ 1205 013e B2F5E26F 		cmp	r2, #1808
+ 1206 0142 02DB     		blt	.L71
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1207              		.loc 1 96 56 is_stmt 1 view .LVU427
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1208              		.loc 1 96 73 is_stmt 0 view .LVU428
+ 1209 0144 40F20F72 		movw	r2, #1807
+ 1210 0148 9A80     		strh	r2, [r3, #4]	@ movhi
+ 1211              	.L71:
+  97:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 1212              		.loc 1 97 17 is_stmt 1 view .LVU429
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 31
+
+
+  97:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 1213              		.loc 1 97 66 is_stmt 0 view .LVU430
+ 1214 014a 9A88     		ldrh	r2, [r3, #4]
+ 1215 014c 12B2     		sxth	r2, r2
+ 1216              	.LVL82:
+ 1217              	.LBB53:
+  28:Bsp/Src/bsp_sbus_controller.c **** static inline int16_t map_value(int16_t x, int16_t in_min, int16_t in_max, int16_t out_min, int16_t
+ 1218              		.loc 1 28 23 is_stmt 1 view .LVU431
+ 1219              	.LBB49:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
+ 1220              		.loc 1 30 5 view .LVU432
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
+ 1221              		.loc 1 30 8 is_stmt 0 view .LVU433
+ 1222 014e F02A     		cmp	r2, #240
+ 1223 0150 2EDD     		ble	.L80
+  31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 1224              		.loc 1 31 5 is_stmt 1 view .LVU434
+  31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 1225              		.loc 1 31 8 is_stmt 0 view .LVU435
+ 1226 0152 40F20E70 		movw	r0, #1806
+ 1227 0156 8242     		cmp	r2, r0
+ 1228 0158 38DC     		bgt	.L81
+  34:Bsp/Src/bsp_sbus_controller.c ****     int32_t temp = (int32_t)(x - in_min) * (out_max - out_min);
+ 1229              		.loc 1 34 5 is_stmt 1 view .LVU436
+  34:Bsp/Src/bsp_sbus_controller.c ****     int32_t temp = (int32_t)(x - in_min) * (out_max - out_min);
+ 1230              		.loc 1 34 13 is_stmt 0 view .LVU437
+ 1231 015a F03A     		subs	r2, r2, #240
+ 1232              	.LVL83:
+  35:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 1233              		.loc 1 35 10 view .LVU438
+ 1234 015c 2648     		ldr	r0, .L94+32
+  34:Bsp/Src/bsp_sbus_controller.c ****     int32_t temp = (int32_t)(x - in_min) * (out_max - out_min);
+ 1235              		.loc 1 34 13 view .LVU439
+ 1236 015e 12B2     		sxth	r2, r2
+ 1237              	.LVL84:
+  34:Bsp/Src/bsp_sbus_controller.c ****     int32_t temp = (int32_t)(x - in_min) * (out_max - out_min);
+ 1238              		.loc 1 34 13 view .LVU440
+ 1239 0160 C2EB0232 		rsb	r2, r2, r2, lsl #12
+ 1240              	.LVL85:
+  35:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 1241              		.loc 1 35 5 is_stmt 1 view .LVU441
+  36:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 1242              		.loc 1 36 5 view .LVU442
+  35:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 1243              		.loc 1 35 10 is_stmt 0 view .LVU443
+ 1244 0164 A0FB0202 		umull	r0, r2, r0, r2
+ 1245              	.LVL86:
+  36:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 1246              		.loc 1 36 12 view .LVU444
+ 1247 0168 42F3CF12 		sbfx	r2, r2, #7, #16
+ 1248              	.LVL87:
+ 1249              	.L72:
+  36:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 1250              		.loc 1 36 12 view .LVU445
+ 1251              	.LBE49:
+ 1252              	.LBE53:
+  97:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 32
+
+
+ 1253              		.loc 1 97 41 view .LVU446
+ 1254 016c 8A80     		strh	r2, [r1, #4]	@ movhi
+  94:Bsp/Src/bsp_sbus_controller.c ****             for (int i = 0; i < SBUS_NUM_CHANNELS; i++) {
+ 1255              		.loc 1 94 53 is_stmt 1 view .LVU447
+ 1256              	.LVL88:
+  94:Bsp/Src/bsp_sbus_controller.c ****             for (int i = 0; i < SBUS_NUM_CHANNELS; i++) {
+ 1257              		.loc 1 94 31 view .LVU448
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1258              		.loc 1 95 17 view .LVU449
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1259              		.loc 1 95 34 is_stmt 0 view .LVU450
+ 1260 016e DA88     		ldrh	r2, [r3, #6]
+ 1261 0170 12B2     		sxth	r2, r2
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1262              		.loc 1 95 20 view .LVU451
+ 1263 0172 EF2A     		cmp	r2, #239
+ 1264 0174 01DC     		bgt	.L73
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1265              		.loc 1 95 56 is_stmt 1 view .LVU452
+  95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
+ 1266              		.loc 1 95 73 is_stmt 0 view .LVU453
+ 1267 0176 F022     		movs	r2, #240
+ 1268 0178 DA80     		strh	r2, [r3, #6]	@ movhi
+ 1269              	.L73:
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1270              		.loc 1 96 17 is_stmt 1 view .LVU454
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1271              		.loc 1 96 34 is_stmt 0 view .LVU455
+ 1272 017a DA88     		ldrh	r2, [r3, #6]
+ 1273 017c 12B2     		sxth	r2, r2
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1274              		.loc 1 96 20 view .LVU456
+ 1275 017e B2F5E26F 		cmp	r2, #1808
+ 1276 0182 02DB     		blt	.L74
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1277              		.loc 1 96 56 is_stmt 1 view .LVU457
+  96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
+ 1278              		.loc 1 96 73 is_stmt 0 view .LVU458
+ 1279 0184 40F20F72 		movw	r2, #1807
+ 1280 0188 DA80     		strh	r2, [r3, #6]	@ movhi
+ 1281              	.L74:
+  97:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 1282              		.loc 1 97 17 is_stmt 1 view .LVU459
+  97:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 1283              		.loc 1 97 66 is_stmt 0 view .LVU460
+ 1284 018a DB88     		ldrh	r3, [r3, #6]
+ 1285 018c 1BB2     		sxth	r3, r3
+ 1286              	.LVL89:
+ 1287              	.LBB54:
+  28:Bsp/Src/bsp_sbus_controller.c **** static inline int16_t map_value(int16_t x, int16_t in_min, int16_t in_max, int16_t out_min, int16_t
+ 1288              		.loc 1 28 23 is_stmt 1 view .LVU461
+ 1289              	.LBB50:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
+ 1290              		.loc 1 30 5 view .LVU462
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
+ 1291              		.loc 1 30 8 is_stmt 0 view .LVU463
+ 1292 018e F02B     		cmp	r3, #240
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 33
+
+
+ 1293 0190 10DD     		ble	.L82
+  31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 1294              		.loc 1 31 5 is_stmt 1 view .LVU464
+  31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 1295              		.loc 1 31 8 is_stmt 0 view .LVU465
+ 1296 0192 40F20E72 		movw	r2, #1806
+ 1297 0196 9342     		cmp	r3, r2
+ 1298 0198 1BDC     		bgt	.L83
+  34:Bsp/Src/bsp_sbus_controller.c ****     int32_t temp = (int32_t)(x - in_min) * (out_max - out_min);
+ 1299              		.loc 1 34 5 is_stmt 1 view .LVU466
+  34:Bsp/Src/bsp_sbus_controller.c ****     int32_t temp = (int32_t)(x - in_min) * (out_max - out_min);
+ 1300              		.loc 1 34 13 is_stmt 0 view .LVU467
+ 1301 019a F03B     		subs	r3, r3, #240
+ 1302              	.LVL90:
+  35:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 1303              		.loc 1 35 10 view .LVU468
+ 1304 019c 164A     		ldr	r2, .L94+32
+  34:Bsp/Src/bsp_sbus_controller.c ****     int32_t temp = (int32_t)(x - in_min) * (out_max - out_min);
+ 1305              		.loc 1 34 13 view .LVU469
+ 1306 019e 1BB2     		sxth	r3, r3
+ 1307              	.LVL91:
+  34:Bsp/Src/bsp_sbus_controller.c ****     int32_t temp = (int32_t)(x - in_min) * (out_max - out_min);
+ 1308              		.loc 1 34 13 view .LVU470
+ 1309 01a0 C3EB0333 		rsb	r3, r3, r3, lsl #12
+ 1310              	.LVL92:
+  35:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 1311              		.loc 1 35 5 is_stmt 1 view .LVU471
+  36:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 1312              		.loc 1 36 5 view .LVU472
+  35:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
+ 1313              		.loc 1 35 10 is_stmt 0 view .LVU473
+ 1314 01a4 A2FB0323 		umull	r2, r3, r2, r3
+ 1315              	.LVL93:
+  36:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 1316              		.loc 1 36 12 view .LVU474
+ 1317 01a8 43F3CF13 		sbfx	r3, r3, #7, #16
+ 1318              	.LVL94:
+ 1319              	.L75:
+  36:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
+ 1320              		.loc 1 36 12 view .LVU475
+ 1321              	.LBE50:
+ 1322              	.LBE54:
+  97:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
+ 1323              		.loc 1 97 41 view .LVU476
+ 1324 01ac CB80     		strh	r3, [r1, #6]	@ movhi
+  94:Bsp/Src/bsp_sbus_controller.c ****             for (int i = 0; i < SBUS_NUM_CHANNELS; i++) {
+ 1325              		.loc 1 94 53 is_stmt 1 view .LVU477
+ 1326              	.LVL95:
+  94:Bsp/Src/bsp_sbus_controller.c ****             for (int i = 0; i < SBUS_NUM_CHANNELS; i++) {
+ 1327              		.loc 1 94 31 view .LVU478
+ 1328 01ae 42E7     		b	.L61
+ 1329              	.LVL96:
+ 1330              	.L80:
+ 1331              	.LBB55:
+ 1332              	.LBB51:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
+ 1333              		.loc 1 30 29 is_stmt 0 view .LVU479
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 34
+
+
+ 1334 01b0 0022     		movs	r2, #0
+ 1335              	.LVL97:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
+ 1336              		.loc 1 30 29 view .LVU480
+ 1337 01b2 DBE7     		b	.L72
+ 1338              	.LVL98:
+ 1339              	.L82:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
+ 1340              		.loc 1 30 29 view .LVU481
+ 1341 01b4 0023     		movs	r3, #0
+ 1342              	.LVL99:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
+ 1343              		.loc 1 30 29 view .LVU482
+ 1344 01b6 F9E7     		b	.L75
+ 1345              	.LVL100:
+ 1346              	.L78:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
+ 1347              		.loc 1 30 29 view .LVU483
+ 1348 01b8 0022     		movs	r2, #0
+ 1349              	.LVL101:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
+ 1350              		.loc 1 30 29 view .LVU484
+ 1351 01ba B7E7     		b	.L69
+ 1352              	.LVL102:
+ 1353              	.L76:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
+ 1354              		.loc 1 30 29 view .LVU485
+ 1355 01bc 0022     		movs	r2, #0
+ 1356              	.LVL103:
+  30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
+ 1357              		.loc 1 30 29 view .LVU486
+ 1358 01be 94E7     		b	.L66
+ 1359              	.LVL104:
+ 1360              	.L79:
+  31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 1361              		.loc 1 31 29 view .LVU487
+ 1362 01c0 40F6FF72 		movw	r2, #4095
+ 1363              	.LVL105:
+  31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 1364              		.loc 1 31 29 view .LVU488
+ 1365 01c4 B2E7     		b	.L69
+ 1366              	.LVL106:
+ 1367              	.L77:
+  31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 1368              		.loc 1 31 29 view .LVU489
+ 1369 01c6 40F6FF72 		movw	r2, #4095
+ 1370              	.LVL107:
+  31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 1371              		.loc 1 31 29 view .LVU490
+ 1372 01ca 8EE7     		b	.L66
+ 1373              	.LVL108:
+ 1374              	.L81:
+  31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 1375              		.loc 1 31 29 view .LVU491
+ 1376 01cc 40F6FF72 		movw	r2, #4095
+ 1377              	.LVL109:
+  31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 35
+
+
+ 1378              		.loc 1 31 29 view .LVU492
+ 1379 01d0 CCE7     		b	.L72
+ 1380              	.LVL110:
+ 1381              	.L83:
+  31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 1382              		.loc 1 31 29 view .LVU493
+ 1383 01d2 40F6FF73 		movw	r3, #4095
+ 1384              	.LVL111:
+  31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
+ 1385              		.loc 1 31 29 view .LVU494
+ 1386 01d6 E9E7     		b	.L75
+ 1387              	.L95:
+ 1388              		.align	2
+ 1389              	.L94:
+ 1390 01d8 00500040 		.word	1073762304
+ 1391 01dc 00000000 		.word	sbus_rx_byte
+ 1392 01e0 00000000 		.word	frame_index
+ 1393 01e4 00000000 		.word	sbus_frame
+ 1394 01e8 00000000 		.word	frame_complete
+ 1395 01ec 00000000 		.word	sbus_last_update
+ 1396 01f0 00000000 		.word	sbus_signal_lost
+ 1397 01f4 00000000 		.word	sbus_channels
+ 1398 01f8 A94AE914 		.word	350833321
+ 1399 01fc 00000000 		.word	sbus_channels_mapped
+ 1400              	.LBE51:
+ 1401              	.LBE55:
+ 1402              	.LBE45:
+ 1403              	.LBE44:
+ 1404              	.LBE43:
+ 1405              	.LBE58:
+ 1406              	.LBE61:
+ 1407              		.cfi_endproc
+ 1408              	.LFE151:
+ 1410              		.section	.bss.sbus_rx_byte,"aw",%nobits
+ 1413              	sbus_rx_byte:
+ 1414 0000 00       		.space	1
+ 1415              		.section	.bss.sbus_frame,"aw",%nobits
+ 1416              		.align	2
+ 1419              	sbus_frame:
+ 1420 0000 00000000 		.space	25
+ 1420      00000000 
+ 1420      00000000 
+ 1420      00000000 
+ 1420      00000000 
+ 1421              		.section	.bss.frame_index,"aw",%nobits
+ 1422              		.align	1
+ 1425              	frame_index:
+ 1426 0000 0000     		.space	2
+ 1427              		.section	.bss.frame_complete,"aw",%nobits
+ 1430              	frame_complete:
+ 1431 0000 00       		.space	1
+ 1432              		.global	sbus_signal_lost
+ 1433              		.section	.data.sbus_signal_lost,"aw"
+ 1436              	sbus_signal_lost:
+ 1437 0000 01       		.byte	1
+ 1438              		.global	sbus_last_update
+ 1439              		.section	.bss.sbus_last_update,"aw",%nobits
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 36
+
+
+ 1440              		.align	2
+ 1443              	sbus_last_update:
+ 1444 0000 00000000 		.space	4
+ 1445              		.global	sbus_channels_mapped
+ 1446              		.section	.data,"aw"
+ 1447              		.align	2
+ 1450              	sbus_channels_mapped:
+ 1451 0000 00000000 		.space	8
+ 1451      00000000 
+ 1452              		.global	sbus_channels
+ 1453              		.align	2
+ 1456              	sbus_channels:
+ 1457 0008 00000000 		.space	8
+ 1457      00000000 
+ 1458              		.text
+ 1459              	.Letext0:
+ 1460              		.file 2 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\machine\\_default_types.h"
+ 1461              		.file 3 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\sys\\_stdint.h"
+ 1462              		.file 4 "Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h723xx.h"
+ 1463              		.file 5 "c:\\msys64\\mingw64\\lib\\gcc\\arm-none-eabi\\12.2.0\\include\\stddef.h"
+ 1464              		.file 6 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
+ 1465              		.file 7 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h"
+ 1466              		.file 8 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h"
+ 1467              		.file 9 "Bsp/Inc/bsp_sbus_controller.h"
+ 1468              		.file 10 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\string.h"
+ 1469              		.file 11 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h"
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 37
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 bsp_sbus_controller.c
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:20     .text.BSP_SBUS_Init:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:27     .text.BSP_SBUS_Init:00000000 BSP_SBUS_Init
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:92     .text.BSP_SBUS_Init:00000038 $d
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1430   .bss.frame_complete:00000000 frame_complete
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1436   .data.sbus_signal_lost:00000000 sbus_signal_lost
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1425   .bss.frame_index:00000000 frame_index
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1443   .bss.sbus_last_update:00000000 sbus_last_update
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1419   .bss.sbus_frame:00000000 sbus_frame
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1456   .data:00000008 sbus_channels
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1450   .data:00000000 sbus_channels_mapped
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:103    .text.BSP_SBUS_IsSignalValid:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:110    .text.BSP_SBUS_IsSignalValid:00000000 BSP_SBUS_IsSignalValid
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:205    .text.BSP_SBUS_IsSignalValid:00000054 $d
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:213    .text.BSP_SBUS_ProcessData:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:220    .text.BSP_SBUS_ProcessData:00000000 BSP_SBUS_ProcessData
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:736    .text.BSP_SBUS_ProcessData:000001bc $d
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:753    .text.BSP_SBUS_GetChannels:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:760    .text.BSP_SBUS_GetChannels:00000000 BSP_SBUS_GetChannels
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:774    .text.BSP_SBUS_GetChannels:00000004 $d
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:779    .text.BSP_SBUS_GetMappedChannels:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:786    .text.BSP_SBUS_GetMappedChannels:00000000 BSP_SBUS_GetMappedChannels
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:800    .text.BSP_SBUS_GetMappedChannels:00000004 $d
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:805    .text.BSP_SBUS_UART_StartReceive:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:812    .text.BSP_SBUS_UART_StartReceive:00000000 BSP_SBUS_UART_StartReceive
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:829    .text.BSP_SBUS_UART_StartReceive:0000000c $d
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1413   .bss.sbus_rx_byte:00000000 sbus_rx_byte
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:835    .text.BSP_SBUS_UART_RxCpltCallback:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:842    .text.BSP_SBUS_UART_RxCpltCallback:00000000 BSP_SBUS_UART_RxCpltCallback
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1390   .text.BSP_SBUS_UART_RxCpltCallback:000001d8 $d
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1414   .bss.sbus_rx_byte:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1416   .bss.sbus_frame:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1422   .bss.frame_index:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1431   .bss.frame_complete:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1440   .bss.sbus_last_update:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1447   .data:00000000 $d
+
+UNDEFINED SYMBOLS
+HAL_GetTick
+HAL_UART_Receive_IT
+huart5

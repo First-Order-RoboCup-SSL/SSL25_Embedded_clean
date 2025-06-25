@@ -1,0 +1,942 @@
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 2
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"bsp_inverse_kinematics.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "Bsp/Src/bsp_inverse_kinematics.c"
+  19              		.section	.text.BSP_InverseKinematics_Init,"ax",%progbits
+  20              		.align	1
+  21              		.p2align 2,,3
+  22              		.global	BSP_InverseKinematics_Init
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	BSP_InverseKinematics_Init:
+  28              	.LFB0:
+   1:Bsp/Src/bsp_inverse_kinematics.c **** #include "bsp_inverse_kinematics.h"
+   2:Bsp/Src/bsp_inverse_kinematics.c **** #include <stdint.h>
+   3:Bsp/Src/bsp_inverse_kinematics.c **** #include <math.h>
+   4:Bsp/Src/bsp_inverse_kinematics.c **** 
+   5:Bsp/Src/bsp_inverse_kinematics.c **** // Define M_PI if not defined
+   6:Bsp/Src/bsp_inverse_kinematics.c **** #ifndef M_PI
+   7:Bsp/Src/bsp_inverse_kinematics.c **** #define M_PI 3.14159265358979323846
+   8:Bsp/Src/bsp_inverse_kinematics.c **** #endif
+   9:Bsp/Src/bsp_inverse_kinematics.c **** 
+  10:Bsp/Src/bsp_inverse_kinematics.c **** #ifndef M_PI_2
+  11:Bsp/Src/bsp_inverse_kinematics.c **** #define M_PI_2 1.57079632679489661923
+  12:Bsp/Src/bsp_inverse_kinematics.c **** #endif
+  13:Bsp/Src/bsp_inverse_kinematics.c **** 
+  14:Bsp/Src/bsp_inverse_kinematics.c **** // Define the global debug structure
+  15:Bsp/Src/bsp_inverse_kinematics.c **** velocity_debug_t velocity_debug = {0};
+  16:Bsp/Src/bsp_inverse_kinematics.c **** 
+  17:Bsp/Src/bsp_inverse_kinematics.c **** void BSP_InverseKinematics_Init(void)
+  18:Bsp/Src/bsp_inverse_kinematics.c **** {
+  29              		.loc 1 18 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		@ link register save eliminated.
+  19:Bsp/Src/bsp_inverse_kinematics.c ****     // Initialize debug structure
+  20:Bsp/Src/bsp_inverse_kinematics.c ****     velocity_debug.update_count = 0;
+  34              		.loc 1 20 5 view .LVU1
+  35              		.loc 1 20 33 is_stmt 0 view .LVU2
+  36 0000 0248     		ldr	r0, .L3
+  37 0002 0021     		movs	r1, #0
+  38              	.LBB2:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s 			page 2
+
+
+  21:Bsp/Src/bsp_inverse_kinematics.c ****     for(int i = 0; i < 4; i++) {
+  22:Bsp/Src/bsp_inverse_kinematics.c ****         velocity_debug.target_wheel_speeds[i] = 0;
+  39              		.loc 1 22 47 view .LVU3
+  40 0004 3022     		movs	r2, #48
+  41              	.LBE2:
+  20:Bsp/Src/bsp_inverse_kinematics.c ****     for(int i = 0; i < 4; i++) {
+  42              		.loc 1 20 33 view .LVU4
+  43 0006 0163     		str	r1, [r0, #48]
+  21:Bsp/Src/bsp_inverse_kinematics.c ****     for(int i = 0; i < 4; i++) {
+  44              		.loc 1 21 5 is_stmt 1 view .LVU5
+  45              	.LBB3:
+  21:Bsp/Src/bsp_inverse_kinematics.c ****     for(int i = 0; i < 4; i++) {
+  46              		.loc 1 21 9 view .LVU6
+  47              	.LVL0:
+  21:Bsp/Src/bsp_inverse_kinematics.c ****     for(int i = 0; i < 4; i++) {
+  48              		.loc 1 21 22 view .LVU7
+  49              		.loc 1 22 47 is_stmt 0 view .LVU8
+  50 0008 FFF7FEBF 		b	memset
+  51              	.LVL1:
+  52              	.L4:
+  53              		.align	2
+  54              	.L3:
+  55 000c 00000000 		.word	velocity_debug
+  56              	.LBE3:
+  57              		.cfi_endproc
+  58              	.LFE0:
+  60              		.section	.text.BSP_InverseKinematics_Calculate,"ax",%progbits
+  61              		.align	1
+  62              		.p2align 2,,3
+  63              		.global	BSP_InverseKinematics_Calculate
+  64              		.syntax unified
+  65              		.thumb
+  66              		.thumb_func
+  68              	BSP_InverseKinematics_Calculate:
+  69              	.LVL2:
+  70              	.LFB1:
+  23:Bsp/Src/bsp_inverse_kinematics.c ****         velocity_debug.target_motor_speeds[i] = 0;
+  24:Bsp/Src/bsp_inverse_kinematics.c ****         velocity_debug.actual_motor_speeds[i] = 0;
+  25:Bsp/Src/bsp_inverse_kinematics.c ****     }
+  26:Bsp/Src/bsp_inverse_kinematics.c **** }
+  27:Bsp/Src/bsp_inverse_kinematics.c **** 
+  28:Bsp/Src/bsp_inverse_kinematics.c **** // Calculate wheel velocities from robot velocities
+  29:Bsp/Src/bsp_inverse_kinematics.c **** void BSP_InverseKinematics_Calculate(float vx, float vy, float omega, float* wheel_velocities)
+  30:Bsp/Src/bsp_inverse_kinematics.c **** {
+  71              		.loc 1 30 1 is_stmt 1 view -0
+  72              		.cfi_startproc
+  73              		@ args = 0, pretend = 0, frame = 0
+  74              		@ frame_needed = 0, uses_anonymous_args = 0
+  75              		@ link register save eliminated.
+  31:Bsp/Src/bsp_inverse_kinematics.c ****     // Store wheel angles for easier access
+  32:Bsp/Src/bsp_inverse_kinematics.c ****     float wheel_angles[4] = {
+  76              		.loc 1 32 5 view .LVU10
+  33:Bsp/Src/bsp_inverse_kinematics.c ****         WHEEL1_ANGLE,
+  34:Bsp/Src/bsp_inverse_kinematics.c ****         WHEEL2_ANGLE,
+  35:Bsp/Src/bsp_inverse_kinematics.c ****         WHEEL3_ANGLE,
+  36:Bsp/Src/bsp_inverse_kinematics.c ****         WHEEL4_ANGLE
+  37:Bsp/Src/bsp_inverse_kinematics.c ****     };
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s 			page 3
+
+
+  38:Bsp/Src/bsp_inverse_kinematics.c ****     
+  39:Bsp/Src/bsp_inverse_kinematics.c ****     // Calculate wheel velocities using inverse kinematics
+  40:Bsp/Src/bsp_inverse_kinematics.c ****     for(int i = 0; i < 4; i++) {
+  77              		.loc 1 40 5 view .LVU11
+  78              	.LBB4:
+  79              		.loc 1 40 9 view .LVU12
+  80              		.loc 1 40 22 view .LVU13
+  81              	.LBB5:
+  41:Bsp/Src/bsp_inverse_kinematics.c ****         float theta = wheel_angles[i];
+  82              		.loc 1 41 9 view .LVU14
+  42:Bsp/Src/bsp_inverse_kinematics.c ****         // Project robot velocity onto wheel direction and add rotational component
+  43:Bsp/Src/bsp_inverse_kinematics.c ****         // Add negative signs to reverse forward/backward and left/right directions
+  44:Bsp/Src/bsp_inverse_kinematics.c ****         wheel_velocities[i] = vy * sinf(theta) + 
+  83              		.loc 1 44 9 view .LVU15
+  45:Bsp/Src/bsp_inverse_kinematics.c ****                              -vx * cosf(theta) + 
+  84              		.loc 1 45 34 is_stmt 0 view .LVU16
+  85 0000 9FED507A 		vldr.32	s14, .L21
+  86 0004 DFED507A 		vldr.32	s15, .L21+4
+  87 0008 20EE077A 		vmul.f32	s14, s0, s14
+  88 000c 9FED4F6A 		vldr.32	s12, .L21+8
+  89 0010 60EE277A 		vmul.f32	s15, s0, s15
+  44:Bsp/Src/bsp_inverse_kinematics.c ****                              -vx * cosf(theta) + 
+  90              		.loc 1 44 48 view .LVU17
+  91 0014 DFED4E5A 		vldr.32	s11, .L21+12
+  92              		.loc 1 45 34 view .LVU18
+  93 0018 20EE460A 		vnmul.f32	s0, s0, s12
+  94              	.LVL3:
+  44:Bsp/Src/bsp_inverse_kinematics.c ****                              -vx * cosf(theta) + 
+  95              		.loc 1 44 48 view .LVU19
+  96 001c DFED4D6A 		vldr.32	s13, .L21+16
+  97 0020 A0EEA57A 		vfma.f32	s14, s1, s11
+  98 0024 9FED4C6A 		vldr.32	s12, .L21+20
+  99 0028 F0EE675A 		vmov.f32	s11, s15
+  46:Bsp/Src/bsp_inverse_kinematics.c ****                              omega * ROBOT_RADIUS;
+  47:Bsp/Src/bsp_inverse_kinematics.c ****         
+  48:Bsp/Src/bsp_inverse_kinematics.c ****         // Convert linear velocity to angular velocity (rad/s)
+  49:Bsp/Src/bsp_inverse_kinematics.c ****         wheel_velocities[i] /= WHEEL_RADIUS;
+  50:Bsp/Src/bsp_inverse_kinematics.c ****         
+  51:Bsp/Src/bsp_inverse_kinematics.c ****         // Store target wheel speeds for debugging
+  52:Bsp/Src/bsp_inverse_kinematics.c ****         velocity_debug.target_wheel_speeds[i] = wheel_velocities[i];
+ 100              		.loc 1 52 47 view .LVU20
+ 101 002c 4B4B     		ldr	r3, .L21+24
+ 102 002e D0EEA67A 		vfnms.f32	s15, s1, s13
+ 103              	.LBE5:
+ 104              	.LBE4:
+  53:Bsp/Src/bsp_inverse_kinematics.c ****     }
+  54:Bsp/Src/bsp_inverse_kinematics.c ****     
+  55:Bsp/Src/bsp_inverse_kinematics.c ****     // Find maximum wheel speed for normalization
+  56:Bsp/Src/bsp_inverse_kinematics.c ****     float max_speed = 0;
+  57:Bsp/Src/bsp_inverse_kinematics.c ****     for(int i = 0; i < 4; i++) {
+  58:Bsp/Src/bsp_inverse_kinematics.c ****         float abs_speed = fabsf(wheel_velocities[i]);
+  59:Bsp/Src/bsp_inverse_kinematics.c ****         if(abs_speed > max_speed) max_speed = abs_speed;
+  60:Bsp/Src/bsp_inverse_kinematics.c ****     }
+  61:Bsp/Src/bsp_inverse_kinematics.c ****     
+  62:Bsp/Src/bsp_inverse_kinematics.c ****     // Normalize wheel speeds if they exceed the maximum
+  63:Bsp/Src/bsp_inverse_kinematics.c ****     if(max_speed > MAX_WHEEL_SPEED) {
+ 105              		.loc 1 63 7 view .LVU21
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s 			page 4
+
+
+ 106 0032 DFED4B3A 		vldr.32	s7, .L21+28
+ 107              	.LBB11:
+ 108              	.LBB6:
+  44:Bsp/Src/bsp_inverse_kinematics.c ****                              -vx * cosf(theta) + 
+ 109              		.loc 1 44 48 view .LVU22
+ 110 0036 A0EE860A 		vfma.f32	s0, s1, s12
+  49:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 111              		.loc 1 49 29 view .LVU23
+ 112 003a 9FED4A6A 		vldr.32	s12, .L21+32
+  44:Bsp/Src/bsp_inverse_kinematics.c ****                              -vx * cosf(theta) + 
+ 113              		.loc 1 44 48 view .LVU24
+ 114 003e E0EEA65A 		vfma.f32	s11, s1, s13
+  45:Bsp/Src/bsp_inverse_kinematics.c ****                              omega * ROBOT_RADIUS;
+ 115              		.loc 1 45 48 view .LVU25
+ 116 0042 DFED496A 		vldr.32	s13, .L21+36
+ 117 0046 A1EE267A 		vfma.f32	s14, s2, s13
+  49:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 118              		.loc 1 49 9 is_stmt 1 view .LVU26
+  45:Bsp/Src/bsp_inverse_kinematics.c ****                              omega * ROBOT_RADIUS;
+ 119              		.loc 1 45 48 is_stmt 0 view .LVU27
+ 120 004a E1EE267A 		vfma.f32	s15, s2, s13
+ 121 004e A1EE260A 		vfma.f32	s0, s2, s13
+ 122 0052 E1EE265A 		vfma.f32	s11, s2, s13
+  49:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 123              		.loc 1 49 29 view .LVU28
+ 124 0056 C7EE064A 		vdiv.f32	s9, s14, s12
+ 125 005a 85EE865A 		vdiv.f32	s10, s11, s12
+ 126 005e 87EE867A 		vdiv.f32	s14, s15, s12
+ 127 0062 C0EE066A 		vdiv.f32	s13, s0, s12
+ 128 0066 C0ED004A 		vstr.32	s9, [r0]
+  52:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 129              		.loc 1 52 9 is_stmt 1 view .LVU29
+  52:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 130              		.loc 1 52 47 is_stmt 0 view .LVU30
+ 131 006a C3ED004A 		vstr.32	s9, [r3]
+ 132              	.LBE6:
+  40:Bsp/Src/bsp_inverse_kinematics.c ****         float theta = wheel_angles[i];
+ 133              		.loc 1 40 28 is_stmt 1 view .LVU31
+ 134              	.LVL4:
+  40:Bsp/Src/bsp_inverse_kinematics.c ****         float theta = wheel_angles[i];
+ 135              		.loc 1 40 22 view .LVU32
+ 136              	.LBB7:
+  41:Bsp/Src/bsp_inverse_kinematics.c ****         // Project robot velocity onto wheel direction and add rotational component
+ 137              		.loc 1 41 9 view .LVU33
+  44:Bsp/Src/bsp_inverse_kinematics.c ****                              -vx * cosf(theta) + 
+ 138              		.loc 1 44 9 view .LVU34
+  49:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 139              		.loc 1 49 9 view .LVU35
+  52:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 140              		.loc 1 52 9 view .LVU36
+  49:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 141              		.loc 1 49 29 is_stmt 0 view .LVU37
+ 142 006e 80ED015A 		vstr.32	s10, [r0, #4]
+  52:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 143              		.loc 1 52 47 view .LVU38
+ 144 0072 83ED015A 		vstr.32	s10, [r3, #4]
+ 145              	.LBE7:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s 			page 5
+
+
+  40:Bsp/Src/bsp_inverse_kinematics.c ****         float theta = wheel_angles[i];
+ 146              		.loc 1 40 28 is_stmt 1 view .LVU39
+ 147              	.LVL5:
+  40:Bsp/Src/bsp_inverse_kinematics.c ****         float theta = wheel_angles[i];
+ 148              		.loc 1 40 22 view .LVU40
+ 149              	.LBB8:
+  41:Bsp/Src/bsp_inverse_kinematics.c ****         // Project robot velocity onto wheel direction and add rotational component
+ 150              		.loc 1 41 9 view .LVU41
+  44:Bsp/Src/bsp_inverse_kinematics.c ****                              -vx * cosf(theta) + 
+ 151              		.loc 1 44 9 view .LVU42
+  49:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 152              		.loc 1 49 9 view .LVU43
+  52:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 153              		.loc 1 52 9 view .LVU44
+  49:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 154              		.loc 1 49 29 is_stmt 0 view .LVU45
+ 155 0076 80ED027A 		vstr.32	s14, [r0, #8]
+  52:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 156              		.loc 1 52 47 view .LVU46
+ 157 007a 83ED027A 		vstr.32	s14, [r3, #8]
+ 158              	.LBE8:
+  40:Bsp/Src/bsp_inverse_kinematics.c ****         float theta = wheel_angles[i];
+ 159              		.loc 1 40 28 is_stmt 1 view .LVU47
+ 160              	.LVL6:
+  40:Bsp/Src/bsp_inverse_kinematics.c ****         float theta = wheel_angles[i];
+ 161              		.loc 1 40 22 view .LVU48
+ 162              	.LBB9:
+  41:Bsp/Src/bsp_inverse_kinematics.c ****         // Project robot velocity onto wheel direction and add rotational component
+ 163              		.loc 1 41 9 view .LVU49
+  44:Bsp/Src/bsp_inverse_kinematics.c ****                              -vx * cosf(theta) + 
+ 164              		.loc 1 44 9 view .LVU50
+  49:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 165              		.loc 1 49 9 view .LVU51
+  49:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 166              		.loc 1 49 29 is_stmt 0 view .LVU52
+ 167 007e C0ED036A 		vstr.32	s13, [r0, #12]
+  52:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 168              		.loc 1 52 9 is_stmt 1 view .LVU53
+ 169              	.LBE9:
+ 170              	.LBE11:
+ 171              	.LBB12:
+ 172              	.LBB13:
+  58:Bsp/Src/bsp_inverse_kinematics.c ****         if(abs_speed > max_speed) max_speed = abs_speed;
+ 173              		.loc 1 58 15 is_stmt 0 view .LVU54
+ 174 0082 B0EEE66A 		vabs.f32	s12, s13
+ 175              	.LBE13:
+ 176              	.LBE12:
+ 177              	.LBB18:
+ 178              	.LBB10:
+  52:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 179              		.loc 1 52 47 view .LVU55
+ 180 0086 C3ED036A 		vstr.32	s13, [r3, #12]
+ 181              	.LBE10:
+  40:Bsp/Src/bsp_inverse_kinematics.c ****         float theta = wheel_angles[i];
+ 182              		.loc 1 40 28 is_stmt 1 view .LVU56
+ 183              	.LVL7:
+  40:Bsp/Src/bsp_inverse_kinematics.c ****         float theta = wheel_angles[i];
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s 			page 6
+
+
+ 184              		.loc 1 40 22 view .LVU57
+  40:Bsp/Src/bsp_inverse_kinematics.c ****         float theta = wheel_angles[i];
+ 185              		.loc 1 40 22 is_stmt 0 view .LVU58
+ 186              	.LBE18:
+ 187              	.LBB19:
+ 188              	.LBB14:
+  58:Bsp/Src/bsp_inverse_kinematics.c ****         if(abs_speed > max_speed) max_speed = abs_speed;
+ 189              		.loc 1 58 9 is_stmt 1 view .LVU59
+  58:Bsp/Src/bsp_inverse_kinematics.c ****         if(abs_speed > max_speed) max_speed = abs_speed;
+ 190              		.loc 1 58 49 is_stmt 0 view .LVU60
+ 191 008a 90ED007A 		vldr.32	s14, [r0]
+ 192 008e 90ED015A 		vldr.32	s10, [r0, #4]
+  58:Bsp/Src/bsp_inverse_kinematics.c ****         if(abs_speed > max_speed) max_speed = abs_speed;
+ 193              		.loc 1 58 15 view .LVU61
+ 194 0092 F0EEC77A 		vabs.f32	s15, s14
+ 195              	.LVL8:
+  59:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 196              		.loc 1 59 9 is_stmt 1 view .LVU62
+  58:Bsp/Src/bsp_inverse_kinematics.c ****         if(abs_speed > max_speed) max_speed = abs_speed;
+ 197              		.loc 1 58 49 is_stmt 0 view .LVU63
+ 198 0096 D0ED025A 		vldr.32	s11, [r0, #8]
+  58:Bsp/Src/bsp_inverse_kinematics.c ****         if(abs_speed > max_speed) max_speed = abs_speed;
+ 199              		.loc 1 58 15 view .LVU64
+ 200 009a B0EEC54A 		vabs.f32	s8, s10
+ 201 009e F0EEE54A 		vabs.f32	s9, s11
+  59:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 202              		.loc 1 59 11 view .LVU65
+ 203 00a2 F5EEC07A 		vcmpe.f32	s15, #0
+ 204 00a6 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 205              	.LBE14:
+ 206              	.LBE19:
+  56:Bsp/Src/bsp_inverse_kinematics.c ****     for(int i = 0; i < 4; i++) {
+ 207              		.loc 1 56 11 view .LVU66
+ 208 00aa D8BF     		it	le
+ 209 00ac DFED2F7A 		vldrle.32	s15, .L21+40
+ 210              	.LVL9:
+ 211              	.LBB20:
+  57:Bsp/Src/bsp_inverse_kinematics.c ****         float abs_speed = fabsf(wheel_velocities[i]);
+ 212              		.loc 1 57 28 is_stmt 1 view .LVU67
+  57:Bsp/Src/bsp_inverse_kinematics.c ****         float abs_speed = fabsf(wheel_velocities[i]);
+ 213              		.loc 1 57 22 view .LVU68
+ 214              	.LBB15:
+  58:Bsp/Src/bsp_inverse_kinematics.c ****         if(abs_speed > max_speed) max_speed = abs_speed;
+ 215              		.loc 1 58 9 view .LVU69
+  59:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 216              		.loc 1 59 9 view .LVU70
+  58:Bsp/Src/bsp_inverse_kinematics.c ****         if(abs_speed > max_speed) max_speed = abs_speed;
+ 217              		.loc 1 58 15 is_stmt 0 view .LVU71
+ 218 00b0 F4EE447A 		vcmp.f32	s15, s8
+ 219 00b4 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 220 00b8 48BF     		it	mi
+ 221 00ba F0EE447A 		vmovmi.f32	s15, s8
+ 222              	.LVL10:
+  58:Bsp/Src/bsp_inverse_kinematics.c ****         if(abs_speed > max_speed) max_speed = abs_speed;
+ 223              		.loc 1 58 15 view .LVU72
+ 224              	.LBE15:
+  57:Bsp/Src/bsp_inverse_kinematics.c ****         float abs_speed = fabsf(wheel_velocities[i]);
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s 			page 7
+
+
+ 225              		.loc 1 57 28 is_stmt 1 view .LVU73
+  57:Bsp/Src/bsp_inverse_kinematics.c ****         float abs_speed = fabsf(wheel_velocities[i]);
+ 226              		.loc 1 57 22 view .LVU74
+ 227              	.LBB16:
+  58:Bsp/Src/bsp_inverse_kinematics.c ****         if(abs_speed > max_speed) max_speed = abs_speed;
+ 228              		.loc 1 58 9 view .LVU75
+  59:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 229              		.loc 1 59 9 view .LVU76
+  58:Bsp/Src/bsp_inverse_kinematics.c ****         if(abs_speed > max_speed) max_speed = abs_speed;
+ 230              		.loc 1 58 15 is_stmt 0 view .LVU77
+ 231 00be F4EE647A 		vcmp.f32	s15, s9
+ 232 00c2 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 233 00c6 48BF     		it	mi
+ 234 00c8 F0EE647A 		vmovmi.f32	s15, s9
+ 235              	.LVL11:
+  58:Bsp/Src/bsp_inverse_kinematics.c ****         if(abs_speed > max_speed) max_speed = abs_speed;
+ 236              		.loc 1 58 15 view .LVU78
+ 237              	.LBE16:
+  57:Bsp/Src/bsp_inverse_kinematics.c ****         float abs_speed = fabsf(wheel_velocities[i]);
+ 238              		.loc 1 57 28 is_stmt 1 view .LVU79
+  57:Bsp/Src/bsp_inverse_kinematics.c ****         float abs_speed = fabsf(wheel_velocities[i]);
+ 239              		.loc 1 57 22 view .LVU80
+ 240              	.LBB17:
+  58:Bsp/Src/bsp_inverse_kinematics.c ****         if(abs_speed > max_speed) max_speed = abs_speed;
+ 241              		.loc 1 58 9 view .LVU81
+  59:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 242              		.loc 1 59 9 view .LVU82
+  58:Bsp/Src/bsp_inverse_kinematics.c ****         if(abs_speed > max_speed) max_speed = abs_speed;
+ 243              		.loc 1 58 15 is_stmt 0 view .LVU83
+ 244 00cc B4EE676A 		vcmp.f32	s12, s15
+ 245 00d0 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 246 00d4 76FE277A 		vselgt.f32	s15, s12, s15
+ 247              	.LVL12:
+  58:Bsp/Src/bsp_inverse_kinematics.c ****         if(abs_speed > max_speed) max_speed = abs_speed;
+ 248              		.loc 1 58 15 view .LVU84
+ 249              	.LBE17:
+  57:Bsp/Src/bsp_inverse_kinematics.c ****         float abs_speed = fabsf(wheel_velocities[i]);
+ 250              		.loc 1 57 28 is_stmt 1 view .LVU85
+  57:Bsp/Src/bsp_inverse_kinematics.c ****         float abs_speed = fabsf(wheel_velocities[i]);
+ 251              		.loc 1 57 22 view .LVU86
+ 252              	.LBE20:
+ 253              		.loc 1 63 5 view .LVU87
+ 254              		.loc 1 63 7 is_stmt 0 view .LVU88
+ 255 00d8 F4EEE37A 		vcmpe.f32	s15, s7
+ 256 00dc F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 257 00e0 13DD     		ble	.L15
+ 258              	.LBB21:
+  64:Bsp/Src/bsp_inverse_kinematics.c ****         float scale = MAX_WHEEL_SPEED / max_speed;
+ 259              		.loc 1 64 9 is_stmt 1 view .LVU89
+ 260              		.loc 1 64 15 is_stmt 0 view .LVU90
+ 261 00e2 83EEA76A 		vdiv.f32	s12, s7, s15
+ 262              	.LVL13:
+  65:Bsp/Src/bsp_inverse_kinematics.c ****         for(int i = 0; i < 4; i++) {
+ 263              		.loc 1 65 9 is_stmt 1 view .LVU91
+ 264              	.LBB22:
+ 265              		.loc 1 65 13 view .LVU92
+ 266              		.loc 1 65 26 view .LVU93
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s 			page 8
+
+
+  66:Bsp/Src/bsp_inverse_kinematics.c ****             wheel_velocities[i] *= scale;
+ 267              		.loc 1 66 13 view .LVU94
+ 268              		.loc 1 66 33 is_stmt 0 view .LVU95
+ 269 00e6 66EE077A 		vmul.f32	s15, s12, s14
+ 270              	.LVL14:
+ 271              		.loc 1 66 33 view .LVU96
+ 272 00ea 26EE055A 		vmul.f32	s10, s12, s10
+ 273 00ee 66EE255A 		vmul.f32	s11, s12, s11
+ 274 00f2 66EE866A 		vmul.f32	s13, s13, s12
+ 275              	.LVL15:
+ 276              		.loc 1 66 33 view .LVU97
+ 277 00f6 C0ED007A 		vstr.32	s15, [r0]
+ 278              	.LVL16:
+  65:Bsp/Src/bsp_inverse_kinematics.c ****         for(int i = 0; i < 4; i++) {
+ 279              		.loc 1 65 32 is_stmt 1 view .LVU98
+  65:Bsp/Src/bsp_inverse_kinematics.c ****         for(int i = 0; i < 4; i++) {
+ 280              		.loc 1 65 26 view .LVU99
+ 281              		.loc 1 66 13 view .LVU100
+ 282 00fa B0EE677A 		vmov.f32	s14, s15
+ 283              	.LVL17:
+ 284              		.loc 1 66 33 is_stmt 0 view .LVU101
+ 285 00fe 80ED015A 		vstr.32	s10, [r0, #4]
+  65:Bsp/Src/bsp_inverse_kinematics.c ****         for(int i = 0; i < 4; i++) {
+ 286              		.loc 1 65 32 is_stmt 1 view .LVU102
+ 287              	.LVL18:
+  65:Bsp/Src/bsp_inverse_kinematics.c ****         for(int i = 0; i < 4; i++) {
+ 288              		.loc 1 65 26 view .LVU103
+ 289              		.loc 1 66 13 view .LVU104
+ 290              		.loc 1 66 33 is_stmt 0 view .LVU105
+ 291 0102 C0ED025A 		vstr.32	s11, [r0, #8]
+  65:Bsp/Src/bsp_inverse_kinematics.c ****         for(int i = 0; i < 4; i++) {
+ 292              		.loc 1 65 32 is_stmt 1 view .LVU106
+ 293              	.LVL19:
+  65:Bsp/Src/bsp_inverse_kinematics.c ****         for(int i = 0; i < 4; i++) {
+ 294              		.loc 1 65 26 view .LVU107
+ 295              		.loc 1 66 13 view .LVU108
+ 296              		.loc 1 66 33 is_stmt 0 view .LVU109
+ 297 0106 C0ED036A 		vstr.32	s13, [r0, #12]
+  65:Bsp/Src/bsp_inverse_kinematics.c ****         for(int i = 0; i < 4; i++) {
+ 298              		.loc 1 65 32 is_stmt 1 view .LVU110
+ 299              	.LVL20:
+  65:Bsp/Src/bsp_inverse_kinematics.c ****         for(int i = 0; i < 4; i++) {
+ 300              		.loc 1 65 26 view .LVU111
+ 301              	.L15:
+  65:Bsp/Src/bsp_inverse_kinematics.c ****         for(int i = 0; i < 4; i++) {
+ 302              		.loc 1 65 26 is_stmt 0 view .LVU112
+ 303              	.LBE22:
+ 304              	.LBE21:
+ 305              	.LBB23:
+  67:Bsp/Src/bsp_inverse_kinematics.c ****         }
+  68:Bsp/Src/bsp_inverse_kinematics.c ****     }
+  69:Bsp/Src/bsp_inverse_kinematics.c ****     
+  70:Bsp/Src/bsp_inverse_kinematics.c ****     // Convert wheel speeds to motor speeds through gear ratio
+  71:Bsp/Src/bsp_inverse_kinematics.c ****     for(int i = 0; i < 4; i++) {
+  72:Bsp/Src/bsp_inverse_kinematics.c ****         velocity_debug.target_motor_speeds[i] = wheel_velocities[i] * GEAR_RATIO;
+ 306              		.loc 1 72 9 is_stmt 1 view .LVU113
+ 307              		.loc 1 72 69 is_stmt 0 view .LVU114
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s 			page 9
+
+
+ 308 010a F1EE007A 		vmov.f32	s15, #4.0e+0
+ 309              	.LBE23:
+  73:Bsp/Src/bsp_inverse_kinematics.c ****     }
+  74:Bsp/Src/bsp_inverse_kinematics.c ****     
+  75:Bsp/Src/bsp_inverse_kinematics.c ****     velocity_debug.update_count++;
+ 310              		.loc 1 75 32 view .LVU115
+ 311 010e 1A6B     		ldr	r2, [r3, #48]
+ 312 0110 0132     		adds	r2, r2, #1
+ 313              	.LBB24:
+  72:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 314              		.loc 1 72 69 view .LVU116
+ 315 0112 27EE277A 		vmul.f32	s14, s14, s15
+  72:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 316              		.loc 1 72 47 view .LVU117
+ 317 0116 83ED047A 		vstr.32	s14, [r3, #16]
+  71:Bsp/Src/bsp_inverse_kinematics.c ****         velocity_debug.target_motor_speeds[i] = wheel_velocities[i] * GEAR_RATIO;
+ 318              		.loc 1 71 28 is_stmt 1 view .LVU118
+ 319              	.LVL21:
+  71:Bsp/Src/bsp_inverse_kinematics.c ****         velocity_debug.target_motor_speeds[i] = wheel_velocities[i] * GEAR_RATIO;
+ 320              		.loc 1 71 22 view .LVU119
+  72:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 321              		.loc 1 72 9 view .LVU120
+  72:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 322              		.loc 1 72 69 is_stmt 0 view .LVU121
+ 323 011a 90ED017A 		vldr.32	s14, [r0, #4]
+ 324 011e 27EE277A 		vmul.f32	s14, s14, s15
+  72:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 325              		.loc 1 72 47 view .LVU122
+ 326 0122 83ED057A 		vstr.32	s14, [r3, #20]
+  71:Bsp/Src/bsp_inverse_kinematics.c ****         velocity_debug.target_motor_speeds[i] = wheel_velocities[i] * GEAR_RATIO;
+ 327              		.loc 1 71 28 is_stmt 1 view .LVU123
+ 328              	.LVL22:
+  71:Bsp/Src/bsp_inverse_kinematics.c ****         velocity_debug.target_motor_speeds[i] = wheel_velocities[i] * GEAR_RATIO;
+ 329              		.loc 1 71 22 view .LVU124
+  72:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 330              		.loc 1 72 9 view .LVU125
+  72:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 331              		.loc 1 72 69 is_stmt 0 view .LVU126
+ 332 0126 90ED027A 		vldr.32	s14, [r0, #8]
+ 333 012a 27EE277A 		vmul.f32	s14, s14, s15
+  72:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 334              		.loc 1 72 47 view .LVU127
+ 335 012e 83ED067A 		vstr.32	s14, [r3, #24]
+  71:Bsp/Src/bsp_inverse_kinematics.c ****         velocity_debug.target_motor_speeds[i] = wheel_velocities[i] * GEAR_RATIO;
+ 336              		.loc 1 71 28 is_stmt 1 view .LVU128
+ 337              	.LVL23:
+  71:Bsp/Src/bsp_inverse_kinematics.c ****         velocity_debug.target_motor_speeds[i] = wheel_velocities[i] * GEAR_RATIO;
+ 338              		.loc 1 71 22 view .LVU129
+  72:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 339              		.loc 1 72 9 view .LVU130
+  72:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 340              		.loc 1 72 69 is_stmt 0 view .LVU131
+ 341 0132 90ED037A 		vldr.32	s14, [r0, #12]
+ 342              	.LBE24:
+ 343              		.loc 1 75 32 view .LVU132
+ 344 0136 1A63     		str	r2, [r3, #48]
+ 345              	.LBB25:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s 			page 10
+
+
+  72:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 346              		.loc 1 72 69 view .LVU133
+ 347 0138 67EE277A 		vmul.f32	s15, s14, s15
+  72:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ 348              		.loc 1 72 47 view .LVU134
+ 349 013c C3ED077A 		vstr.32	s15, [r3, #28]
+  71:Bsp/Src/bsp_inverse_kinematics.c ****         velocity_debug.target_motor_speeds[i] = wheel_velocities[i] * GEAR_RATIO;
+ 350              		.loc 1 71 28 is_stmt 1 view .LVU135
+ 351              	.LVL24:
+  71:Bsp/Src/bsp_inverse_kinematics.c ****         velocity_debug.target_motor_speeds[i] = wheel_velocities[i] * GEAR_RATIO;
+ 352              		.loc 1 71 22 view .LVU136
+ 353              	.LBE25:
+ 354              		.loc 1 75 5 view .LVU137
+  76:Bsp/Src/bsp_inverse_kinematics.c **** }
+ 355              		.loc 1 76 1 is_stmt 0 view .LVU138
+ 356 0140 7047     		bx	lr
+ 357              	.L22:
+ 358 0142 00BF     		.align	2
+ 359              	.L21:
+ 360 0144 A46A573F 		.word	1062693540
+ 361 0148 E17F2E3F 		.word	1060012001
+ 362 014c A56A573F 		.word	1062693541
+ 363 0150 42510A3F 		.word	1057640770
+ 364 0154 F64F3BBF 		.word	-1086631946
+ 365 0158 40510A3F 		.word	1057640768
+ 366 015c 00000000 		.word	velocity_debug
+ 367 0160 00007042 		.word	1114636288
+ 368 0164 62A1D63C 		.word	1020698978
+ 369 0168 C520B03D 		.word	1034952901
+ 370 016c 00000000 		.word	0
+ 371              		.cfi_endproc
+ 372              	.LFE1:
+ 374              		.section	.text.BSP_ConvertVelocityToCurrent,"ax",%progbits
+ 375              		.align	1
+ 376              		.p2align 2,,3
+ 377              		.global	BSP_ConvertVelocityToCurrent
+ 378              		.syntax unified
+ 379              		.thumb
+ 380              		.thumb_func
+ 382              	BSP_ConvertVelocityToCurrent:
+ 383              	.LVL25:
+ 384              	.LFB2:
+  77:Bsp/Src/bsp_inverse_kinematics.c **** 
+  78:Bsp/Src/bsp_inverse_kinematics.c **** // Convert wheel velocities to motor currents for DM3519
+  79:Bsp/Src/bsp_inverse_kinematics.c **** void BSP_ConvertVelocityToCurrent(float* wheel_velocities, int16_t* motor_currents)
+  80:Bsp/Src/bsp_inverse_kinematics.c **** {
+ 385              		.loc 1 80 1 is_stmt 1 view -0
+ 386              		.cfi_startproc
+ 387              		@ args = 0, pretend = 0, frame = 0
+ 388              		@ frame_needed = 0, uses_anonymous_args = 0
+ 389              		@ link register save eliminated.
+  81:Bsp/Src/bsp_inverse_kinematics.c ****     // Simple proportional control for current
+  82:Bsp/Src/bsp_inverse_kinematics.c ****     const float KP = 0.5f; // Proportional gain, adjust as needed
+ 390              		.loc 1 82 5 view .LVU140
+  83:Bsp/Src/bsp_inverse_kinematics.c ****     
+  84:Bsp/Src/bsp_inverse_kinematics.c ****     for(int i = 0; i < 4; i++) {
+ 391              		.loc 1 84 5 view .LVU141
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s 			page 11
+
+
+ 392              	.LBB26:
+ 393              		.loc 1 84 9 view .LVU142
+ 394              		.loc 1 84 22 view .LVU143
+ 395              	.LBB27:
+  85:Bsp/Src/bsp_inverse_kinematics.c ****         // Calculate current based on desired velocity
+  86:Bsp/Src/bsp_inverse_kinematics.c ****         float current = wheel_velocities[i] * KP;
+ 396              		.loc 1 86 9 view .LVU144
+ 397              		.loc 1 86 15 is_stmt 0 view .LVU145
+ 398 0000 B6EE007A 		vmov.f32	s14, #5.0e-1
+ 399 0004 D0ED007A 		vldr.32	s15, [r0]
+  87:Bsp/Src/bsp_inverse_kinematics.c ****         
+  88:Bsp/Src/bsp_inverse_kinematics.c ****         // Limit current to maximum
+  89:Bsp/Src/bsp_inverse_kinematics.c ****         if(current > MAX_CURRENT) current = MAX_CURRENT;
+ 400              		.loc 1 89 11 view .LVU146
+ 401 0008 F0EE086A 		vmov.f32	s13, #3.0e+0
+  86:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 402              		.loc 1 86 15 view .LVU147
+ 403 000c 67EE877A 		vmul.f32	s15, s15, s14
+ 404              	.LVL26:
+ 405              		.loc 1 89 9 is_stmt 1 view .LVU148
+ 406              		.loc 1 89 11 is_stmt 0 view .LVU149
+ 407 0010 F4EEE67A 		vcmpe.f32	s15, s13
+ 408 0014 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 409 0018 4BDC     		bgt	.L28
+  90:Bsp/Src/bsp_inverse_kinematics.c ****         if(current < -MAX_CURRENT) current = -MAX_CURRENT;
+ 410              		.loc 1 90 9 is_stmt 1 view .LVU150
+ 411              		.loc 1 90 11 is_stmt 0 view .LVU151
+ 412 001a B8EE087A 		vmov.f32	s14, #-3.0e+0
+ 413 001e F4EEC77A 		vcmpe.f32	s15, s14
+ 414 0022 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 415 0026 51D5     		bpl	.L36
+ 416 0028 404B     		ldr	r3, .L40
+ 417              	.LVL27:
+ 418              	.L24:
+  91:Bsp/Src/bsp_inverse_kinematics.c ****         
+  92:Bsp/Src/bsp_inverse_kinematics.c ****         // Convert to DM3519 current scale (-16384 to 16384)
+  93:Bsp/Src/bsp_inverse_kinematics.c ****         motor_currents[i] = (int16_t)(current * CURRENT_SCALE / MAX_CURRENT);
+ 419              		.loc 1 93 9 is_stmt 1 view .LVU152
+  86:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 420              		.loc 1 86 15 is_stmt 0 view .LVU153
+ 421 002a B6EE007A 		vmov.f32	s14, #5.0e-1
+ 422 002e D0ED017A 		vldr.32	s15, [r0, #4]
+  89:Bsp/Src/bsp_inverse_kinematics.c ****         if(current < -MAX_CURRENT) current = -MAX_CURRENT;
+ 423              		.loc 1 89 11 view .LVU154
+ 424 0032 F0EE086A 		vmov.f32	s13, #3.0e+0
+ 425              		.loc 1 93 27 view .LVU155
+ 426 0036 0B80     		strh	r3, [r1]	@ movhi
+ 427              	.LBE27:
+  84:Bsp/Src/bsp_inverse_kinematics.c ****         // Calculate current based on desired velocity
+ 428              		.loc 1 84 28 is_stmt 1 view .LVU156
+ 429              	.LVL28:
+  84:Bsp/Src/bsp_inverse_kinematics.c ****         // Calculate current based on desired velocity
+ 430              		.loc 1 84 22 view .LVU157
+ 431              	.LBB28:
+  86:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 432              		.loc 1 86 9 view .LVU158
+  86:Bsp/Src/bsp_inverse_kinematics.c ****         
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s 			page 12
+
+
+ 433              		.loc 1 86 15 is_stmt 0 view .LVU159
+ 434 0038 67EE877A 		vmul.f32	s15, s15, s14
+ 435              	.LVL29:
+  89:Bsp/Src/bsp_inverse_kinematics.c ****         if(current < -MAX_CURRENT) current = -MAX_CURRENT;
+ 436              		.loc 1 89 9 is_stmt 1 view .LVU160
+  89:Bsp/Src/bsp_inverse_kinematics.c ****         if(current < -MAX_CURRENT) current = -MAX_CURRENT;
+ 437              		.loc 1 89 11 is_stmt 0 view .LVU161
+ 438 003c F4EEE67A 		vcmpe.f32	s15, s13
+ 439 0040 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 440 0044 3FDC     		bgt	.L30
+  90:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 441              		.loc 1 90 9 is_stmt 1 view .LVU162
+  90:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 442              		.loc 1 90 11 is_stmt 0 view .LVU163
+ 443 0046 B8EE087A 		vmov.f32	s14, #-3.0e+0
+ 444 004a F4EEC77A 		vcmpe.f32	s15, s14
+ 445 004e F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 446 0052 5FD5     		bpl	.L37
+ 447 0054 354B     		ldr	r3, .L40
+ 448              	.LVL30:
+ 449              	.L25:
+ 450              		.loc 1 93 9 is_stmt 1 view .LVU164
+  86:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 451              		.loc 1 86 15 is_stmt 0 view .LVU165
+ 452 0056 B6EE007A 		vmov.f32	s14, #5.0e-1
+ 453 005a D0ED027A 		vldr.32	s15, [r0, #8]
+  89:Bsp/Src/bsp_inverse_kinematics.c ****         if(current < -MAX_CURRENT) current = -MAX_CURRENT;
+ 454              		.loc 1 89 11 view .LVU166
+ 455 005e F0EE086A 		vmov.f32	s13, #3.0e+0
+ 456              		.loc 1 93 27 view .LVU167
+ 457 0062 4B80     		strh	r3, [r1, #2]	@ movhi
+ 458              	.LBE28:
+  84:Bsp/Src/bsp_inverse_kinematics.c ****         // Calculate current based on desired velocity
+ 459              		.loc 1 84 28 is_stmt 1 view .LVU168
+ 460              	.LVL31:
+  84:Bsp/Src/bsp_inverse_kinematics.c ****         // Calculate current based on desired velocity
+ 461              		.loc 1 84 22 view .LVU169
+ 462              	.LBB29:
+  86:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 463              		.loc 1 86 9 view .LVU170
+  86:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 464              		.loc 1 86 15 is_stmt 0 view .LVU171
+ 465 0064 67EE877A 		vmul.f32	s15, s15, s14
+ 466              	.LVL32:
+  89:Bsp/Src/bsp_inverse_kinematics.c ****         if(current < -MAX_CURRENT) current = -MAX_CURRENT;
+ 467              		.loc 1 89 9 is_stmt 1 view .LVU172
+  89:Bsp/Src/bsp_inverse_kinematics.c ****         if(current < -MAX_CURRENT) current = -MAX_CURRENT;
+ 468              		.loc 1 89 11 is_stmt 0 view .LVU173
+ 469 0068 F4EEE67A 		vcmpe.f32	s15, s13
+ 470 006c F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 471 0070 26DC     		bgt	.L32
+  90:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 472              		.loc 1 90 9 is_stmt 1 view .LVU174
+  90:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 473              		.loc 1 90 11 is_stmt 0 view .LVU175
+ 474 0072 B8EE087A 		vmov.f32	s14, #-3.0e+0
+ 475 0076 F4EEC77A 		vcmpe.f32	s15, s14
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s 			page 13
+
+
+ 476 007a F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 477 007e 3DD5     		bpl	.L38
+ 478 0080 2A4B     		ldr	r3, .L40
+ 479              	.LVL33:
+ 480              	.L26:
+ 481              		.loc 1 93 9 is_stmt 1 view .LVU176
+  86:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 482              		.loc 1 86 15 is_stmt 0 view .LVU177
+ 483 0082 B6EE007A 		vmov.f32	s14, #5.0e-1
+ 484 0086 D0ED037A 		vldr.32	s15, [r0, #12]
+  89:Bsp/Src/bsp_inverse_kinematics.c ****         if(current < -MAX_CURRENT) current = -MAX_CURRENT;
+ 485              		.loc 1 89 11 view .LVU178
+ 486 008a F0EE086A 		vmov.f32	s13, #3.0e+0
+ 487              		.loc 1 93 27 view .LVU179
+ 488 008e 8B80     		strh	r3, [r1, #4]	@ movhi
+ 489              	.LBE29:
+  84:Bsp/Src/bsp_inverse_kinematics.c ****         // Calculate current based on desired velocity
+ 490              		.loc 1 84 28 is_stmt 1 view .LVU180
+ 491              	.LVL34:
+  84:Bsp/Src/bsp_inverse_kinematics.c ****         // Calculate current based on desired velocity
+ 492              		.loc 1 84 22 view .LVU181
+ 493              	.LBB30:
+  86:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 494              		.loc 1 86 9 view .LVU182
+  86:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 495              		.loc 1 86 15 is_stmt 0 view .LVU183
+ 496 0090 67EE877A 		vmul.f32	s15, s15, s14
+ 497              	.LVL35:
+  89:Bsp/Src/bsp_inverse_kinematics.c ****         if(current < -MAX_CURRENT) current = -MAX_CURRENT;
+ 498              		.loc 1 89 9 is_stmt 1 view .LVU184
+  89:Bsp/Src/bsp_inverse_kinematics.c ****         if(current < -MAX_CURRENT) current = -MAX_CURRENT;
+ 499              		.loc 1 89 11 is_stmt 0 view .LVU185
+ 500 0094 F4EEE67A 		vcmpe.f32	s15, s13
+ 501 0098 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 502 009c 0CDC     		bgt	.L34
+  90:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 503              		.loc 1 90 9 is_stmt 1 view .LVU186
+  90:Bsp/Src/bsp_inverse_kinematics.c ****         
+ 504              		.loc 1 90 11 is_stmt 0 view .LVU187
+ 505 009e B8EE087A 		vmov.f32	s14, #-3.0e+0
+ 506 00a2 F4EEC77A 		vcmpe.f32	s15, s14
+ 507 00a6 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 508 00aa 1BD5     		bpl	.L39
+ 509 00ac 1F4B     		ldr	r3, .L40
+ 510              	.LVL36:
+ 511              	.L27:
+ 512              		.loc 1 93 9 is_stmt 1 discriminator 2 view .LVU188
+ 513              		.loc 1 93 27 is_stmt 0 discriminator 2 view .LVU189
+ 514 00ae CB80     		strh	r3, [r1, #6]	@ movhi
+ 515              	.LBE30:
+  84:Bsp/Src/bsp_inverse_kinematics.c ****         // Calculate current based on desired velocity
+ 516              		.loc 1 84 28 is_stmt 1 discriminator 2 view .LVU190
+ 517              	.LVL37:
+  84:Bsp/Src/bsp_inverse_kinematics.c ****         // Calculate current based on desired velocity
+ 518              		.loc 1 84 22 discriminator 2 view .LVU191
+ 519              	.LBE26:
+  94:Bsp/Src/bsp_inverse_kinematics.c ****     }
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s 			page 14
+
+
+  95:Bsp/Src/bsp_inverse_kinematics.c **** } ...
+ 520              		.loc 1 95 1 is_stmt 0 discriminator 2 view .LVU192
+ 521 00b0 7047     		bx	lr
+ 522              	.LVL38:
+ 523              	.L28:
+ 524              	.LBB33:
+ 525              	.LBB31:
+  89:Bsp/Src/bsp_inverse_kinematics.c ****         if(current > MAX_CURRENT) current = MAX_CURRENT;
+ 526              		.loc 1 89 11 view .LVU193
+ 527 00b2 4FF48043 		mov	r3, #16384
+ 528 00b6 B8E7     		b	.L24
+ 529              	.LVL39:
+ 530              	.L34:
+  89:Bsp/Src/bsp_inverse_kinematics.c ****         if(current > MAX_CURRENT) current = MAX_CURRENT;
+ 531              		.loc 1 89 11 view .LVU194
+ 532 00b8 4FF48043 		mov	r3, #16384
+ 533              	.LVL40:
+  93:Bsp/Src/bsp_inverse_kinematics.c ****         motor_currents[i] = (int16_t)(current * CURRENT_SCALE / MAX_CURRENT);
+ 534              		.loc 1 93 9 is_stmt 1 view .LVU195
+  93:Bsp/Src/bsp_inverse_kinematics.c ****         motor_currents[i] = (int16_t)(current * CURRENT_SCALE / MAX_CURRENT);
+ 535              		.loc 1 93 27 is_stmt 0 view .LVU196
+ 536 00bc CB80     		strh	r3, [r1, #6]	@ movhi
+ 537              	.LBE31:
+  84:Bsp/Src/bsp_inverse_kinematics.c ****     for(int i = 0; i < 4; i++) {
+ 538              		.loc 1 84 28 is_stmt 1 view .LVU197
+ 539              	.LVL41:
+  84:Bsp/Src/bsp_inverse_kinematics.c ****     for(int i = 0; i < 4; i++) {
+ 540              		.loc 1 84 22 view .LVU198
+ 541              	.LBE33:
+ 542              		.loc 1 95 1 is_stmt 0 view .LVU199
+ 543 00be 7047     		bx	lr
+ 544              	.LVL42:
+ 545              	.L32:
+ 546              	.LBB34:
+ 547              	.LBB32:
+  89:Bsp/Src/bsp_inverse_kinematics.c ****         if(current > MAX_CURRENT) current = MAX_CURRENT;
+ 548              		.loc 1 89 11 view .LVU200
+ 549 00c0 4FF48043 		mov	r3, #16384
+ 550 00c4 DDE7     		b	.L26
+ 551              	.LVL43:
+ 552              	.L30:
+  89:Bsp/Src/bsp_inverse_kinematics.c ****         if(current > MAX_CURRENT) current = MAX_CURRENT;
+ 553              		.loc 1 89 11 view .LVU201
+ 554 00c6 4FF48043 		mov	r3, #16384
+ 555 00ca C4E7     		b	.L25
+ 556              	.LVL44:
+ 557              	.L36:
+  93:Bsp/Src/bsp_inverse_kinematics.c ****         motor_currents[i] = (int16_t)(current * CURRENT_SCALE / MAX_CURRENT);
+ 558              		.loc 1 93 47 view .LVU202
+ 559 00cc 9FED187A 		vldr.32	s14, .L40+4
+ 560 00d0 67EE877A 		vmul.f32	s15, s15, s14
+ 561              	.LVL45:
+  93:Bsp/Src/bsp_inverse_kinematics.c ****         motor_currents[i] = (int16_t)(current * CURRENT_SCALE / MAX_CURRENT);
+ 562              		.loc 1 93 63 view .LVU203
+ 563 00d4 87EEA67A 		vdiv.f32	s14, s15, s13
+  93:Bsp/Src/bsp_inverse_kinematics.c ****         motor_currents[i] = (int16_t)(current * CURRENT_SCALE / MAX_CURRENT);
+ 564              		.loc 1 93 29 view .LVU204
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s 			page 15
+
+
+ 565 00d8 FDEEC77A 		vcvt.s32.f32	s15, s14
+ 566 00dc 17EE903A 		vmov	r3, s15	@ int
+ 567 00e0 1BB2     		sxth	r3, r3
+ 568 00e2 A2E7     		b	.L24
+ 569              	.LVL46:
+ 570              	.L39:
+  93:Bsp/Src/bsp_inverse_kinematics.c ****         motor_currents[i] = (int16_t)(current * CURRENT_SCALE / MAX_CURRENT);
+ 571              		.loc 1 93 47 view .LVU205
+ 572 00e4 9FED127A 		vldr.32	s14, .L40+4
+ 573 00e8 67EE877A 		vmul.f32	s15, s15, s14
+ 574              	.LVL47:
+  93:Bsp/Src/bsp_inverse_kinematics.c ****         motor_currents[i] = (int16_t)(current * CURRENT_SCALE / MAX_CURRENT);
+ 575              		.loc 1 93 63 view .LVU206
+ 576 00ec 87EEA67A 		vdiv.f32	s14, s15, s13
+  93:Bsp/Src/bsp_inverse_kinematics.c ****         motor_currents[i] = (int16_t)(current * CURRENT_SCALE / MAX_CURRENT);
+ 577              		.loc 1 93 29 view .LVU207
+ 578 00f0 FDEEC77A 		vcvt.s32.f32	s15, s14
+ 579 00f4 17EE903A 		vmov	r3, s15	@ int
+ 580 00f8 1BB2     		sxth	r3, r3
+ 581 00fa D8E7     		b	.L27
+ 582              	.LVL48:
+ 583              	.L38:
+  93:Bsp/Src/bsp_inverse_kinematics.c ****         motor_currents[i] = (int16_t)(current * CURRENT_SCALE / MAX_CURRENT);
+ 584              		.loc 1 93 47 view .LVU208
+ 585 00fc 9FED0C7A 		vldr.32	s14, .L40+4
+ 586 0100 67EE877A 		vmul.f32	s15, s15, s14
+ 587              	.LVL49:
+  93:Bsp/Src/bsp_inverse_kinematics.c ****         motor_currents[i] = (int16_t)(current * CURRENT_SCALE / MAX_CURRENT);
+ 588              		.loc 1 93 63 view .LVU209
+ 589 0104 87EEA67A 		vdiv.f32	s14, s15, s13
+  93:Bsp/Src/bsp_inverse_kinematics.c ****         motor_currents[i] = (int16_t)(current * CURRENT_SCALE / MAX_CURRENT);
+ 590              		.loc 1 93 29 view .LVU210
+ 591 0108 FDEEC77A 		vcvt.s32.f32	s15, s14
+ 592 010c 17EE903A 		vmov	r3, s15	@ int
+ 593 0110 1BB2     		sxth	r3, r3
+ 594 0112 B6E7     		b	.L26
+ 595              	.LVL50:
+ 596              	.L37:
+  93:Bsp/Src/bsp_inverse_kinematics.c ****         motor_currents[i] = (int16_t)(current * CURRENT_SCALE / MAX_CURRENT);
+ 597              		.loc 1 93 47 view .LVU211
+ 598 0114 9FED067A 		vldr.32	s14, .L40+4
+ 599 0118 67EE877A 		vmul.f32	s15, s15, s14
+ 600              	.LVL51:
+  93:Bsp/Src/bsp_inverse_kinematics.c ****         motor_currents[i] = (int16_t)(current * CURRENT_SCALE / MAX_CURRENT);
+ 601              		.loc 1 93 63 view .LVU212
+ 602 011c 87EEA67A 		vdiv.f32	s14, s15, s13
+  93:Bsp/Src/bsp_inverse_kinematics.c ****         motor_currents[i] = (int16_t)(current * CURRENT_SCALE / MAX_CURRENT);
+ 603              		.loc 1 93 29 view .LVU213
+ 604 0120 FDEEC77A 		vcvt.s32.f32	s15, s14
+ 605 0124 17EE903A 		vmov	r3, s15	@ int
+ 606 0128 1BB2     		sxth	r3, r3
+ 607 012a 94E7     		b	.L25
+ 608              	.L41:
+ 609              		.align	2
+ 610              	.L40:
+ 611 012c 00C0FFFF 		.word	-16384
+ 612 0130 00008046 		.word	1182793728
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s 			page 16
+
+
+ 613              	.LBE32:
+ 614              	.LBE34:
+ 615              		.cfi_endproc
+ 616              	.LFE2:
+ 618              		.global	velocity_debug
+ 619              		.section	.bss.velocity_debug,"aw",%nobits
+ 620              		.align	2
+ 623              	velocity_debug:
+ 624 0000 00000000 		.space	52
+ 624      00000000 
+ 624      00000000 
+ 624      00000000 
+ 624      00000000 
+ 625              		.text
+ 626              	.Letext0:
+ 627              		.file 2 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\machine\\_default_types.h"
+ 628              		.file 3 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\sys\\_stdint.h"
+ 629              		.file 4 "Bsp/Inc/bsp_inverse_kinematics.h"
+ 630              		.file 5 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\math.h"
+ 631              		.file 6 "<built-in>"
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s 			page 17
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 bsp_inverse_kinematics.c
+C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s:20     .text.BSP_InverseKinematics_Init:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s:27     .text.BSP_InverseKinematics_Init:00000000 BSP_InverseKinematics_Init
+C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s:55     .text.BSP_InverseKinematics_Init:0000000c $d
+C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s:623    .bss.velocity_debug:00000000 velocity_debug
+C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s:61     .text.BSP_InverseKinematics_Calculate:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s:68     .text.BSP_InverseKinematics_Calculate:00000000 BSP_InverseKinematics_Calculate
+C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s:360    .text.BSP_InverseKinematics_Calculate:00000144 $d
+C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s:375    .text.BSP_ConvertVelocityToCurrent:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s:382    .text.BSP_ConvertVelocityToCurrent:00000000 BSP_ConvertVelocityToCurrent
+C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s:611    .text.BSP_ConvertVelocityToCurrent:0000012c $d
+C:\Users\l1234\AppData\Local\Temp\ccuqlkkb.s:620    .bss.velocity_debug:00000000 $d
+
+UNDEFINED SYMBOLS
+memset

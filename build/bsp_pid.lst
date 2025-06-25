@@ -1,0 +1,865 @@
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 2
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"bsp_pid.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "Bsp/Src/bsp_pid.c"
+  19              		.section	.text.BSP_PID_Init,"ax",%progbits
+  20              		.align	1
+  21              		.p2align 2,,3
+  22              		.global	BSP_PID_Init
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	BSP_PID_Init:
+  28              	.LFB144:
+   1:Bsp/Src/bsp_pid.c **** #include "bsp_pid.h"
+   2:Bsp/Src/bsp_pid.c **** #include "main.h"
+   3:Bsp/Src/bsp_pid.c **** #include <math.h>
+   4:Bsp/Src/bsp_pid.c **** 
+   5:Bsp/Src/bsp_pid.c **** // Global debug parameters - Adjust these in debugger
+   6:Bsp/Src/bsp_pid.c **** volatile deadband_params_t g_deadband_params = {
+   7:Bsp/Src/bsp_pid.c ****     .velocity_deadband = 0.2f,           // 0.2 rad/s - Adjust in debugger
+   8:Bsp/Src/bsp_pid.c ****     .current_deadband = 164.0f           // ~30mA (164 = 30mA * 16384/3000mA) - Adjust in debugger
+   9:Bsp/Src/bsp_pid.c **** };
+  10:Bsp/Src/bsp_pid.c **** 
+  11:Bsp/Src/bsp_pid.c **** // Global PID gains - Adjust these in debugger
+  12:Bsp/Src/bsp_pid.c **** volatile pid_gains_t g_pid_gains = {
+  13:Bsp/Src/bsp_pid.c ****     .kp = 900.0f,  // Proportional gain
+  14:Bsp/Src/bsp_pid.c ****     .ki = 5.0f,    // Integral gain
+  15:Bsp/Src/bsp_pid.c ****     .kd = 3.0f     // Derivative gain
+  16:Bsp/Src/bsp_pid.c **** };
+  17:Bsp/Src/bsp_pid.c **** 
+  18:Bsp/Src/bsp_pid.c **** // Global filter coefficient - Adjust in debugger
+  19:Bsp/Src/bsp_pid.c **** volatile float g_velocity_filter = 0.2f;  // Default low-pass filter coefficient
+  20:Bsp/Src/bsp_pid.c **** 
+  21:Bsp/Src/bsp_pid.c **** // Define PID states for 4 motors
+  22:Bsp/Src/bsp_pid.c **** pid_state_t pid_states[4] = {
+  23:Bsp/Src/bsp_pid.c ****     {0.0f, 0.0f, 0.0f, 0.0f}, // motor1
+  24:Bsp/Src/bsp_pid.c ****     {0.0f, 0.0f, 0.0f, 0.0f}, // motor2
+  25:Bsp/Src/bsp_pid.c ****     {0.0f, 0.0f, 0.0f, 0.0f}, // motor3
+  26:Bsp/Src/bsp_pid.c ****     {0.0f, 0.0f, 0.0f, 0.0f}  // motor4
+  27:Bsp/Src/bsp_pid.c **** };
+  28:Bsp/Src/bsp_pid.c **** 
+  29:Bsp/Src/bsp_pid.c **** void BSP_PID_Init(void)
+  30:Bsp/Src/bsp_pid.c **** {
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s 			page 2
+
+
+  29              		.loc 1 30 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		@ link register save eliminated.
+  31:Bsp/Src/bsp_pid.c ****     // Initialize PID states
+  32:Bsp/Src/bsp_pid.c ****     for(int i = 0; i < 4; i++) {
+  34              		.loc 1 32 5 view .LVU1
+  35              	.LBB10:
+  36              		.loc 1 32 9 view .LVU2
+  37              	.LVL0:
+  38              		.loc 1 32 22 view .LVU3
+  33:Bsp/Src/bsp_pid.c ****         BSP_PID_Reset(i);
+  39              		.loc 1 33 9 view .LVU4
+  40              	.LBB11:
+  41              	.LBI11:
+  34:Bsp/Src/bsp_pid.c ****     }
+  35:Bsp/Src/bsp_pid.c **** }
+  36:Bsp/Src/bsp_pid.c **** 
+  37:Bsp/Src/bsp_pid.c **** void BSP_PID_Reset(uint8_t motor_index)
+  42              		.loc 1 37 6 view .LVU5
+  38:Bsp/Src/bsp_pid.c **** {
+  39:Bsp/Src/bsp_pid.c ****     if(motor_index >= 4) return;
+  43              		.loc 1 39 5 view .LVU6
+  44              	.LBB12:
+  45              	.LBI12:
+  37:Bsp/Src/bsp_pid.c **** {
+  46              		.loc 1 37 6 view .LVU7
+  47              	.LBB13:
+  40:Bsp/Src/bsp_pid.c ****     
+  41:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].error_sum = 0.0f;
+  48              		.loc 1 41 5 view .LVU8
+  49              		.loc 1 41 39 is_stmt 0 view .LVU9
+  50 0000 094B     		ldr	r3, .L3
+  51 0002 0022     		movs	r2, #0
+  42:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_error = 0.0f;
+  43:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_output = 0.0f;
+  44:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].output = 0.0f;
+  52              		.loc 1 44 36 view .LVU10
+  53 0004 DA60     		str	r2, [r3, #12]	@ float
+  41:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_error = 0.0f;
+  54              		.loc 1 41 39 view .LVU11
+  55 0006 1A60     		str	r2, [r3]	@ float
+  42:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_error = 0.0f;
+  56              		.loc 1 42 5 is_stmt 1 view .LVU12
+  57              		.loc 1 44 36 is_stmt 0 view .LVU13
+  58 0008 DA61     		str	r2, [r3, #28]	@ float
+  42:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_error = 0.0f;
+  59              		.loc 1 42 40 view .LVU14
+  60 000a 5A60     		str	r2, [r3, #4]	@ float
+  43:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].output = 0.0f;
+  61              		.loc 1 43 5 is_stmt 1 view .LVU15
+  62              		.loc 1 44 36 is_stmt 0 view .LVU16
+  63 000c DA62     		str	r2, [r3, #44]	@ float
+  43:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].output = 0.0f;
+  64              		.loc 1 43 41 view .LVU17
+  65 000e 9A60     		str	r2, [r3, #8]	@ float
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s 			page 3
+
+
+  66              		.loc 1 44 5 is_stmt 1 view .LVU18
+  67              	.LVL1:
+  68              		.loc 1 44 5 is_stmt 0 view .LVU19
+  69              	.LBE13:
+  70              	.LBE12:
+  71              	.LBE11:
+  32:Bsp/Src/bsp_pid.c ****         BSP_PID_Reset(i);
+  72              		.loc 1 32 28 is_stmt 1 view .LVU20
+  32:Bsp/Src/bsp_pid.c ****         BSP_PID_Reset(i);
+  73              		.loc 1 32 22 view .LVU21
+  33:Bsp/Src/bsp_pid.c ****     }
+  74              		.loc 1 33 9 view .LVU22
+  75              	.LBB20:
+  37:Bsp/Src/bsp_pid.c **** {
+  76              		.loc 1 37 6 view .LVU23
+  39:Bsp/Src/bsp_pid.c ****     
+  77              		.loc 1 39 5 view .LVU24
+  78              	.LBB17:
+  37:Bsp/Src/bsp_pid.c **** {
+  79              		.loc 1 37 6 view .LVU25
+  80              	.LBB14:
+  41:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_error = 0.0f;
+  81              		.loc 1 41 5 view .LVU26
+  41:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_error = 0.0f;
+  82              		.loc 1 41 39 is_stmt 0 view .LVU27
+  83 0010 1A61     		str	r2, [r3, #16]	@ float
+  42:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_output = 0.0f;
+  84              		.loc 1 42 5 is_stmt 1 view .LVU28
+  42:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_output = 0.0f;
+  85              		.loc 1 42 40 is_stmt 0 view .LVU29
+  86 0012 5A61     		str	r2, [r3, #20]	@ float
+  43:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].output = 0.0f;
+  87              		.loc 1 43 5 is_stmt 1 view .LVU30
+  43:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].output = 0.0f;
+  88              		.loc 1 43 41 is_stmt 0 view .LVU31
+  89 0014 9A61     		str	r2, [r3, #24]	@ float
+  90              		.loc 1 44 5 is_stmt 1 view .LVU32
+  91              	.LVL2:
+  92              		.loc 1 44 5 is_stmt 0 view .LVU33
+  93              	.LBE14:
+  94              	.LBE17:
+  95              	.LBE20:
+  32:Bsp/Src/bsp_pid.c ****         BSP_PID_Reset(i);
+  96              		.loc 1 32 28 is_stmt 1 view .LVU34
+  32:Bsp/Src/bsp_pid.c ****         BSP_PID_Reset(i);
+  97              		.loc 1 32 22 view .LVU35
+  33:Bsp/Src/bsp_pid.c ****     }
+  98              		.loc 1 33 9 view .LVU36
+  99              	.LBB21:
+  37:Bsp/Src/bsp_pid.c **** {
+ 100              		.loc 1 37 6 view .LVU37
+  39:Bsp/Src/bsp_pid.c ****     
+ 101              		.loc 1 39 5 view .LVU38
+ 102              	.LBB18:
+  37:Bsp/Src/bsp_pid.c **** {
+ 103              		.loc 1 37 6 view .LVU39
+ 104              	.LBB15:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s 			page 4
+
+
+  41:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_error = 0.0f;
+ 105              		.loc 1 41 5 view .LVU40
+  41:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_error = 0.0f;
+ 106              		.loc 1 41 39 is_stmt 0 view .LVU41
+ 107 0016 1A62     		str	r2, [r3, #32]	@ float
+  42:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_output = 0.0f;
+ 108              		.loc 1 42 5 is_stmt 1 view .LVU42
+  42:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_output = 0.0f;
+ 109              		.loc 1 42 40 is_stmt 0 view .LVU43
+ 110 0018 5A62     		str	r2, [r3, #36]	@ float
+  43:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].output = 0.0f;
+ 111              		.loc 1 43 5 is_stmt 1 view .LVU44
+  43:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].output = 0.0f;
+ 112              		.loc 1 43 41 is_stmt 0 view .LVU45
+ 113 001a 9A62     		str	r2, [r3, #40]	@ float
+ 114              		.loc 1 44 5 is_stmt 1 view .LVU46
+ 115              	.LVL3:
+ 116              		.loc 1 44 5 is_stmt 0 view .LVU47
+ 117              	.LBE15:
+ 118              	.LBE18:
+ 119              	.LBE21:
+  32:Bsp/Src/bsp_pid.c ****         BSP_PID_Reset(i);
+ 120              		.loc 1 32 28 is_stmt 1 view .LVU48
+  32:Bsp/Src/bsp_pid.c ****         BSP_PID_Reset(i);
+ 121              		.loc 1 32 22 view .LVU49
+  33:Bsp/Src/bsp_pid.c ****     }
+ 122              		.loc 1 33 9 view .LVU50
+ 123              	.LBB22:
+  37:Bsp/Src/bsp_pid.c **** {
+ 124              		.loc 1 37 6 view .LVU51
+  39:Bsp/Src/bsp_pid.c ****     
+ 125              		.loc 1 39 5 view .LVU52
+ 126              	.LBB19:
+  37:Bsp/Src/bsp_pid.c **** {
+ 127              		.loc 1 37 6 view .LVU53
+ 128              	.LBB16:
+  41:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_error = 0.0f;
+ 129              		.loc 1 41 5 view .LVU54
+  41:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_error = 0.0f;
+ 130              		.loc 1 41 39 is_stmt 0 view .LVU55
+ 131 001c 1A63     		str	r2, [r3, #48]	@ float
+  42:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_output = 0.0f;
+ 132              		.loc 1 42 5 is_stmt 1 view .LVU56
+  42:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_output = 0.0f;
+ 133              		.loc 1 42 40 is_stmt 0 view .LVU57
+ 134 001e 5A63     		str	r2, [r3, #52]	@ float
+  43:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].output = 0.0f;
+ 135              		.loc 1 43 5 is_stmt 1 view .LVU58
+  43:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].output = 0.0f;
+ 136              		.loc 1 43 41 is_stmt 0 view .LVU59
+ 137 0020 9A63     		str	r2, [r3, #56]	@ float
+ 138              		.loc 1 44 5 is_stmt 1 view .LVU60
+ 139              		.loc 1 44 36 is_stmt 0 view .LVU61
+ 140 0022 DA63     		str	r2, [r3, #60]	@ float
+ 141              	.LVL4:
+ 142              		.loc 1 44 36 view .LVU62
+ 143              	.LBE16:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s 			page 5
+
+
+ 144              	.LBE19:
+ 145              	.LBE22:
+  32:Bsp/Src/bsp_pid.c ****         BSP_PID_Reset(i);
+ 146              		.loc 1 32 28 is_stmt 1 view .LVU63
+  32:Bsp/Src/bsp_pid.c ****         BSP_PID_Reset(i);
+ 147              		.loc 1 32 22 view .LVU64
+ 148              	.LBE10:
+  35:Bsp/Src/bsp_pid.c **** 
+ 149              		.loc 1 35 1 is_stmt 0 view .LVU65
+ 150 0024 7047     		bx	lr
+ 151              	.L4:
+ 152 0026 00BF     		.align	2
+ 153              	.L3:
+ 154 0028 00000000 		.word	pid_states
+ 155              		.cfi_endproc
+ 156              	.LFE144:
+ 158              		.section	.text.BSP_PID_Reset,"ax",%progbits
+ 159              		.align	1
+ 160              		.p2align 2,,3
+ 161              		.global	BSP_PID_Reset
+ 162              		.syntax unified
+ 163              		.thumb
+ 164              		.thumb_func
+ 166              	BSP_PID_Reset:
+ 167              	.LVL5:
+ 168              	.LFB145:
+  38:Bsp/Src/bsp_pid.c ****     if(motor_index >= 4) return;
+ 169              		.loc 1 38 1 is_stmt 1 view -0
+ 170              		.cfi_startproc
+ 171              		@ args = 0, pretend = 0, frame = 0
+ 172              		@ frame_needed = 0, uses_anonymous_args = 0
+ 173              		@ link register save eliminated.
+  39:Bsp/Src/bsp_pid.c ****     
+ 174              		.loc 1 39 5 view .LVU67
+  39:Bsp/Src/bsp_pid.c ****     
+ 175              		.loc 1 39 7 is_stmt 0 view .LVU68
+ 176 0000 0328     		cmp	r0, #3
+ 177 0002 07D8     		bhi	.L5
+ 178              	.LVL6:
+ 179              	.LBB25:
+ 180              	.LBI25:
+  37:Bsp/Src/bsp_pid.c **** {
+ 181              		.loc 1 37 6 is_stmt 1 view .LVU69
+ 182              	.LBB26:
+  41:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_error = 0.0f;
+ 183              		.loc 1 41 5 view .LVU70
+  41:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_error = 0.0f;
+ 184              		.loc 1 41 39 is_stmt 0 view .LVU71
+ 185 0004 044B     		ldr	r3, .L7
+ 186 0006 0022     		movs	r2, #0
+ 187 0008 03EB0013 		add	r3, r3, r0, lsl #4
+ 188 000c 1A60     		str	r2, [r3]	@ float
+  42:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_output = 0.0f;
+ 189              		.loc 1 42 5 is_stmt 1 view .LVU72
+  42:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].last_output = 0.0f;
+ 190              		.loc 1 42 40 is_stmt 0 view .LVU73
+ 191 000e 5A60     		str	r2, [r3, #4]	@ float
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s 			page 6
+
+
+  43:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].output = 0.0f;
+ 192              		.loc 1 43 5 is_stmt 1 view .LVU74
+  43:Bsp/Src/bsp_pid.c ****     pid_states[motor_index].output = 0.0f;
+ 193              		.loc 1 43 41 is_stmt 0 view .LVU75
+ 194 0010 9A60     		str	r2, [r3, #8]	@ float
+ 195              		.loc 1 44 5 is_stmt 1 view .LVU76
+ 196              		.loc 1 44 36 is_stmt 0 view .LVU77
+ 197 0012 DA60     		str	r2, [r3, #12]	@ float
+ 198              	.LVL7:
+ 199              	.L5:
+ 200              		.loc 1 44 36 view .LVU78
+ 201              	.LBE26:
+ 202              	.LBE25:
+  45:Bsp/Src/bsp_pid.c **** }
+ 203              		.loc 1 45 1 view .LVU79
+ 204 0014 7047     		bx	lr
+ 205              	.L8:
+ 206 0016 00BF     		.align	2
+ 207              	.L7:
+ 208 0018 00000000 		.word	pid_states
+ 209              		.cfi_endproc
+ 210              	.LFE145:
+ 212              		.section	.text.BSP_PID_UpdateDeadbandParams,"ax",%progbits
+ 213              		.align	1
+ 214              		.p2align 2,,3
+ 215              		.global	BSP_PID_UpdateDeadbandParams
+ 216              		.syntax unified
+ 217              		.thumb
+ 218              		.thumb_func
+ 220              	BSP_PID_UpdateDeadbandParams:
+ 221              	.LVL8:
+ 222              	.LFB146:
+  46:Bsp/Src/bsp_pid.c **** 
+  47:Bsp/Src/bsp_pid.c **** void BSP_PID_UpdateDeadbandParams(float velocity_db, float current_db)
+  48:Bsp/Src/bsp_pid.c **** {
+ 223              		.loc 1 48 1 is_stmt 1 view -0
+ 224              		.cfi_startproc
+ 225              		@ args = 0, pretend = 0, frame = 0
+ 226              		@ frame_needed = 0, uses_anonymous_args = 0
+ 227              		@ link register save eliminated.
+  49:Bsp/Src/bsp_pid.c ****     g_deadband_params.velocity_deadband = velocity_db;
+ 228              		.loc 1 49 5 view .LVU81
+ 229              		.loc 1 49 41 is_stmt 0 view .LVU82
+ 230 0000 024B     		ldr	r3, .L10
+ 231 0002 83ED000A 		vstr.32	s0, [r3]
+  50:Bsp/Src/bsp_pid.c ****     g_deadband_params.current_deadband = current_db;
+ 232              		.loc 1 50 5 is_stmt 1 view .LVU83
+ 233              		.loc 1 50 40 is_stmt 0 view .LVU84
+ 234 0006 C3ED010A 		vstr.32	s1, [r3, #4]
+  51:Bsp/Src/bsp_pid.c **** }
+ 235              		.loc 1 51 1 view .LVU85
+ 236 000a 7047     		bx	lr
+ 237              	.L11:
+ 238              		.align	2
+ 239              	.L10:
+ 240 000c 00000000 		.word	g_deadband_params
+ 241              		.cfi_endproc
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s 			page 7
+
+
+ 242              	.LFE146:
+ 244              		.section	.text.BSP_PID_UpdateGains,"ax",%progbits
+ 245              		.align	1
+ 246              		.p2align 2,,3
+ 247              		.global	BSP_PID_UpdateGains
+ 248              		.syntax unified
+ 249              		.thumb
+ 250              		.thumb_func
+ 252              	BSP_PID_UpdateGains:
+ 253              	.LVL9:
+ 254              	.LFB147:
+  52:Bsp/Src/bsp_pid.c **** 
+  53:Bsp/Src/bsp_pid.c **** void BSP_PID_UpdateGains(float kp, float ki, float kd)
+  54:Bsp/Src/bsp_pid.c **** {
+ 255              		.loc 1 54 1 is_stmt 1 view -0
+ 256              		.cfi_startproc
+ 257              		@ args = 0, pretend = 0, frame = 0
+ 258              		@ frame_needed = 0, uses_anonymous_args = 0
+ 259              		@ link register save eliminated.
+  55:Bsp/Src/bsp_pid.c ****     g_pid_gains.kp = kp;
+ 260              		.loc 1 55 5 view .LVU87
+ 261              		.loc 1 55 20 is_stmt 0 view .LVU88
+ 262 0000 034B     		ldr	r3, .L13
+ 263 0002 83ED000A 		vstr.32	s0, [r3]
+  56:Bsp/Src/bsp_pid.c ****     g_pid_gains.ki = ki;
+ 264              		.loc 1 56 5 is_stmt 1 view .LVU89
+ 265              		.loc 1 56 20 is_stmt 0 view .LVU90
+ 266 0006 C3ED010A 		vstr.32	s1, [r3, #4]
+  57:Bsp/Src/bsp_pid.c ****     g_pid_gains.kd = kd;
+ 267              		.loc 1 57 5 is_stmt 1 view .LVU91
+ 268              		.loc 1 57 20 is_stmt 0 view .LVU92
+ 269 000a 83ED021A 		vstr.32	s2, [r3, #8]
+  58:Bsp/Src/bsp_pid.c **** }
+ 270              		.loc 1 58 1 view .LVU93
+ 271 000e 7047     		bx	lr
+ 272              	.L14:
+ 273              		.align	2
+ 274              	.L13:
+ 275 0010 00000000 		.word	g_pid_gains
+ 276              		.cfi_endproc
+ 277              	.LFE147:
+ 279              		.section	.text.BSP_PID_Calculate,"ax",%progbits
+ 280              		.align	1
+ 281              		.p2align 2,,3
+ 282              		.global	BSP_PID_Calculate
+ 283              		.syntax unified
+ 284              		.thumb
+ 285              		.thumb_func
+ 287              	BSP_PID_Calculate:
+ 288              	.LVL10:
+ 289              	.LFB148:
+  59:Bsp/Src/bsp_pid.c **** 
+  60:Bsp/Src/bsp_pid.c **** float BSP_PID_Calculate(uint8_t motor_index, float target, float actual)
+  61:Bsp/Src/bsp_pid.c **** {
+ 290              		.loc 1 61 1 is_stmt 1 view -0
+ 291              		.cfi_startproc
+ 292              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s 			page 8
+
+
+ 293              		@ frame_needed = 0, uses_anonymous_args = 0
+ 294              		@ link register save eliminated.
+  62:Bsp/Src/bsp_pid.c ****     if(motor_index >= 4) return 0.0f;
+ 295              		.loc 1 62 5 view .LVU95
+ 296              		.loc 1 62 7 is_stmt 0 view .LVU96
+ 297 0000 0328     		cmp	r0, #3
+ 298 0002 7DD8     		bhi	.L16
+  63:Bsp/Src/bsp_pid.c ****     
+  64:Bsp/Src/bsp_pid.c ****     pid_state_t* state = &pid_states[motor_index];
+ 299              		.loc 1 64 5 is_stmt 1 view .LVU97
+ 300              	.LVL11:
+  65:Bsp/Src/bsp_pid.c ****     float error = target - actual;
+ 301              		.loc 1 65 5 view .LVU98
+ 302              		.loc 1 65 11 is_stmt 0 view .LVU99
+ 303 0004 30EE600A 		vsub.f32	s0, s0, s1
+ 304              	.LVL12:
+  66:Bsp/Src/bsp_pid.c ****     
+  67:Bsp/Src/bsp_pid.c ****     // Apply velocity deadband
+  68:Bsp/Src/bsp_pid.c ****     if (fabsf(error) < g_deadband_params.velocity_deadband) {
+ 305              		.loc 1 68 5 is_stmt 1 view .LVU100
+ 306              		.loc 1 68 41 is_stmt 0 view .LVU101
+ 307 0008 524A     		ldr	r2, .L45
+ 308 000a D2ED007A 		vldr.32	s15, [r2]
+ 309              		.loc 1 68 9 view .LVU102
+ 310 000e B0EEC07A 		vabs.f32	s14, s0
+ 311              		.loc 1 68 8 view .LVU103
+ 312 0012 B4EEE77A 		vcmpe.f32	s14, s15
+ 313 0016 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 314 001a 6AD4     		bmi	.L42
+  69:Bsp/Src/bsp_pid.c ****         error = 0;
+  70:Bsp/Src/bsp_pid.c ****         state->error_sum = 0;  // Reset integral when in deadband
+  71:Bsp/Src/bsp_pid.c ****         state->last_output = 0;
+  72:Bsp/Src/bsp_pid.c ****         state->output = 0;
+  73:Bsp/Src/bsp_pid.c ****         return 0;
+  74:Bsp/Src/bsp_pid.c ****     }
+  75:Bsp/Src/bsp_pid.c ****     
+  76:Bsp/Src/bsp_pid.c ****     // Calculate PID terms
+  77:Bsp/Src/bsp_pid.c ****     float dt = CONTROL_PERIOD_MS / 1000.0f;  // Convert ms to seconds
+ 315              		.loc 1 77 5 is_stmt 1 view .LVU104
+ 316              	.LVL13:
+  78:Bsp/Src/bsp_pid.c ****     
+  79:Bsp/Src/bsp_pid.c ****     // P term
+  80:Bsp/Src/bsp_pid.c ****     float p_term = g_pid_gains.kp * error;
+ 317              		.loc 1 80 5 view .LVU105
+  81:Bsp/Src/bsp_pid.c ****     
+  82:Bsp/Src/bsp_pid.c ****     // I term with anti-windup
+  83:Bsp/Src/bsp_pid.c ****     state->error_sum += error * dt;
+ 318              		.loc 1 83 10 is_stmt 0 view .LVU106
+ 319 001c 4E4B     		ldr	r3, .L45+4
+ 320 001e 4FEA001C 		lsl	ip, r0, #4
+ 321              		.loc 1 83 22 view .LVU107
+ 322 0022 9FED4E6A 		vldr.32	s12, .L45+8
+ 323              		.loc 1 83 10 view .LVU108
+ 324 0026 03EB0010 		add	r0, r3, r0, lsl #4
+ 325              	.LVL14:
+  84:Bsp/Src/bsp_pid.c ****     if (state->error_sum > PID_INTEGRAL_MAX) state->error_sum = PID_INTEGRAL_MAX;
+ 326              		.loc 1 84 8 view .LVU109
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s 			page 9
+
+
+ 327 002a DFED4D6A 		vldr.32	s13, .L45+12
+  83:Bsp/Src/bsp_pid.c ****     if (state->error_sum > PID_INTEGRAL_MAX) state->error_sum = PID_INTEGRAL_MAX;
+ 328              		.loc 1 83 22 view .LVU110
+ 329 002e 90ED007A 		vldr.32	s14, [r0]
+ 330 0032 A0EE067A 		vfma.f32	s14, s0, s12
+  61:Bsp/Src/bsp_pid.c ****     if(motor_index >= 4) return 0.0f;
+ 331              		.loc 1 61 1 view .LVU111
+ 332 0036 10B4     		push	{r4}
+ 333              	.LCFI0:
+ 334              		.cfi_def_cfa_offset 4
+ 335              		.cfi_offset 4, -4
+  80:Bsp/Src/bsp_pid.c ****     
+ 336              		.loc 1 80 31 view .LVU112
+ 337 0038 4A4C     		ldr	r4, .L45+16
+ 338              		.loc 1 84 8 view .LVU113
+ 339 003a B4EEE67A 		vcmpe.f32	s14, s13
+  80:Bsp/Src/bsp_pid.c ****     
+ 340              		.loc 1 80 31 view .LVU114
+ 341 003e D4ED007A 		vldr.32	s15, [r4]
+  80:Bsp/Src/bsp_pid.c ****     
+ 342              		.loc 1 80 11 view .LVU115
+ 343 0042 67EE807A 		vmul.f32	s15, s15, s0
+ 344              	.LVL15:
+  83:Bsp/Src/bsp_pid.c ****     if (state->error_sum > PID_INTEGRAL_MAX) state->error_sum = PID_INTEGRAL_MAX;
+ 345              		.loc 1 83 5 is_stmt 1 view .LVU116
+ 346              		.loc 1 84 5 view .LVU117
+ 347              		.loc 1 84 8 is_stmt 0 view .LVU118
+ 348 0046 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 349 004a 06DC     		bgt	.L29
+  85:Bsp/Src/bsp_pid.c ****     else if (state->error_sum < PID_INTEGRAL_MIN) state->error_sum = PID_INTEGRAL_MIN;
+ 350              		.loc 1 85 10 is_stmt 1 view .LVU119
+ 351              		.loc 1 85 13 is_stmt 0 view .LVU120
+ 352 004c DFED466A 		vldr.32	s13, .L45+20
+ 353 0050 B4EEE67A 		vcmpe.f32	s14, s13
+ 354 0054 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 355 0058 78D5     		bpl	.L43
+ 356              	.L29:
+ 357 005a B0EE667A 		vmov.f32	s14, s13
+ 358              	.L20:
+  84:Bsp/Src/bsp_pid.c ****     else if (state->error_sum < PID_INTEGRAL_MIN) state->error_sum = PID_INTEGRAL_MIN;
+ 359              		.loc 1 84 63 view .LVU121
+ 360 005e 03EB0C01 		add	r1, r3, ip
+  86:Bsp/Src/bsp_pid.c ****     float i_term = g_pid_gains.ki * state->error_sum;
+ 361              		.loc 1 86 31 view .LVU122
+ 362 0062 D4ED015A 		vldr.32	s11, [r4, #4]
+  87:Bsp/Src/bsp_pid.c ****     
+  88:Bsp/Src/bsp_pid.c ****     // D term with filtering
+  89:Bsp/Src/bsp_pid.c ****     float d_term = g_pid_gains.kd * (error - state->last_error) / dt;
+ 363              		.loc 1 89 31 view .LVU123
+ 364 0066 D4ED024A 		vldr.32	s9, [r4, #8]
+ 365              		.loc 1 89 44 view .LVU124
+ 366 006a 91ED016A 		vldr.32	s12, [r1, #4]
+  90:Bsp/Src/bsp_pid.c ****     state->last_error = error;
+  91:Bsp/Src/bsp_pid.c ****     
+  92:Bsp/Src/bsp_pid.c ****     // Calculate base output
+  93:Bsp/Src/bsp_pid.c ****     float output = p_term + i_term + d_term;
+ 367              		.loc 1 93 27 view .LVU125
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s 			page 10
+
+
+ 368 006e E5EE877A 		vfma.f32	s15, s11, s14
+ 369              	.LVL16:
+  89:Bsp/Src/bsp_pid.c ****     state->last_error = error;
+ 370              		.loc 1 89 11 view .LVU126
+ 371 0072 9FED3A5A 		vldr.32	s10, .L45+8
+  89:Bsp/Src/bsp_pid.c ****     state->last_error = error;
+ 372              		.loc 1 89 44 view .LVU127
+ 373 0076 30EE467A 		vsub.f32	s14, s0, s12
+  84:Bsp/Src/bsp_pid.c ****     else if (state->error_sum < PID_INTEGRAL_MIN) state->error_sum = PID_INTEGRAL_MIN;
+ 374              		.loc 1 84 63 view .LVU128
+ 375 007a C1ED006A 		vstr.32	s13, [r1]
+  86:Bsp/Src/bsp_pid.c ****     
+ 376              		.loc 1 86 5 is_stmt 1 view .LVU129
+ 377              	.LVL17:
+  89:Bsp/Src/bsp_pid.c ****     state->last_error = error;
+ 378              		.loc 1 89 5 view .LVU130
+  94:Bsp/Src/bsp_pid.c ****     
+  95:Bsp/Src/bsp_pid.c ****     // Apply current deadband with hysteresis
+  96:Bsp/Src/bsp_pid.c ****     if (fabsf(output) < g_deadband_params.current_deadband) {
+ 379              		.loc 1 96 42 is_stmt 0 view .LVU131
+ 380 007e D2ED015A 		vldr.32	s11, [r2, #4]
+  90:Bsp/Src/bsp_pid.c ****     
+ 381              		.loc 1 90 23 view .LVU132
+ 382 0082 81ED010A 		vstr.32	s0, [r1, #4]
+  89:Bsp/Src/bsp_pid.c ****     state->last_error = error;
+ 383              		.loc 1 89 35 view .LVU133
+ 384 0086 27EE247A 		vmul.f32	s14, s14, s9
+  89:Bsp/Src/bsp_pid.c ****     state->last_error = error;
+ 385              		.loc 1 89 11 view .LVU134
+ 386 008a C7EE056A 		vdiv.f32	s13, s14, s10
+ 387              	.LVL18:
+  90:Bsp/Src/bsp_pid.c ****     
+ 388              		.loc 1 90 5 is_stmt 1 view .LVU135
+  93:Bsp/Src/bsp_pid.c ****     
+ 389              		.loc 1 93 5 view .LVU136
+  93:Bsp/Src/bsp_pid.c ****     
+ 390              		.loc 1 93 11 is_stmt 0 view .LVU137
+ 391 008e 77EEA67A 		vadd.f32	s15, s15, s13
+ 392              	.LVL19:
+ 393              		.loc 1 96 5 is_stmt 1 view .LVU138
+ 394              		.loc 1 96 9 is_stmt 0 view .LVU139
+ 395 0092 B0EEE77A 		vabs.f32	s14, s15
+ 396              		.loc 1 96 8 view .LVU140
+ 397 0096 B4EEE57A 		vcmpe.f32	s14, s11
+ 398 009a F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 399 009e 32D5     		bpl	.L37
+  97:Bsp/Src/bsp_pid.c ****         if (fabsf(state->last_output) < g_deadband_params.current_deadband) {
+ 400              		.loc 1 97 9 is_stmt 1 view .LVU141
+ 401              		.loc 1 97 24 is_stmt 0 view .LVU142
+ 402 00a0 D1ED026A 		vldr.32	s13, [r1, #8]
+ 403              	.LVL20:
+ 404              		.loc 1 97 58 view .LVU143
+ 405 00a4 92ED017A 		vldr.32	s14, [r2, #4]
+ 406              		.loc 1 97 13 view .LVU144
+ 407 00a8 B0EEE66A 		vabs.f32	s12, s13
+ 408              	.LVL21:
+ 409              		.loc 1 97 12 view .LVU145
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s 			page 11
+
+
+ 410 00ac B4EEC76A 		vcmpe.f32	s12, s14
+ 411 00b0 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 412 00b4 47D4     		bmi	.L30
+  98:Bsp/Src/bsp_pid.c ****             output = 0;
+  99:Bsp/Src/bsp_pid.c ****         }
+ 100:Bsp/Src/bsp_pid.c ****     } else {
+ 101:Bsp/Src/bsp_pid.c ****         // Add or subtract deadband based on direction
+ 102:Bsp/Src/bsp_pid.c ****         output += (output > 0) ? g_deadband_params.current_deadband : -g_deadband_params.current_de
+ 103:Bsp/Src/bsp_pid.c ****     }
+ 104:Bsp/Src/bsp_pid.c ****     
+ 105:Bsp/Src/bsp_pid.c ****     // Apply output limits
+ 106:Bsp/Src/bsp_pid.c ****     if (output > PID_OUTPUT_MAX) output = PID_OUTPUT_MAX;
+ 413              		.loc 1 106 5 is_stmt 1 view .LVU146
+ 414              		.loc 1 106 8 is_stmt 0 view .LVU147
+ 415 00b6 9FED2D7A 		vldr.32	s14, .L45+24
+ 416 00ba F4EEC77A 		vcmpe.f32	s15, s14
+ 417 00be F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 418 00c2 36DD     		ble	.L44
+ 419              	.L31:
+ 420              		.loc 1 106 41 view .LVU148
+ 421 00c4 F0EE477A 		vmov.f32	s15, s14
+ 422              	.LVL22:
+ 423              	.L23:
+ 107:Bsp/Src/bsp_pid.c ****     else if (output < PID_OUTPUT_MIN) output = PID_OUTPUT_MIN;
+ 108:Bsp/Src/bsp_pid.c ****     
+ 109:Bsp/Src/bsp_pid.c ****     // Apply output filtering
+ 110:Bsp/Src/bsp_pid.c ****     output = output * (1.0f - g_velocity_filter) + state->last_output * g_velocity_filter;
+ 424              		.loc 1 110 5 is_stmt 1 view .LVU149
+ 425              		.loc 1 110 29 is_stmt 0 view .LVU150
+ 426 00c8 294A     		ldr	r2, .L45+28
+ 427 00ca B7EE007A 		vmov.f32	s14, #1.0e+0
+ 111:Bsp/Src/bsp_pid.c ****     state->last_output = output;
+ 428              		.loc 1 111 24 view .LVU151
+ 429 00ce 6344     		add	r3, r3, ip
+ 112:Bsp/Src/bsp_pid.c ****     
+ 113:Bsp/Src/bsp_pid.c ****     // Store output for debugging
+ 114:Bsp/Src/bsp_pid.c ****     state->output = output;
+ 115:Bsp/Src/bsp_pid.c ****     
+ 116:Bsp/Src/bsp_pid.c ****     return output;
+ 117:Bsp/Src/bsp_pid.c **** } ...
+ 430              		.loc 1 117 1 view .LVU152
+ 431 00d0 5DF8044B 		ldr	r4, [sp], #4
+ 432              	.LCFI1:
+ 433              		.cfi_restore 4
+ 434              		.cfi_def_cfa_offset 0
+ 110:Bsp/Src/bsp_pid.c ****     output = output * (1.0f - g_velocity_filter) + state->last_output * g_velocity_filter;
+ 435              		.loc 1 110 29 view .LVU153
+ 436 00d4 92ED006A 		vldr.32	s12, [r2]
+ 110:Bsp/Src/bsp_pid.c ****     output = output * (1.0f - g_velocity_filter) + state->last_output * g_velocity_filter;
+ 437              		.loc 1 110 71 view .LVU154
+ 438 00d8 92ED000A 		vldr.32	s0, [r2]
+ 439              	.LVL23:
+ 110:Bsp/Src/bsp_pid.c ****     output = output * (1.0f - g_velocity_filter) + state->last_output * g_velocity_filter;
+ 440              		.loc 1 110 29 view .LVU155
+ 441 00dc 37EE467A 		vsub.f32	s14, s14, s12
+ 110:Bsp/Src/bsp_pid.c ****     output = output * (1.0f - g_velocity_filter) + state->last_output * g_velocity_filter;
+ 442              		.loc 1 110 71 view .LVU156
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s 			page 12
+
+
+ 443 00e0 20EE260A 		vmul.f32	s0, s0, s13
+ 110:Bsp/Src/bsp_pid.c ****     output = output * (1.0f - g_velocity_filter) + state->last_output * g_velocity_filter;
+ 444              		.loc 1 110 12 view .LVU157
+ 445 00e4 A7EE270A 		vfma.f32	s0, s14, s15
+ 446              	.LVL24:
+ 111:Bsp/Src/bsp_pid.c ****     state->last_output = output;
+ 447              		.loc 1 111 5 is_stmt 1 view .LVU158
+ 111:Bsp/Src/bsp_pid.c ****     state->last_output = output;
+ 448              		.loc 1 111 24 is_stmt 0 view .LVU159
+ 449 00e8 83ED020A 		vstr.32	s0, [r3, #8]
+ 114:Bsp/Src/bsp_pid.c ****     state->output = output;
+ 450              		.loc 1 114 5 is_stmt 1 view .LVU160
+ 114:Bsp/Src/bsp_pid.c ****     state->output = output;
+ 451              		.loc 1 114 19 is_stmt 0 view .LVU161
+ 452 00ec 83ED030A 		vstr.32	s0, [r3, #12]
+ 116:Bsp/Src/bsp_pid.c ****     return output;
+ 453              		.loc 1 116 5 is_stmt 1 view .LVU162
+ 454              		.loc 1 117 1 is_stmt 0 view .LVU163
+ 455 00f0 7047     		bx	lr
+ 456              	.LVL25:
+ 457              	.L42:
+  69:Bsp/Src/bsp_pid.c ****         error = 0;
+ 458              		.loc 1 69 9 is_stmt 1 view .LVU164
+  70:Bsp/Src/bsp_pid.c ****         state->error_sum = 0;  // Reset integral when in deadband
+ 459              		.loc 1 70 9 view .LVU165
+  70:Bsp/Src/bsp_pid.c ****         state->error_sum = 0;  // Reset integral when in deadband
+ 460              		.loc 1 70 26 is_stmt 0 view .LVU166
+ 461 00f2 194B     		ldr	r3, .L45+4
+ 462 00f4 0022     		movs	r2, #0
+ 463 00f6 03EB0013 		add	r3, r3, r0, lsl #4
+ 464 00fa 1A60     		str	r2, [r3]	@ float
+  71:Bsp/Src/bsp_pid.c ****         state->last_output = 0;
+ 465              		.loc 1 71 9 is_stmt 1 view .LVU167
+  71:Bsp/Src/bsp_pid.c ****         state->last_output = 0;
+ 466              		.loc 1 71 28 is_stmt 0 view .LVU168
+ 467 00fc 9A60     		str	r2, [r3, #8]	@ float
+  72:Bsp/Src/bsp_pid.c ****         state->output = 0;
+ 468              		.loc 1 72 9 is_stmt 1 view .LVU169
+  72:Bsp/Src/bsp_pid.c ****         state->output = 0;
+ 469              		.loc 1 72 23 is_stmt 0 view .LVU170
+ 470 00fe DA60     		str	r2, [r3, #12]	@ float
+  73:Bsp/Src/bsp_pid.c ****         return 0;
+ 471              		.loc 1 73 9 is_stmt 1 view .LVU171
+ 472              	.LVL26:
+ 473              	.L16:
+  62:Bsp/Src/bsp_pid.c ****     if(motor_index >= 4) return 0.0f;
+ 474              		.loc 1 62 33 is_stmt 0 view .LVU172
+ 475 0100 9FED1C0A 		vldr.32	s0, .L45+32
+ 476              		.loc 1 117 1 view .LVU173
+ 477 0104 7047     		bx	lr
+ 478              	.LVL27:
+ 479              	.L37:
+ 480              	.LCFI2:
+ 481              		.cfi_def_cfa_offset 4
+ 482              		.cfi_offset 4, -4
+ 102:Bsp/Src/bsp_pid.c ****         output += (output > 0) ? g_deadband_params.current_deadband : -g_deadband_params.current_de
+ 483              		.loc 1 102 9 is_stmt 1 view .LVU174
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s 			page 13
+
+
+ 102:Bsp/Src/bsp_pid.c ****         output += (output > 0) ? g_deadband_params.current_deadband : -g_deadband_params.current_de
+ 484              		.loc 1 102 69 is_stmt 0 view .LVU175
+ 485 0106 F5EEC07A 		vcmpe.f32	s15, #0
+ 486 010a 92ED017A 		vldr.32	s14, [r2, #4]
+  97:Bsp/Src/bsp_pid.c ****         if (fabsf(state->last_output) < g_deadband_params.current_deadband) {
+ 487              		.loc 1 97 24 view .LVU176
+ 488 010e 03EB0C02 		add	r2, r3, ip
+ 102:Bsp/Src/bsp_pid.c ****         output += (output > 0) ? g_deadband_params.current_deadband : -g_deadband_params.current_de
+ 489              		.loc 1 102 69 view .LVU177
+ 490 0112 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+  97:Bsp/Src/bsp_pid.c ****         if (fabsf(state->last_output) < g_deadband_params.current_deadband) {
+ 491              		.loc 1 97 24 view .LVU178
+ 492 0116 D2ED026A 		vldr.32	s13, [r2, #8]
+ 493              	.LVL28:
+ 102:Bsp/Src/bsp_pid.c ****         output += (output > 0) ? g_deadband_params.current_deadband : -g_deadband_params.current_de
+ 494              		.loc 1 102 69 view .LVU179
+ 495 011a D8BF     		it	le
+ 496 011c B1EE477A 		vnegle.f32	s14, s14
+ 102:Bsp/Src/bsp_pid.c ****         output += (output > 0) ? g_deadband_params.current_deadband : -g_deadband_params.current_de
+ 497              		.loc 1 102 16 view .LVU180
+ 498 0120 77EE877A 		vadd.f32	s15, s15, s14
+ 499              	.LVL29:
+ 106:Bsp/Src/bsp_pid.c ****     if (output > PID_OUTPUT_MAX) output = PID_OUTPUT_MAX;
+ 500              		.loc 1 106 5 is_stmt 1 view .LVU181
+ 106:Bsp/Src/bsp_pid.c ****     if (output > PID_OUTPUT_MAX) output = PID_OUTPUT_MAX;
+ 501              		.loc 1 106 8 is_stmt 0 view .LVU182
+ 502 0124 9FED117A 		vldr.32	s14, .L45+24
+ 503 0128 F4EEC77A 		vcmpe.f32	s15, s14
+ 504 012c F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 505 0130 C8DC     		bgt	.L31
+ 506              	.LVL30:
+ 507              	.L44:
+ 107:Bsp/Src/bsp_pid.c ****     else if (output < PID_OUTPUT_MIN) output = PID_OUTPUT_MIN;
+ 508              		.loc 1 107 10 is_stmt 1 view .LVU183
+ 107:Bsp/Src/bsp_pid.c ****     else if (output < PID_OUTPUT_MIN) output = PID_OUTPUT_MIN;
+ 509              		.loc 1 107 13 is_stmt 0 view .LVU184
+ 510 0132 9FED117A 		vldr.32	s14, .L45+36
+ 107:Bsp/Src/bsp_pid.c ****     else if (output < PID_OUTPUT_MIN) output = PID_OUTPUT_MIN;
+ 511              		.loc 1 107 46 view .LVU185
+ 512 0136 F4EE477A 		vcmp.f32	s15, s14
+ 513 013a F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 514 013e 48BF     		it	mi
+ 515 0140 F0EE477A 		vmovmi.f32	s15, s14
+ 516              	.LVL31:
+ 107:Bsp/Src/bsp_pid.c ****     else if (output < PID_OUTPUT_MIN) output = PID_OUTPUT_MIN;
+ 517              		.loc 1 107 46 view .LVU186
+ 518 0144 C0E7     		b	.L23
+ 519              	.LVL32:
+ 520              	.L30:
+  98:Bsp/Src/bsp_pid.c ****             output = 0;
+ 521              		.loc 1 98 20 view .LVU187
+ 522 0146 DFED0B7A 		vldr.32	s15, .L45+32
+ 523              	.LVL33:
+  98:Bsp/Src/bsp_pid.c ****             output = 0;
+ 524              		.loc 1 98 20 view .LVU188
+ 525 014a BDE7     		b	.L23
+ 526              	.LVL34:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s 			page 14
+
+
+ 527              	.L43:
+  85:Bsp/Src/bsp_pid.c ****     else if (state->error_sum < PID_INTEGRAL_MIN) state->error_sum = PID_INTEGRAL_MIN;
+ 528              		.loc 1 85 13 view .LVU189
+ 529 014c F0EE476A 		vmov.f32	s13, s14
+ 530 0150 85E7     		b	.L20
+ 531              	.L46:
+ 532 0152 00BF     		.align	2
+ 533              	.L45:
+ 534 0154 00000000 		.word	g_deadband_params
+ 535 0158 00000000 		.word	pid_states
+ 536 015c 6F12833A 		.word	981668463
+ 537 0160 00409C45 		.word	1167867904
+ 538 0164 00000000 		.word	g_pid_gains
+ 539 0168 00409CC5 		.word	-979615744
+ 540 016c 00008046 		.word	1182793728
+ 541 0170 00000000 		.word	g_velocity_filter
+ 542 0174 00000000 		.word	0
+ 543 0178 000080C6 		.word	-964689920
+ 544              		.cfi_endproc
+ 545              	.LFE148:
+ 547              		.global	pid_states
+ 548              		.section	.bss.pid_states,"aw",%nobits
+ 549              		.align	2
+ 552              	pid_states:
+ 553 0000 00000000 		.space	64
+ 553      00000000 
+ 553      00000000 
+ 553      00000000 
+ 553      00000000 
+ 554              		.global	g_velocity_filter
+ 555              		.section	.data.g_velocity_filter,"aw"
+ 556              		.align	2
+ 559              	g_velocity_filter:
+ 560 0000 CDCC4C3E 		.word	1045220557
+ 561              		.global	g_pid_gains
+ 562              		.section	.data.g_pid_gains,"aw"
+ 563              		.align	2
+ 566              	g_pid_gains:
+ 567 0000 00006144 		.word	1147207680
+ 568 0004 0000A040 		.word	1084227584
+ 569 0008 00004040 		.word	1077936128
+ 570              		.global	g_deadband_params
+ 571              		.section	.data.g_deadband_params,"aw"
+ 572              		.align	2
+ 575              	g_deadband_params:
+ 576 0000 CDCC4C3E 		.word	1045220557
+ 577 0004 00002443 		.word	1126432768
+ 578              		.text
+ 579              	.Letext0:
+ 580              		.file 2 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\machine\\_default_types.h"
+ 581              		.file 3 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\sys\\_stdint.h"
+ 582              		.file 4 "Bsp/Inc/bsp_pid.h"
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s 			page 15
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 bsp_pid.c
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:20     .text.BSP_PID_Init:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:27     .text.BSP_PID_Init:00000000 BSP_PID_Init
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:154    .text.BSP_PID_Init:00000028 $d
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:552    .bss.pid_states:00000000 pid_states
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:159    .text.BSP_PID_Reset:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:166    .text.BSP_PID_Reset:00000000 BSP_PID_Reset
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:208    .text.BSP_PID_Reset:00000018 $d
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:213    .text.BSP_PID_UpdateDeadbandParams:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:220    .text.BSP_PID_UpdateDeadbandParams:00000000 BSP_PID_UpdateDeadbandParams
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:240    .text.BSP_PID_UpdateDeadbandParams:0000000c $d
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:575    .data.g_deadband_params:00000000 g_deadband_params
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:245    .text.BSP_PID_UpdateGains:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:252    .text.BSP_PID_UpdateGains:00000000 BSP_PID_UpdateGains
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:275    .text.BSP_PID_UpdateGains:00000010 $d
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:566    .data.g_pid_gains:00000000 g_pid_gains
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:280    .text.BSP_PID_Calculate:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:287    .text.BSP_PID_Calculate:00000000 BSP_PID_Calculate
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:534    .text.BSP_PID_Calculate:00000154 $d
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:559    .data.g_velocity_filter:00000000 g_velocity_filter
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:549    .bss.pid_states:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:556    .data.g_velocity_filter:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:563    .data.g_pid_gains:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccrukvtq.s:572    .data.g_deadband_params:00000000 $d
+
+NO UNDEFINED SYMBOLS

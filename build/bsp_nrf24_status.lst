@@ -1,0 +1,521 @@
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 2
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"bsp_nrf24_status.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "Bsp/Src/bsp_nrf24_status.c"
+  19              		.section	.text.BSP_NRF24_Status_Init,"ax",%progbits
+  20              		.align	1
+  21              		.p2align 2,,3
+  22              		.global	BSP_NRF24_Status_Init
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	BSP_NRF24_Status_Init:
+  28              	.LVL0:
+  29              	.LFB150:
+   1:Bsp/Src/bsp_nrf24_status.c **** /**
+   2:Bsp/Src/bsp_nrf24_status.c ****   ******************************************************************************
+   3:Bsp/Src/bsp_nrf24_status.c ****   * @file    bsp_nrf24_status.c
+   4:Bsp/Src/bsp_nrf24_status.c ****   * @brief   NRF24 Status Monitoring Module Implementation
+   5:Bsp/Src/bsp_nrf24_status.c ****   ******************************************************************************
+   6:Bsp/Src/bsp_nrf24_status.c ****   */
+   7:Bsp/Src/bsp_nrf24_status.c **** 
+   8:Bsp/Src/bsp_nrf24_status.c **** /* Includes ------------------------------------------------------------------*/
+   9:Bsp/Src/bsp_nrf24_status.c **** #include "bsp_nrf24_status.h"
+  10:Bsp/Src/bsp_nrf24_status.c **** 
+  11:Bsp/Src/bsp_nrf24_status.c **** /* Private variables ---------------------------------------------------------*/
+  12:Bsp/Src/bsp_nrf24_status.c **** NRF24_Status_t nrf24_status = {0};
+  13:Bsp/Src/bsp_nrf24_status.c **** 
+  14:Bsp/Src/bsp_nrf24_status.c **** /* Functions -----------------------------------------------------------------*/
+  15:Bsp/Src/bsp_nrf24_status.c **** 
+  16:Bsp/Src/bsp_nrf24_status.c **** void BSP_NRF24_Status_Init(const NRF24_TypeDef *nrf) {
+  30              		.loc 1 16 54 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  17:Bsp/Src/bsp_nrf24_status.c ****     // Reset all status fields
+  18:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.initialized = false;
+  34              		.loc 1 18 5 view .LVU1
+  19:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.communication_ok = false;
+  35              		.loc 1 19 5 view .LVU2
+  20:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.tx_success = false;
+  36              		.loc 1 20 5 view .LVU3
+  21:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.tx_failed = false;
+  37              		.loc 1 21 5 view .LVU4
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s 			page 2
+
+
+  16:Bsp/Src/bsp_nrf24_status.c ****     // Reset all status fields
+  38              		.loc 1 16 54 is_stmt 0 view .LVU5
+  39 0000 10B5     		push	{r4, lr}
+  40              	.LCFI0:
+  41              		.cfi_def_cfa_offset 8
+  42              		.cfi_offset 4, -8
+  43              		.cfi_offset 14, -4
+  18:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.communication_ok = false;
+  44              		.loc 1 18 30 view .LVU6
+  45 0002 0023     		movs	r3, #0
+  46 0004 074C     		ldr	r4, .L8
+  22:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.tx_count = 0;
+  47              		.loc 1 22 27 view .LVU7
+  48 0006 C4E90033 		strd	r3, r3, [r4]
+  23:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.tx_error_count = 0;
+  49              		.loc 1 23 5 is_stmt 1 view .LVU8
+  24:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.last_tx_time = 0;
+  50              		.loc 1 24 31 is_stmt 0 view .LVU9
+  51 000a C4E90233 		strd	r3, r3, [r4, #8]
+  25:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.last_rx_time = 0;
+  52              		.loc 1 25 5 is_stmt 1 view .LVU10
+  26:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.last_status = 0;
+  53              		.loc 1 26 30 is_stmt 0 view .LVU11
+  54 000e C4E90433 		strd	r3, r3, [r4, #16]
+  27:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.config = 0;
+  28:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.rf_ch = 0;
+  29:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.rf_setup = 0;
+  30:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.observe_tx = 0;
+  55              		.loc 1 30 5 is_stmt 1 view .LVU12
+  31:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.fifo_status = 0;
+  56              		.loc 1 31 5 view .LVU13
+  30:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.fifo_status = 0;
+  57              		.loc 1 30 29 is_stmt 0 view .LVU14
+  58 0012 2383     		strh	r3, [r4, #24]	@ movhi
+  32:Bsp/Src/bsp_nrf24_status.c **** 
+  33:Bsp/Src/bsp_nrf24_status.c ****     // Check if NRF24 is responding
+  34:Bsp/Src/bsp_nrf24_status.c ****     if (nRF24_Check(nrf)) {
+  59              		.loc 1 34 5 is_stmt 1 view .LVU15
+  60              		.loc 1 34 9 is_stmt 0 view .LVU16
+  61 0014 FFF7FEFF 		bl	nRF24_Check
+  62              	.LVL1:
+  63              		.loc 1 34 8 view .LVU17
+  64 0018 10B1     		cbz	r0, .L1
+  35:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.initialized = true;
+  65              		.loc 1 35 9 is_stmt 1 view .LVU18
+  36:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.communication_ok = true;
+  66              		.loc 1 36 9 view .LVU19
+  35:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.initialized = true;
+  67              		.loc 1 35 34 is_stmt 0 view .LVU20
+  68 001a 40F20113 		movw	r3, #257
+  69 001e 2380     		strh	r3, [r4]	@ movhi
+  70              	.L1:
+  37:Bsp/Src/bsp_nrf24_status.c ****     }
+  38:Bsp/Src/bsp_nrf24_status.c **** }
+  71              		.loc 1 38 1 view .LVU21
+  72 0020 10BD     		pop	{r4, pc}
+  73              	.L9:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s 			page 3
+
+
+  74 0022 00BF     		.align	2
+  75              	.L8:
+  76 0024 00000000 		.word	nrf24_status
+  77              		.cfi_endproc
+  78              	.LFE150:
+  80              		.section	.text.BSP_NRF24_Status_Update,"ax",%progbits
+  81              		.align	1
+  82              		.p2align 2,,3
+  83              		.global	BSP_NRF24_Status_Update
+  84              		.syntax unified
+  85              		.thumb
+  86              		.thumb_func
+  88              	BSP_NRF24_Status_Update:
+  89              	.LVL2:
+  90              	.LFB151:
+  39:Bsp/Src/bsp_nrf24_status.c **** 
+  40:Bsp/Src/bsp_nrf24_status.c **** void BSP_NRF24_Status_Update(const NRF24_TypeDef *nrf) {
+  91              		.loc 1 40 56 is_stmt 1 view -0
+  92              		.cfi_startproc
+  93              		@ args = 0, pretend = 0, frame = 0
+  94              		@ frame_needed = 0, uses_anonymous_args = 0
+  41:Bsp/Src/bsp_nrf24_status.c ****     // Update status registers
+  42:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.last_status = nRF24_GetStatus(nrf);
+  95              		.loc 1 42 5 view .LVU23
+  40:Bsp/Src/bsp_nrf24_status.c ****     // Update status registers
+  96              		.loc 1 40 56 is_stmt 0 view .LVU24
+  97 0000 70B5     		push	{r4, r5, r6, lr}
+  98              	.LCFI1:
+  99              		.cfi_def_cfa_offset 16
+ 100              		.cfi_offset 4, -16
+ 101              		.cfi_offset 5, -12
+ 102              		.cfi_offset 6, -8
+ 103              		.cfi_offset 14, -4
+  40:Bsp/Src/bsp_nrf24_status.c ****     // Update status registers
+ 104              		.loc 1 40 56 view .LVU25
+ 105 0002 0546     		mov	r5, r0
+ 106              		.loc 1 42 30 view .LVU26
+ 107 0004 204C     		ldr	r4, .L26
+ 108              		.loc 1 42 32 view .LVU27
+ 109 0006 FFF7FEFF 		bl	nRF24_GetStatus
+ 110              	.LVL3:
+ 111              		.loc 1 42 32 view .LVU28
+ 112 000a 0346     		mov	r3, r0
+  43:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.config = nRF24_GetConfig(nrf);
+ 113              		.loc 1 43 27 view .LVU29
+ 114 000c 2846     		mov	r0, r5
+  42:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.config = nRF24_GetConfig(nrf);
+ 115              		.loc 1 42 30 view .LVU30
+ 116 000e 2375     		strb	r3, [r4, #20]
+ 117              		.loc 1 43 5 is_stmt 1 view .LVU31
+ 118              		.loc 1 43 27 is_stmt 0 view .LVU32
+ 119 0010 FFF7FEFF 		bl	nRF24_GetConfig
+ 120              	.LVL4:
+ 121 0014 0346     		mov	r3, r0
+  44:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.rf_ch = nRF24_GetRFChannel(nrf);
+ 122              		.loc 1 44 26 view .LVU33
+ 123 0016 2846     		mov	r0, r5
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s 			page 4
+
+
+  43:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.config = nRF24_GetConfig(nrf);
+ 124              		.loc 1 43 25 view .LVU34
+ 125 0018 6375     		strb	r3, [r4, #21]
+ 126              		.loc 1 44 5 is_stmt 1 view .LVU35
+ 127              		.loc 1 44 26 is_stmt 0 view .LVU36
+ 128 001a FFF7FEFF 		bl	nRF24_GetRFChannel
+ 129              	.LVL5:
+ 130 001e 0346     		mov	r3, r0
+  45:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.rf_setup = nRF24_ReadReg(nrf, nRF24_REG_RF_SETUP);
+ 131              		.loc 1 45 29 view .LVU37
+ 132 0020 0621     		movs	r1, #6
+ 133 0022 2846     		mov	r0, r5
+  44:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.rf_ch = nRF24_GetRFChannel(nrf);
+ 134              		.loc 1 44 24 view .LVU38
+ 135 0024 A375     		strb	r3, [r4, #22]
+ 136              		.loc 1 45 5 is_stmt 1 view .LVU39
+ 137              		.loc 1 45 29 is_stmt 0 view .LVU40
+ 138 0026 FFF7FEFF 		bl	nRF24_ReadReg
+ 139              	.LVL6:
+ 140 002a 0346     		mov	r3, r0
+  46:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.observe_tx = nRF24_GetRetransmitCounters(nrf);
+ 141              		.loc 1 46 31 view .LVU41
+ 142 002c 2846     		mov	r0, r5
+  45:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.rf_setup = nRF24_ReadReg(nrf, nRF24_REG_RF_SETUP);
+ 143              		.loc 1 45 27 view .LVU42
+ 144 002e E375     		strb	r3, [r4, #23]
+ 145              		.loc 1 46 5 is_stmt 1 view .LVU43
+ 146              		.loc 1 46 31 is_stmt 0 view .LVU44
+ 147 0030 FFF7FEFF 		bl	nRF24_GetRetransmitCounters
+ 148              	.LVL7:
+ 149 0034 0346     		mov	r3, r0
+  47:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.fifo_status = nRF24_ReadReg(nrf, nRF24_REG_FIFO_STATUS);
+ 150              		.loc 1 47 32 view .LVU45
+ 151 0036 1721     		movs	r1, #23
+ 152 0038 2846     		mov	r0, r5
+  46:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.observe_tx = nRF24_GetRetransmitCounters(nrf);
+ 153              		.loc 1 46 29 view .LVU46
+ 154 003a 2376     		strb	r3, [r4, #24]
+ 155              		.loc 1 47 5 is_stmt 1 view .LVU47
+ 156              		.loc 1 47 32 is_stmt 0 view .LVU48
+ 157 003c FFF7FEFF 		bl	nRF24_ReadReg
+ 158              	.LVL8:
+  48:Bsp/Src/bsp_nrf24_status.c **** 
+  49:Bsp/Src/bsp_nrf24_status.c ****     // Check for TX success/failure
+  50:Bsp/Src/bsp_nrf24_status.c ****     uint8_t status = nrf24_status.last_status;
+ 159              		.loc 1 50 13 view .LVU49
+ 160 0040 267D     		ldrb	r6, [r4, #20]	@ zero_extendqisi2
+  47:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.fifo_status = nRF24_ReadReg(nrf, nRF24_REG_FIFO_STATUS);
+ 161              		.loc 1 47 30 view .LVU50
+ 162 0042 6076     		strb	r0, [r4, #25]
+ 163              		.loc 1 50 5 is_stmt 1 view .LVU51
+ 164              	.LVL9:
+  51:Bsp/Src/bsp_nrf24_status.c ****     if (status & nRF24_FLAG_TX_DS) {
+ 165              		.loc 1 51 5 view .LVU52
+ 166              		.loc 1 51 8 is_stmt 0 view .LVU53
+ 167 0044 B106     		lsls	r1, r6, #26
+ 168 0046 0ED4     		bmi	.L24
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s 			page 5
+
+
+ 169              	.L11:
+  52:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.tx_success = true;
+  53:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.tx_failed = false;
+  54:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.tx_count++;
+  55:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.last_tx_time = HAL_GetTick();
+  56:Bsp/Src/bsp_nrf24_status.c ****     }
+  57:Bsp/Src/bsp_nrf24_status.c ****     if (status & nRF24_FLAG_MAX_RT) {
+ 170              		.loc 1 57 5 is_stmt 1 view .LVU54
+ 171              		.loc 1 57 8 is_stmt 0 view .LVU55
+ 172 0048 F206     		lsls	r2, r6, #27
+ 173 004a 05D5     		bpl	.L12
+  58:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.tx_success = false;
+ 174              		.loc 1 58 9 is_stmt 1 view .LVU56
+  59:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.tx_failed = true;
+ 175              		.loc 1 59 9 view .LVU57
+  60:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.tx_error_count++;
+ 176              		.loc 1 60 36 is_stmt 0 view .LVU58
+ 177 004c A368     		ldr	r3, [r4, #8]
+  58:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.tx_success = false;
+ 178              		.loc 1 58 33 view .LVU59
+ 179 004e 4FF48072 		mov	r2, #256
+ 180              		.loc 1 60 36 view .LVU60
+ 181 0052 0133     		adds	r3, r3, #1
+  58:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.tx_success = false;
+ 182              		.loc 1 58 33 view .LVU61
+ 183 0054 6280     		strh	r2, [r4, #2]	@ movhi
+ 184              		.loc 1 60 9 is_stmt 1 view .LVU62
+ 185              		.loc 1 60 36 is_stmt 0 view .LVU63
+ 186 0056 A360     		str	r3, [r4, #8]
+ 187              	.L12:
+  61:Bsp/Src/bsp_nrf24_status.c ****     }
+  62:Bsp/Src/bsp_nrf24_status.c ****     if (status & nRF24_FLAG_RX_DR) {
+ 188              		.loc 1 62 5 is_stmt 1 view .LVU64
+ 189              		.loc 1 62 8 is_stmt 0 view .LVU65
+ 190 0058 7306     		lsls	r3, r6, #25
+ 191 005a 0DD4     		bmi	.L25
+  63:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.last_rx_time = HAL_GetTick();
+  64:Bsp/Src/bsp_nrf24_status.c ****     }
+  65:Bsp/Src/bsp_nrf24_status.c **** 
+  66:Bsp/Src/bsp_nrf24_status.c ****     // Clear interrupt flags
+  67:Bsp/Src/bsp_nrf24_status.c ****     nRF24_ClearIRQFlags(nrf);
+ 192              		.loc 1 67 5 is_stmt 1 view .LVU66
+ 193 005c 2846     		mov	r0, r5
+  68:Bsp/Src/bsp_nrf24_status.c **** }
+ 194              		.loc 1 68 1 is_stmt 0 view .LVU67
+ 195 005e BDE87040 		pop	{r4, r5, r6, lr}
+ 196              	.LCFI2:
+ 197              		.cfi_remember_state
+ 198              		.cfi_restore 14
+ 199              		.cfi_restore 6
+ 200              		.cfi_restore 5
+ 201              		.cfi_restore 4
+ 202              		.cfi_def_cfa_offset 0
+ 203              	.LVL10:
+  67:Bsp/Src/bsp_nrf24_status.c **** }
+ 204              		.loc 1 67 5 view .LVU68
+ 205 0062 FFF7FEBF 		b	nRF24_ClearIRQFlags
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s 			page 6
+
+
+ 206              	.LVL11:
+ 207              	.L24:
+ 208              	.LCFI3:
+ 209              		.cfi_restore_state
+  52:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.tx_failed = false;
+ 210              		.loc 1 52 9 is_stmt 1 view .LVU69
+  53:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.tx_count++;
+ 211              		.loc 1 53 9 view .LVU70
+  54:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.last_tx_time = HAL_GetTick();
+ 212              		.loc 1 54 30 is_stmt 0 view .LVU71
+ 213 0066 6368     		ldr	r3, [r4, #4]
+  52:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.tx_failed = false;
+ 214              		.loc 1 52 33 view .LVU72
+ 215 0068 0122     		movs	r2, #1
+  54:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.last_tx_time = HAL_GetTick();
+ 216              		.loc 1 54 30 view .LVU73
+ 217 006a 1344     		add	r3, r3, r2
+  52:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.tx_failed = false;
+ 218              		.loc 1 52 33 view .LVU74
+ 219 006c 6280     		strh	r2, [r4, #2]	@ movhi
+  54:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.last_tx_time = HAL_GetTick();
+ 220              		.loc 1 54 9 is_stmt 1 view .LVU75
+  54:Bsp/Src/bsp_nrf24_status.c ****         nrf24_status.last_tx_time = HAL_GetTick();
+ 221              		.loc 1 54 30 is_stmt 0 view .LVU76
+ 222 006e 6360     		str	r3, [r4, #4]
+  55:Bsp/Src/bsp_nrf24_status.c ****     }
+ 223              		.loc 1 55 9 is_stmt 1 view .LVU77
+  55:Bsp/Src/bsp_nrf24_status.c ****     }
+ 224              		.loc 1 55 37 is_stmt 0 view .LVU78
+ 225 0070 FFF7FEFF 		bl	HAL_GetTick
+ 226              	.LVL12:
+  55:Bsp/Src/bsp_nrf24_status.c ****     }
+ 227              		.loc 1 55 35 view .LVU79
+ 228 0074 E060     		str	r0, [r4, #12]
+ 229 0076 E7E7     		b	.L11
+ 230              	.L25:
+  63:Bsp/Src/bsp_nrf24_status.c ****     }
+ 231              		.loc 1 63 9 is_stmt 1 view .LVU80
+  63:Bsp/Src/bsp_nrf24_status.c ****     }
+ 232              		.loc 1 63 37 is_stmt 0 view .LVU81
+ 233 0078 FFF7FEFF 		bl	HAL_GetTick
+ 234              	.LVL13:
+  63:Bsp/Src/bsp_nrf24_status.c ****     }
+ 235              		.loc 1 63 35 view .LVU82
+ 236 007c 2061     		str	r0, [r4, #16]
+  67:Bsp/Src/bsp_nrf24_status.c **** }
+ 237              		.loc 1 67 5 is_stmt 1 view .LVU83
+ 238 007e 2846     		mov	r0, r5
+ 239              		.loc 1 68 1 is_stmt 0 view .LVU84
+ 240 0080 BDE87040 		pop	{r4, r5, r6, lr}
+ 241              	.LCFI4:
+ 242              		.cfi_restore 14
+ 243              		.cfi_restore 6
+ 244              		.cfi_restore 5
+ 245              		.cfi_restore 4
+ 246              		.cfi_def_cfa_offset 0
+ 247              	.LVL14:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s 			page 7
+
+
+  67:Bsp/Src/bsp_nrf24_status.c **** }
+ 248              		.loc 1 67 5 view .LVU85
+ 249 0084 FFF7FEBF 		b	nRF24_ClearIRQFlags
+ 250              	.LVL15:
+ 251              	.L27:
+  67:Bsp/Src/bsp_nrf24_status.c **** }
+ 252              		.loc 1 67 5 view .LVU86
+ 253              		.align	2
+ 254              	.L26:
+ 255 0088 00000000 		.word	nrf24_status
+ 256              		.cfi_endproc
+ 257              	.LFE151:
+ 259              		.section	.text.BSP_NRF24_Status_Get,"ax",%progbits
+ 260              		.align	1
+ 261              		.p2align 2,,3
+ 262              		.global	BSP_NRF24_Status_Get
+ 263              		.syntax unified
+ 264              		.thumb
+ 265              		.thumb_func
+ 267              	BSP_NRF24_Status_Get:
+ 268              	.LVL16:
+ 269              	.LFB152:
+  69:Bsp/Src/bsp_nrf24_status.c **** 
+  70:Bsp/Src/bsp_nrf24_status.c **** NRF24_Status_t BSP_NRF24_Status_Get(void) {
+ 270              		.loc 1 70 43 is_stmt 1 view -0
+ 271              		.cfi_startproc
+ 272              		@ args = 0, pretend = 0, frame = 0
+ 273              		@ frame_needed = 0, uses_anonymous_args = 0
+  71:Bsp/Src/bsp_nrf24_status.c ****     return nrf24_status;
+ 274              		.loc 1 71 5 view .LVU88
+  70:Bsp/Src/bsp_nrf24_status.c ****     return nrf24_status;
+ 275              		.loc 1 70 43 is_stmt 0 view .LVU89
+ 276 0000 10B5     		push	{r4, lr}
+ 277              	.LCFI5:
+ 278              		.cfi_def_cfa_offset 8
+ 279              		.cfi_offset 4, -8
+ 280              		.cfi_offset 14, -4
+ 281              		.loc 1 71 12 view .LVU90
+ 282 0002 064C     		ldr	r4, .L30
+  70:Bsp/Src/bsp_nrf24_status.c ****     return nrf24_status;
+ 283              		.loc 1 70 43 view .LVU91
+ 284 0004 8646     		mov	lr, r0
+ 285              		.loc 1 71 12 view .LVU92
+ 286 0006 8446     		mov	ip, r0
+ 287 0008 0FCC     		ldmia	r4!, {r0, r1, r2, r3}
+ 288              	.LVL17:
+ 289              		.loc 1 71 12 view .LVU93
+ 290 000a ACE80F00 		stmia	ip!, {r0, r1, r2, r3}
+ 291              	.LVL18:
+ 292              		.loc 1 71 12 view .LVU94
+ 293 000e 94E80700 		ldm	r4, {r0, r1, r2}
+ 294 0012 8CE80700 		stm	ip, {r0, r1, r2}
+  72:Bsp/Src/bsp_nrf24_status.c **** }
+ 295              		.loc 1 72 1 view .LVU95
+ 296 0016 7046     		mov	r0, lr
+ 297 0018 10BD     		pop	{r4, pc}
+ 298              	.L31:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s 			page 8
+
+
+ 299 001a 00BF     		.align	2
+ 300              	.L30:
+ 301 001c 00000000 		.word	nrf24_status
+ 302              		.cfi_endproc
+ 303              	.LFE152:
+ 305              		.section	.text.BSP_NRF24_Status_Reset,"ax",%progbits
+ 306              		.align	1
+ 307              		.p2align 2,,3
+ 308              		.global	BSP_NRF24_Status_Reset
+ 309              		.syntax unified
+ 310              		.thumb
+ 311              		.thumb_func
+ 313              	BSP_NRF24_Status_Reset:
+ 314              	.LFB153:
+  73:Bsp/Src/bsp_nrf24_status.c **** 
+  74:Bsp/Src/bsp_nrf24_status.c **** void BSP_NRF24_Status_Reset(void) {
+ 315              		.loc 1 74 35 is_stmt 1 view -0
+ 316              		.cfi_startproc
+ 317              		@ args = 0, pretend = 0, frame = 0
+ 318              		@ frame_needed = 0, uses_anonymous_args = 0
+ 319              		@ link register save eliminated.
+  75:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.tx_count = 0;
+ 320              		.loc 1 75 5 view .LVU97
+ 321              		.loc 1 75 27 is_stmt 0 view .LVU98
+ 322 0000 024B     		ldr	r3, .L33
+ 323 0002 0022     		movs	r2, #0
+  76:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.tx_error_count = 0;
+ 324              		.loc 1 76 33 view .LVU99
+ 325 0004 C3E90122 		strd	r2, r2, [r3, #4]
+  77:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.tx_success = false;
+ 326              		.loc 1 77 5 is_stmt 1 view .LVU100
+  78:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.tx_failed = false;
+ 327              		.loc 1 78 5 view .LVU101
+  77:Bsp/Src/bsp_nrf24_status.c ****     nrf24_status.tx_success = false;
+ 328              		.loc 1 77 29 is_stmt 0 view .LVU102
+ 329 0008 5A80     		strh	r2, [r3, #2]	@ movhi
+  79:Bsp/Src/bsp_nrf24_status.c **** } ...
+ 330              		.loc 1 79 1 view .LVU103
+ 331 000a 7047     		bx	lr
+ 332              	.L34:
+ 333              		.align	2
+ 334              	.L33:
+ 335 000c 00000000 		.word	nrf24_status
+ 336              		.cfi_endproc
+ 337              	.LFE153:
+ 339              		.global	nrf24_status
+ 340              		.section	.bss.nrf24_status,"aw",%nobits
+ 341              		.align	2
+ 344              	nrf24_status:
+ 345 0000 00000000 		.space	28
+ 345      00000000 
+ 345      00000000 
+ 345      00000000 
+ 345      00000000 
+ 346              		.text
+ 347              	.Letext0:
+ 348              		.file 2 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\machine\\_default_types.h"
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s 			page 9
+
+
+ 349              		.file 3 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\sys\\_stdint.h"
+ 350              		.file 4 "Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h723xx.h"
+ 351              		.file 5 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
+ 352              		.file 6 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h"
+ 353              		.file 7 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_spi.h"
+ 354              		.file 8 "Core/Inc/radio/support.h"
+ 355              		.file 9 "Core/Inc/radio/nrf24.h"
+ 356              		.file 10 "Bsp/Inc/bsp_nrf24_status.h"
+ 357              		.file 11 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h"
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s 			page 10
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 bsp_nrf24_status.c
+C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s:20     .text.BSP_NRF24_Status_Init:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s:27     .text.BSP_NRF24_Status_Init:00000000 BSP_NRF24_Status_Init
+C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s:76     .text.BSP_NRF24_Status_Init:00000024 $d
+C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s:344    .bss.nrf24_status:00000000 nrf24_status
+C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s:81     .text.BSP_NRF24_Status_Update:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s:88     .text.BSP_NRF24_Status_Update:00000000 BSP_NRF24_Status_Update
+C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s:255    .text.BSP_NRF24_Status_Update:00000088 $d
+C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s:260    .text.BSP_NRF24_Status_Get:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s:267    .text.BSP_NRF24_Status_Get:00000000 BSP_NRF24_Status_Get
+C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s:301    .text.BSP_NRF24_Status_Get:0000001c $d
+C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s:306    .text.BSP_NRF24_Status_Reset:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s:313    .text.BSP_NRF24_Status_Reset:00000000 BSP_NRF24_Status_Reset
+C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s:335    .text.BSP_NRF24_Status_Reset:0000000c $d
+C:\Users\l1234\AppData\Local\Temp\ccUa3IED.s:341    .bss.nrf24_status:00000000 $d
+
+UNDEFINED SYMBOLS
+nRF24_Check
+nRF24_GetStatus
+nRF24_GetConfig
+nRF24_GetRFChannel
+nRF24_ReadReg
+nRF24_GetRetransmitCounters
+nRF24_ClearIRQFlags
+HAL_GetTick

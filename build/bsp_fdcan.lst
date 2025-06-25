@@ -1,0 +1,1649 @@
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 2
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"bsp_fdcan.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "Bsp/Src/bsp_fdcan.c"
+  19              		.section	.text.BSP_FDCAN_Filter_Init,"ax",%progbits
+  20              		.align	1
+  21              		.p2align 2,,3
+  22              		.global	BSP_FDCAN_Filter_Init
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	BSP_FDCAN_Filter_Init:
+  28              	.LFB145:
+   1:Bsp/Src/bsp_fdcan.c **** #include "bsp_fdcan.h"
+   2:Bsp/Src/bsp_fdcan.c **** #include "bsp_motor_feedback.h"
+   3:Bsp/Src/bsp_fdcan.c **** #include <string.h>
+   4:Bsp/Src/bsp_fdcan.c **** 
+   5:Bsp/Src/bsp_fdcan.c **** /* Private variables */
+   6:Bsp/Src/bsp_fdcan.c **** static uint8_t rx_buffer[8];  // 8 bytes buffer for receiving data
+   7:Bsp/Src/bsp_fdcan.c **** static uint8_t tx_buffer[8];  // 8 bytes buffer for sending data
+   8:Bsp/Src/bsp_fdcan.c **** 
+   9:Bsp/Src/bsp_fdcan.c **** // Debug counters for CAN reception
+  10:Bsp/Src/bsp_fdcan.c **** volatile uint32_t can1_rx_count = 0;
+  11:Bsp/Src/bsp_fdcan.c **** volatile uint32_t can2_rx_count = 0;
+  12:Bsp/Src/bsp_fdcan.c **** volatile uint32_t can3_rx_count = 0;
+  13:Bsp/Src/bsp_fdcan.c **** 
+  14:Bsp/Src/bsp_fdcan.c **** /**
+  15:Bsp/Src/bsp_fdcan.c ****   * @brief  Initialize FDCAN peripherals
+  16:Bsp/Src/bsp_fdcan.c ****   * @param  None
+  17:Bsp/Src/bsp_fdcan.c ****   * @retval None
+  18:Bsp/Src/bsp_fdcan.c ****   */
+  19:Bsp/Src/bsp_fdcan.c **** void BSP_FDCAN_Init(void)
+  20:Bsp/Src/bsp_fdcan.c **** {
+  21:Bsp/Src/bsp_fdcan.c ****     /* Initialize FDCAN filters */
+  22:Bsp/Src/bsp_fdcan.c ****     BSP_FDCAN_Filter_Init();
+  23:Bsp/Src/bsp_fdcan.c ****     
+  24:Bsp/Src/bsp_fdcan.c ****     /* Initialize motor feedback system */
+  25:Bsp/Src/bsp_fdcan.c ****     BSP_MotorFeedback_Init();
+  26:Bsp/Src/bsp_fdcan.c ****     
+  27:Bsp/Src/bsp_fdcan.c ****     /* Start FDCAN peripherals */
+  28:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_Start(&hfdcan1);
+  29:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_Start(&hfdcan2);
+  30:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_Start(&hfdcan3);
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 2
+
+
+  31:Bsp/Src/bsp_fdcan.c ****     
+  32:Bsp/Src/bsp_fdcan.c ****     /* Activate notification for new messages */
+  33:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
+  34:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
+  35:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_ActivateNotification(&hfdcan3, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
+  36:Bsp/Src/bsp_fdcan.c **** }
+  37:Bsp/Src/bsp_fdcan.c **** 
+  38:Bsp/Src/bsp_fdcan.c **** /**
+  39:Bsp/Src/bsp_fdcan.c ****   * @brief  Initialize FDCAN filters
+  40:Bsp/Src/bsp_fdcan.c ****   * @param  None
+  41:Bsp/Src/bsp_fdcan.c ****   * @retval None
+  42:Bsp/Src/bsp_fdcan.c ****   */
+  43:Bsp/Src/bsp_fdcan.c **** void BSP_FDCAN_Filter_Init(void)
+  44:Bsp/Src/bsp_fdcan.c **** {
+  29              		.loc 1 44 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 32
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  45:Bsp/Src/bsp_fdcan.c ****     FDCAN_FilterTypeDef sFilterConfig;
+  33              		.loc 1 45 5 view .LVU1
+  46:Bsp/Src/bsp_fdcan.c ****     
+  47:Bsp/Src/bsp_fdcan.c ****     /* Configure filter for motor feedback messages */
+  48:Bsp/Src/bsp_fdcan.c ****     sFilterConfig.IdType = FDCAN_STANDARD_ID;
+  34              		.loc 1 48 5 view .LVU2
+  44:Bsp/Src/bsp_fdcan.c ****     FDCAN_FilterTypeDef sFilterConfig;
+  35              		.loc 1 44 1 is_stmt 0 view .LVU3
+  36 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+  37              	.LCFI0:
+  38              		.cfi_def_cfa_offset 24
+  39              		.cfi_offset 4, -24
+  40              		.cfi_offset 5, -20
+  41              		.cfi_offset 6, -16
+  42              		.cfi_offset 7, -12
+  43              		.cfi_offset 8, -8
+  44              		.cfi_offset 14, -4
+  49:Bsp/Src/bsp_fdcan.c ****     sFilterConfig.FilterIndex = 0;
+  50:Bsp/Src/bsp_fdcan.c ****     sFilterConfig.FilterType = FDCAN_FILTER_MASK;
+  51:Bsp/Src/bsp_fdcan.c ****     sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+  45              		.loc 1 51 32 view .LVU4
+  46 0004 0123     		movs	r3, #1
+  44:Bsp/Src/bsp_fdcan.c ****     FDCAN_FilterTypeDef sFilterConfig;
+  47              		.loc 1 44 1 view .LVU5
+  48 0006 8AB0     		sub	sp, sp, #40
+  49              	.LCFI1:
+  50              		.cfi_def_cfa_offset 64
+  50:Bsp/Src/bsp_fdcan.c ****     sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+  51              		.loc 1 50 30 view .LVU6
+  52 0008 0225     		movs	r5, #2
+  52:Bsp/Src/bsp_fdcan.c ****     sFilterConfig.FilterID1 = 0x200;  // Base ID for motor messages
+  53:Bsp/Src/bsp_fdcan.c ****     sFilterConfig.FilterID2 = 0x7F0;  // Mask to accept IDs 0x201-0x204
+  54:Bsp/Src/bsp_fdcan.c ****     
+  55:Bsp/Src/bsp_fdcan.c ****     /* Configure filters for all FDCAN instances */
+  56:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig);
+  53              		.loc 1 56 5 view .LVU7
+  54 000a DFF86C80 		ldr	r8, .L4+8
+  48:Bsp/Src/bsp_fdcan.c ****     sFilterConfig.FilterIndex = 0;
+  55              		.loc 1 48 26 view .LVU8
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 3
+
+
+  56 000e 0024     		movs	r4, #0
+  52:Bsp/Src/bsp_fdcan.c ****     sFilterConfig.FilterID1 = 0x200;  // Base ID for motor messages
+  57              		.loc 1 52 29 view .LVU9
+  58 0010 4FF40072 		mov	r2, #512
+  57:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_ConfigFilter(&hfdcan2, &sFilterConfig);
+  59              		.loc 1 57 5 view .LVU10
+  60 0014 164F     		ldr	r7, .L4
+  56:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_ConfigFilter(&hfdcan2, &sFilterConfig);
+  61              		.loc 1 56 5 view .LVU11
+  62 0016 02A9     		add	r1, sp, #8
+  58:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_ConfigFilter(&hfdcan3, &sFilterConfig);
+  63              		.loc 1 58 5 view .LVU12
+  64 0018 164E     		ldr	r6, .L4+4
+  56:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_ConfigFilter(&hfdcan2, &sFilterConfig);
+  65              		.loc 1 56 5 view .LVU13
+  66 001a 4046     		mov	r0, r8
+  51:Bsp/Src/bsp_fdcan.c ****     sFilterConfig.FilterID1 = 0x200;  // Base ID for motor messages
+  67              		.loc 1 51 32 view .LVU14
+  68 001c CDE90453 		strd	r5, r3, [sp, #16]
+  52:Bsp/Src/bsp_fdcan.c ****     sFilterConfig.FilterID2 = 0x7F0;  // Mask to accept IDs 0x201-0x204
+  69              		.loc 1 52 29 view .LVU15
+  70 0020 4FF4FE63 		mov	r3, #2032
+  49:Bsp/Src/bsp_fdcan.c ****     sFilterConfig.FilterType = FDCAN_FILTER_MASK;
+  71              		.loc 1 49 31 view .LVU16
+  72 0024 CDE90244 		strd	r4, r4, [sp, #8]
+  50:Bsp/Src/bsp_fdcan.c ****     sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+  73              		.loc 1 50 5 is_stmt 1 view .LVU17
+  52:Bsp/Src/bsp_fdcan.c ****     sFilterConfig.FilterID2 = 0x7F0;  // Mask to accept IDs 0x201-0x204
+  74              		.loc 1 52 5 view .LVU18
+  53:Bsp/Src/bsp_fdcan.c ****     
+  75              		.loc 1 53 5 view .LVU19
+  52:Bsp/Src/bsp_fdcan.c ****     sFilterConfig.FilterID2 = 0x7F0;  // Mask to accept IDs 0x201-0x204
+  76              		.loc 1 52 29 is_stmt 0 view .LVU20
+  77 0028 CDE90623 		strd	r2, [sp, #24]
+  56:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_ConfigFilter(&hfdcan2, &sFilterConfig);
+  78              		.loc 1 56 5 is_stmt 1 view .LVU21
+  79 002c FFF7FEFF 		bl	HAL_FDCAN_ConfigFilter
+  80              	.LVL0:
+  57:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_ConfigFilter(&hfdcan3, &sFilterConfig);
+  81              		.loc 1 57 5 view .LVU22
+  82 0030 02A9     		add	r1, sp, #8
+  83 0032 3846     		mov	r0, r7
+  84 0034 FFF7FEFF 		bl	HAL_FDCAN_ConfigFilter
+  85              	.LVL1:
+  86              		.loc 1 58 5 view .LVU23
+  87 0038 02A9     		add	r1, sp, #8
+  88 003a 3046     		mov	r0, r6
+  89 003c FFF7FEFF 		bl	HAL_FDCAN_ConfigFilter
+  90              	.LVL2:
+  59:Bsp/Src/bsp_fdcan.c ****     
+  60:Bsp/Src/bsp_fdcan.c ****     /* Configure global filters to reject non-matching frames */
+  61:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_ConfigGlobalFilter(&hfdcan1, FDCAN_REJECT, FDCAN_REJECT, FDCAN_FILTER_REMOTE, FDCAN_F
+  91              		.loc 1 61 5 view .LVU24
+  92 0040 2346     		mov	r3, r4
+  93 0042 2A46     		mov	r2, r5
+  94 0044 2946     		mov	r1, r5
+  95 0046 4046     		mov	r0, r8
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 4
+
+
+  96 0048 0094     		str	r4, [sp]
+  97 004a FFF7FEFF 		bl	HAL_FDCAN_ConfigGlobalFilter
+  98              	.LVL3:
+  62:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_ConfigGlobalFilter(&hfdcan2, FDCAN_REJECT, FDCAN_REJECT, FDCAN_FILTER_REMOTE, FDCAN_F
+  99              		.loc 1 62 5 view .LVU25
+ 100 004e 2346     		mov	r3, r4
+ 101 0050 2A46     		mov	r2, r5
+ 102 0052 2946     		mov	r1, r5
+ 103 0054 3846     		mov	r0, r7
+ 104 0056 0094     		str	r4, [sp]
+ 105 0058 FFF7FEFF 		bl	HAL_FDCAN_ConfigGlobalFilter
+ 106              	.LVL4:
+  63:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_ConfigGlobalFilter(&hfdcan3, FDCAN_REJECT, FDCAN_REJECT, FDCAN_FILTER_REMOTE, FDCAN_F
+ 107              		.loc 1 63 5 view .LVU26
+ 108 005c 2346     		mov	r3, r4
+ 109 005e 2A46     		mov	r2, r5
+ 110 0060 2946     		mov	r1, r5
+ 111 0062 3046     		mov	r0, r6
+ 112 0064 0094     		str	r4, [sp]
+ 113 0066 FFF7FEFF 		bl	HAL_FDCAN_ConfigGlobalFilter
+ 114              	.LVL5:
+  64:Bsp/Src/bsp_fdcan.c **** }
+ 115              		.loc 1 64 1 is_stmt 0 view .LVU27
+ 116 006a 0AB0     		add	sp, sp, #40
+ 117              	.LCFI2:
+ 118              		.cfi_def_cfa_offset 24
+ 119              		@ sp needed
+ 120 006c BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 121              	.L5:
+ 122              		.align	2
+ 123              	.L4:
+ 124 0070 00000000 		.word	hfdcan2
+ 125 0074 00000000 		.word	hfdcan3
+ 126 0078 00000000 		.word	hfdcan1
+ 127              		.cfi_endproc
+ 128              	.LFE145:
+ 130              		.section	.text.BSP_FDCAN_Init,"ax",%progbits
+ 131              		.align	1
+ 132              		.p2align 2,,3
+ 133              		.global	BSP_FDCAN_Init
+ 134              		.syntax unified
+ 135              		.thumb
+ 136              		.thumb_func
+ 138              	BSP_FDCAN_Init:
+ 139              	.LFB144:
+  20:Bsp/Src/bsp_fdcan.c ****     /* Initialize FDCAN filters */
+ 140              		.loc 1 20 1 is_stmt 1 view -0
+ 141              		.cfi_startproc
+ 142              		@ args = 0, pretend = 0, frame = 0
+ 143              		@ frame_needed = 0, uses_anonymous_args = 0
+  22:Bsp/Src/bsp_fdcan.c ****     
+ 144              		.loc 1 22 5 view .LVU29
+  20:Bsp/Src/bsp_fdcan.c ****     /* Initialize FDCAN filters */
+ 145              		.loc 1 20 1 is_stmt 0 view .LVU30
+ 146 0000 70B5     		push	{r4, r5, r6, lr}
+ 147              	.LCFI3:
+ 148              		.cfi_def_cfa_offset 16
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 5
+
+
+ 149              		.cfi_offset 4, -16
+ 150              		.cfi_offset 5, -12
+ 151              		.cfi_offset 6, -8
+ 152              		.cfi_offset 14, -4
+  28:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_Start(&hfdcan2);
+ 153              		.loc 1 28 5 view .LVU31
+ 154 0002 104E     		ldr	r6, .L8
+  22:Bsp/Src/bsp_fdcan.c ****     
+ 155              		.loc 1 22 5 view .LVU32
+ 156 0004 FFF7FEFF 		bl	BSP_FDCAN_Filter_Init
+ 157              	.LVL6:
+  25:Bsp/Src/bsp_fdcan.c ****     
+ 158              		.loc 1 25 5 is_stmt 1 view .LVU33
+  29:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_Start(&hfdcan3);
+ 159              		.loc 1 29 5 is_stmt 0 view .LVU34
+ 160 0008 0F4D     		ldr	r5, .L8+4
+  25:Bsp/Src/bsp_fdcan.c ****     
+ 161              		.loc 1 25 5 view .LVU35
+ 162 000a FFF7FEFF 		bl	BSP_MotorFeedback_Init
+ 163              	.LVL7:
+  28:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_Start(&hfdcan2);
+ 164              		.loc 1 28 5 is_stmt 1 view .LVU36
+  30:Bsp/Src/bsp_fdcan.c ****     
+ 165              		.loc 1 30 5 is_stmt 0 view .LVU37
+ 166 000e 0F4C     		ldr	r4, .L8+8
+  28:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_Start(&hfdcan2);
+ 167              		.loc 1 28 5 view .LVU38
+ 168 0010 3046     		mov	r0, r6
+ 169 0012 FFF7FEFF 		bl	HAL_FDCAN_Start
+ 170              	.LVL8:
+  29:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_Start(&hfdcan3);
+ 171              		.loc 1 29 5 is_stmt 1 view .LVU39
+ 172 0016 2846     		mov	r0, r5
+ 173 0018 FFF7FEFF 		bl	HAL_FDCAN_Start
+ 174              	.LVL9:
+  30:Bsp/Src/bsp_fdcan.c ****     
+ 175              		.loc 1 30 5 view .LVU40
+ 176 001c 2046     		mov	r0, r4
+ 177 001e FFF7FEFF 		bl	HAL_FDCAN_Start
+ 178              	.LVL10:
+  33:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
+ 179              		.loc 1 33 5 view .LVU41
+ 180 0022 0022     		movs	r2, #0
+ 181 0024 0121     		movs	r1, #1
+ 182 0026 3046     		mov	r0, r6
+ 183 0028 FFF7FEFF 		bl	HAL_FDCAN_ActivateNotification
+ 184              	.LVL11:
+  34:Bsp/Src/bsp_fdcan.c ****     HAL_FDCAN_ActivateNotification(&hfdcan3, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
+ 185              		.loc 1 34 5 view .LVU42
+ 186 002c 0022     		movs	r2, #0
+ 187 002e 0121     		movs	r1, #1
+ 188 0030 2846     		mov	r0, r5
+ 189 0032 FFF7FEFF 		bl	HAL_FDCAN_ActivateNotification
+ 190              	.LVL12:
+  35:Bsp/Src/bsp_fdcan.c **** }
+ 191              		.loc 1 35 5 view .LVU43
+ 192 0036 2046     		mov	r0, r4
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 6
+
+
+ 193 0038 0022     		movs	r2, #0
+ 194 003a 0121     		movs	r1, #1
+  36:Bsp/Src/bsp_fdcan.c **** 
+ 195              		.loc 1 36 1 is_stmt 0 view .LVU44
+ 196 003c BDE87040 		pop	{r4, r5, r6, lr}
+ 197              	.LCFI4:
+ 198              		.cfi_restore 14
+ 199              		.cfi_restore 6
+ 200              		.cfi_restore 5
+ 201              		.cfi_restore 4
+ 202              		.cfi_def_cfa_offset 0
+  35:Bsp/Src/bsp_fdcan.c **** }
+ 203              		.loc 1 35 5 view .LVU45
+ 204 0040 FFF7FEBF 		b	HAL_FDCAN_ActivateNotification
+ 205              	.LVL13:
+ 206              	.L9:
+ 207              		.align	2
+ 208              	.L8:
+ 209 0044 00000000 		.word	hfdcan1
+ 210 0048 00000000 		.word	hfdcan2
+ 211 004c 00000000 		.word	hfdcan3
+ 212              		.cfi_endproc
+ 213              	.LFE144:
+ 215              		.section	.text.BSP_FDCAN_Send_Message,"ax",%progbits
+ 216              		.align	1
+ 217              		.p2align 2,,3
+ 218              		.global	BSP_FDCAN_Send_Message
+ 219              		.syntax unified
+ 220              		.thumb
+ 221              		.thumb_func
+ 223              	BSP_FDCAN_Send_Message:
+ 224              	.LVL14:
+ 225              	.LFB146:
+  65:Bsp/Src/bsp_fdcan.c **** 
+  66:Bsp/Src/bsp_fdcan.c **** /**
+  67:Bsp/Src/bsp_fdcan.c ****   * @brief  Send message through FDCAN
+  68:Bsp/Src/bsp_fdcan.c ****   * @param  hfdcan: FDCAN handle
+  69:Bsp/Src/bsp_fdcan.c ****   * @param  id: Message ID
+  70:Bsp/Src/bsp_fdcan.c ****   * @param  data: Pointer to data buffer
+  71:Bsp/Src/bsp_fdcan.c ****   * @param  len: Length of data (max 8 bytes)
+  72:Bsp/Src/bsp_fdcan.c ****   * @retval HAL status
+  73:Bsp/Src/bsp_fdcan.c ****   */
+  74:Bsp/Src/bsp_fdcan.c **** HAL_StatusTypeDef BSP_FDCAN_Send_Message(FDCAN_HandleTypeDef *hfdcan, uint32_t id, uint8_t *data, u
+  75:Bsp/Src/bsp_fdcan.c **** {
+ 226              		.loc 1 75 1 is_stmt 1 view -0
+ 227              		.cfi_startproc
+ 228              		@ args = 0, pretend = 0, frame = 40
+ 229              		@ frame_needed = 0, uses_anonymous_args = 0
+  76:Bsp/Src/bsp_fdcan.c ****     FDCAN_TxHeaderTypeDef tx_header;
+ 230              		.loc 1 76 5 view .LVU47
+  77:Bsp/Src/bsp_fdcan.c ****     
+  78:Bsp/Src/bsp_fdcan.c ****     /* Configure header */
+  79:Bsp/Src/bsp_fdcan.c ****     tx_header.Identifier = id;
+ 231              		.loc 1 79 5 view .LVU48
+  75:Bsp/Src/bsp_fdcan.c ****     FDCAN_TxHeaderTypeDef tx_header;
+ 232              		.loc 1 75 1 is_stmt 0 view .LVU49
+ 233 0000 10B5     		push	{r4, lr}
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 7
+
+
+ 234              	.LCFI5:
+ 235              		.cfi_def_cfa_offset 8
+ 236              		.cfi_offset 4, -8
+ 237              		.cfi_offset 14, -4
+  80:Bsp/Src/bsp_fdcan.c ****     tx_header.IdType = FDCAN_STANDARD_ID;
+ 238              		.loc 1 80 22 view .LVU50
+ 239 0002 0023     		movs	r3, #0
+ 240              	.LVL15:
+  75:Bsp/Src/bsp_fdcan.c ****     FDCAN_TxHeaderTypeDef tx_header;
+ 241              		.loc 1 75 1 view .LVU51
+ 242 0004 8AB0     		sub	sp, sp, #40
+ 243              	.LCFI6:
+ 244              		.cfi_def_cfa_offset 48
+  81:Bsp/Src/bsp_fdcan.c ****     tx_header.TxFrameType = FDCAN_DATA_FRAME;
+  82:Bsp/Src/bsp_fdcan.c ****     tx_header.DataLength = FDCAN_DLC_BYTES_8;
+ 245              		.loc 1 82 26 view .LVU52
+ 246 0006 0824     		movs	r4, #8
+  83:Bsp/Src/bsp_fdcan.c ****     tx_header.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+  84:Bsp/Src/bsp_fdcan.c ****     tx_header.BitRateSwitch = FDCAN_BRS_OFF;
+  85:Bsp/Src/bsp_fdcan.c ****     tx_header.FDFormat = FDCAN_CLASSIC_CAN;
+  86:Bsp/Src/bsp_fdcan.c ****     tx_header.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+  87:Bsp/Src/bsp_fdcan.c ****     tx_header.MessageMarker = 0;
+ 247              		.loc 1 87 29 view .LVU53
+ 248 0008 0993     		str	r3, [sp, #36]
+  80:Bsp/Src/bsp_fdcan.c ****     tx_header.TxFrameType = FDCAN_DATA_FRAME;
+ 249              		.loc 1 80 22 view .LVU54
+ 250 000a CDE90113 		strd	r1, r3, [sp, #4]
+  81:Bsp/Src/bsp_fdcan.c ****     tx_header.TxFrameType = FDCAN_DATA_FRAME;
+ 251              		.loc 1 81 5 is_stmt 1 view .LVU55
+  88:Bsp/Src/bsp_fdcan.c ****     
+  89:Bsp/Src/bsp_fdcan.c ****     /* Add message to FIFO */
+  90:Bsp/Src/bsp_fdcan.c ****     return HAL_FDCAN_AddMessageToTxFifoQ(hfdcan, &tx_header, data);
+ 252              		.loc 1 90 12 is_stmt 0 view .LVU56
+ 253 000e 01A9     		add	r1, sp, #4
+ 254              	.LVL16:
+  82:Bsp/Src/bsp_fdcan.c ****     tx_header.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+ 255              		.loc 1 82 26 view .LVU57
+ 256 0010 CDE90334 		strd	r3, r4, [sp, #12]
+  83:Bsp/Src/bsp_fdcan.c ****     tx_header.BitRateSwitch = FDCAN_BRS_OFF;
+ 257              		.loc 1 83 5 is_stmt 1 view .LVU58
+  84:Bsp/Src/bsp_fdcan.c ****     tx_header.FDFormat = FDCAN_CLASSIC_CAN;
+ 258              		.loc 1 84 29 is_stmt 0 view .LVU59
+ 259 0014 CDE90533 		strd	r3, r3, [sp, #20]
+  85:Bsp/Src/bsp_fdcan.c ****     tx_header.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+ 260              		.loc 1 85 5 is_stmt 1 view .LVU60
+  86:Bsp/Src/bsp_fdcan.c ****     tx_header.MessageMarker = 0;
+ 261              		.loc 1 86 34 is_stmt 0 view .LVU61
+ 262 0018 CDE90733 		strd	r3, r3, [sp, #28]
+  87:Bsp/Src/bsp_fdcan.c ****     
+ 263              		.loc 1 87 5 is_stmt 1 view .LVU62
+ 264              		.loc 1 90 5 view .LVU63
+ 265              		.loc 1 90 12 is_stmt 0 view .LVU64
+ 266 001c FFF7FEFF 		bl	HAL_FDCAN_AddMessageToTxFifoQ
+ 267              	.LVL17:
+  91:Bsp/Src/bsp_fdcan.c **** }
+ 268              		.loc 1 91 1 view .LVU65
+ 269 0020 0AB0     		add	sp, sp, #40
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 8
+
+
+ 270              	.LCFI7:
+ 271              		.cfi_def_cfa_offset 8
+ 272              		@ sp needed
+ 273 0022 10BD     		pop	{r4, pc}
+ 274              		.cfi_endproc
+ 275              	.LFE146:
+ 277              		.section	.text.BSP_FDCAN_Send_Motor_Command,"ax",%progbits
+ 278              		.align	1
+ 279              		.p2align 2,,3
+ 280              		.global	BSP_FDCAN_Send_Motor_Command
+ 281              		.syntax unified
+ 282              		.thumb
+ 283              		.thumb_func
+ 285              	BSP_FDCAN_Send_Motor_Command:
+ 286              	.LVL18:
+ 287              	.LFB147:
+  92:Bsp/Src/bsp_fdcan.c **** 
+  93:Bsp/Src/bsp_fdcan.c **** /**
+  94:Bsp/Src/bsp_fdcan.c ****   * @brief  Send motor control command for DM3519 motors
+  95:Bsp/Src/bsp_fdcan.c ****   * @param  hfdcan: FDCAN handle
+  96:Bsp/Src/bsp_fdcan.c ****   * @param  motor_currents: Array of 4 current values for motors
+  97:Bsp/Src/bsp_fdcan.c ****   * @retval HAL status
+  98:Bsp/Src/bsp_fdcan.c ****   */
+  99:Bsp/Src/bsp_fdcan.c **** HAL_StatusTypeDef BSP_FDCAN_Send_Motor_Command(FDCAN_HandleTypeDef *hfdcan, int16_t *motor_currents
+ 100:Bsp/Src/bsp_fdcan.c **** {
+ 288              		.loc 1 100 1 is_stmt 1 view -0
+ 289              		.cfi_startproc
+ 290              		@ args = 0, pretend = 0, frame = 40
+ 291              		@ frame_needed = 0, uses_anonymous_args = 0
+ 101:Bsp/Src/bsp_fdcan.c ****     // Pack motor currents into CAN frame
+ 102:Bsp/Src/bsp_fdcan.c ****     for(int i = 0; i < 4; i++) {
+ 292              		.loc 1 102 5 view .LVU67
+ 293              	.LBB7:
+ 294              		.loc 1 102 9 view .LVU68
+ 295              		.loc 1 102 22 view .LVU69
+ 103:Bsp/Src/bsp_fdcan.c ****         tx_buffer[2*i] = (motor_currents[i] >> 8) & 0xFF;     // High byte
+ 296              		.loc 1 103 9 view .LVU70
+ 297              		.loc 1 103 24 is_stmt 0 view .LVU71
+ 298 0000 91F901C0 		ldrsb	ip, [r1, #1]
+ 299 0004 1E4A     		ldr	r2, .L14+24
+ 300 0006 91F90330 		ldrsb	r3, [r1, #3]
+ 301              	.LBE7:
+ 302              	.LBB8:
+ 303              	.LBB9:
+  79:Bsp/Src/bsp_fdcan.c ****     tx_header.IdType = FDCAN_STANDARD_ID;
+ 304              		.loc 1 79 26 view .LVU72
+ 305 000a 9FED177B 		vldr.64	d7, .L14	@ int
+ 306              	.LBE9:
+ 307              	.LBE8:
+ 100:Bsp/Src/bsp_fdcan.c ****     // Pack motor currents into CAN frame
+ 308              		.loc 1 100 1 view .LVU73
+ 309 000e 00B5     		push	{lr}
+ 310              	.LCFI8:
+ 311              		.cfi_def_cfa_offset 4
+ 312              		.cfi_offset 14, -4
+ 313              	.LBB12:
+ 314              		.loc 1 103 24 view .LVU74
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 9
+
+
+ 315 0010 82F800C0 		strb	ip, [r2]
+ 104:Bsp/Src/bsp_fdcan.c ****         tx_buffer[2*i + 1] = motor_currents[i] & 0xFF;        // Low byte
+ 316              		.loc 1 104 9 is_stmt 1 view .LVU75
+ 317              	.LBE12:
+ 100:Bsp/Src/bsp_fdcan.c ****     // Pack motor currents into CAN frame
+ 318              		.loc 1 100 1 is_stmt 0 view .LVU76
+ 319 0014 8BB0     		sub	sp, sp, #44
+ 320              	.LCFI9:
+ 321              		.cfi_def_cfa_offset 48
+ 322              	.LBB13:
+ 323              		.loc 1 104 28 view .LVU77
+ 324 0016 B1F800C0 		ldrh	ip, [r1]
+ 103:Bsp/Src/bsp_fdcan.c ****         tx_buffer[2*i + 1] = motor_currents[i] & 0xFF;        // Low byte
+ 325              		.loc 1 103 24 view .LVU78
+ 326 001a 9370     		strb	r3, [r2, #2]
+ 327              		.loc 1 104 28 view .LVU79
+ 328 001c 4B88     		ldrh	r3, [r1, #2]
+ 329 001e 82F801C0 		strb	ip, [r2, #1]
+ 102:Bsp/Src/bsp_fdcan.c ****         tx_buffer[2*i] = (motor_currents[i] >> 8) & 0xFF;     // High byte
+ 330              		.loc 1 102 28 is_stmt 1 view .LVU80
+ 331              	.LVL19:
+ 102:Bsp/Src/bsp_fdcan.c ****         tx_buffer[2*i] = (motor_currents[i] >> 8) & 0xFF;     // High byte
+ 332              		.loc 1 102 22 view .LVU81
+ 103:Bsp/Src/bsp_fdcan.c ****         tx_buffer[2*i + 1] = motor_currents[i] & 0xFF;        // Low byte
+ 333              		.loc 1 103 9 view .LVU82
+ 334              		.loc 1 104 9 view .LVU83
+ 335              		.loc 1 104 28 is_stmt 0 view .LVU84
+ 336 0022 D370     		strb	r3, [r2, #3]
+ 102:Bsp/Src/bsp_fdcan.c ****         tx_buffer[2*i] = (motor_currents[i] >> 8) & 0xFF;     // High byte
+ 337              		.loc 1 102 28 is_stmt 1 view .LVU85
+ 338              	.LVL20:
+ 102:Bsp/Src/bsp_fdcan.c ****         tx_buffer[2*i] = (motor_currents[i] >> 8) & 0xFF;     // High byte
+ 339              		.loc 1 102 22 view .LVU86
+ 103:Bsp/Src/bsp_fdcan.c ****         tx_buffer[2*i + 1] = motor_currents[i] & 0xFF;        // Low byte
+ 340              		.loc 1 103 9 view .LVU87
+ 103:Bsp/Src/bsp_fdcan.c ****         tx_buffer[2*i + 1] = motor_currents[i] & 0xFF;        // Low byte
+ 341              		.loc 1 103 24 is_stmt 0 view .LVU88
+ 342 0024 91F905C0 		ldrsb	ip, [r1, #5]
+ 343 0028 91F90730 		ldrsb	r3, [r1, #7]
+ 344 002c 82F804C0 		strb	ip, [r2, #4]
+ 345              		.loc 1 104 9 is_stmt 1 view .LVU89
+ 346              		.loc 1 104 28 is_stmt 0 view .LVU90
+ 347 0030 B1F804C0 		ldrh	ip, [r1, #4]
+ 103:Bsp/Src/bsp_fdcan.c ****         tx_buffer[2*i + 1] = motor_currents[i] & 0xFF;        // Low byte
+ 348              		.loc 1 103 24 view .LVU91
+ 349 0034 9371     		strb	r3, [r2, #6]
+ 350              		.loc 1 104 28 view .LVU92
+ 351 0036 CB88     		ldrh	r3, [r1, #6]
+ 352              	.LBE13:
+ 353              	.LBB14:
+ 354              	.LBB10:
+  90:Bsp/Src/bsp_fdcan.c **** }
+ 355              		.loc 1 90 12 view .LVU93
+ 356 0038 6946     		mov	r1, sp
+ 357              	.LVL21:
+  90:Bsp/Src/bsp_fdcan.c **** }
+ 358              		.loc 1 90 12 view .LVU94
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 10
+
+
+ 359              	.LBE10:
+ 360              	.LBE14:
+ 361              	.LBB15:
+ 362              		.loc 1 104 28 view .LVU95
+ 363 003a 82F805C0 		strb	ip, [r2, #5]
+ 102:Bsp/Src/bsp_fdcan.c ****         tx_buffer[2*i] = (motor_currents[i] >> 8) & 0xFF;     // High byte
+ 364              		.loc 1 102 28 is_stmt 1 view .LVU96
+ 365              	.LVL22:
+ 102:Bsp/Src/bsp_fdcan.c ****         tx_buffer[2*i] = (motor_currents[i] >> 8) & 0xFF;     // High byte
+ 366              		.loc 1 102 22 view .LVU97
+ 103:Bsp/Src/bsp_fdcan.c ****         tx_buffer[2*i + 1] = motor_currents[i] & 0xFF;        // Low byte
+ 367              		.loc 1 103 9 view .LVU98
+ 368              		.loc 1 104 9 view .LVU99
+ 369              		.loc 1 104 28 is_stmt 0 view .LVU100
+ 370 003e D371     		strb	r3, [r2, #7]
+ 102:Bsp/Src/bsp_fdcan.c ****         tx_buffer[2*i] = (motor_currents[i] >> 8) & 0xFF;     // High byte
+ 371              		.loc 1 102 28 is_stmt 1 view .LVU101
+ 372              	.LVL23:
+ 102:Bsp/Src/bsp_fdcan.c ****         tx_buffer[2*i] = (motor_currents[i] >> 8) & 0xFF;     // High byte
+ 373              		.loc 1 102 22 view .LVU102
+ 374              	.LBE15:
+ 105:Bsp/Src/bsp_fdcan.c ****     }
+ 106:Bsp/Src/bsp_fdcan.c ****     
+ 107:Bsp/Src/bsp_fdcan.c ****     // Send command frame
+ 108:Bsp/Src/bsp_fdcan.c ****     return BSP_FDCAN_Send_Message(hfdcan, FDCAN_MSG_ID_CONTROL, tx_buffer, 8);
+ 375              		.loc 1 108 5 view .LVU103
+ 376              	.LBB16:
+ 377              	.LBI8:
+  74:Bsp/Src/bsp_fdcan.c **** {
+ 378              		.loc 1 74 19 view .LVU104
+ 379              	.LBB11:
+  76:Bsp/Src/bsp_fdcan.c ****     
+ 380              		.loc 1 76 5 view .LVU105
+  79:Bsp/Src/bsp_fdcan.c ****     tx_header.IdType = FDCAN_STANDARD_ID;
+ 381              		.loc 1 79 5 view .LVU106
+  80:Bsp/Src/bsp_fdcan.c ****     tx_header.TxFrameType = FDCAN_DATA_FRAME;
+ 382              		.loc 1 80 5 view .LVU107
+  81:Bsp/Src/bsp_fdcan.c ****     tx_header.DataLength = FDCAN_DLC_BYTES_8;
+ 383              		.loc 1 81 5 view .LVU108
+  82:Bsp/Src/bsp_fdcan.c ****     tx_header.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+ 384              		.loc 1 82 5 view .LVU109
+  83:Bsp/Src/bsp_fdcan.c ****     tx_header.BitRateSwitch = FDCAN_BRS_OFF;
+ 385              		.loc 1 83 5 view .LVU110
+  84:Bsp/Src/bsp_fdcan.c ****     tx_header.FDFormat = FDCAN_CLASSIC_CAN;
+ 386              		.loc 1 84 5 view .LVU111
+  85:Bsp/Src/bsp_fdcan.c ****     tx_header.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+ 387              		.loc 1 85 5 view .LVU112
+  86:Bsp/Src/bsp_fdcan.c ****     tx_header.MessageMarker = 0;
+ 388              		.loc 1 86 5 view .LVU113
+  87:Bsp/Src/bsp_fdcan.c ****     
+ 389              		.loc 1 87 29 is_stmt 0 view .LVU114
+ 390 0040 0023     		movs	r3, #0
+  79:Bsp/Src/bsp_fdcan.c ****     tx_header.IdType = FDCAN_STANDARD_ID;
+ 391              		.loc 1 79 26 view .LVU115
+ 392 0042 8DED007B 		vstr.64	d7, [sp]	@ int
+ 393 0046 9FED0A7B 		vldr.64	d7, .L14+8	@ int
+  87:Bsp/Src/bsp_fdcan.c ****     
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 11
+
+
+ 394              		.loc 1 87 29 view .LVU116
+ 395 004a 0893     		str	r3, [sp, #32]
+  79:Bsp/Src/bsp_fdcan.c ****     tx_header.IdType = FDCAN_STANDARD_ID;
+ 396              		.loc 1 79 26 view .LVU117
+ 397 004c 8DED027B 		vstr.64	d7, [sp, #8]	@ int
+ 398 0050 9FED097B 		vldr.64	d7, .L14+16	@ int
+ 399 0054 8DED047B 		vstr.64	d7, [sp, #16]	@ int
+ 400 0058 8DED067B 		vstr.64	d7, [sp, #24]	@ int
+  87:Bsp/Src/bsp_fdcan.c ****     
+ 401              		.loc 1 87 5 is_stmt 1 view .LVU118
+  90:Bsp/Src/bsp_fdcan.c **** }
+ 402              		.loc 1 90 5 view .LVU119
+  90:Bsp/Src/bsp_fdcan.c **** }
+ 403              		.loc 1 90 12 is_stmt 0 view .LVU120
+ 404 005c FFF7FEFF 		bl	HAL_FDCAN_AddMessageToTxFifoQ
+ 405              	.LVL24:
+  90:Bsp/Src/bsp_fdcan.c **** }
+ 406              		.loc 1 90 12 view .LVU121
+ 407              	.LBE11:
+ 408              	.LBE16:
+ 109:Bsp/Src/bsp_fdcan.c **** }
+ 409              		.loc 1 109 1 view .LVU122
+ 410 0060 0BB0     		add	sp, sp, #44
+ 411              	.LCFI10:
+ 412              		.cfi_def_cfa_offset 4
+ 413              		@ sp needed
+ 414 0062 5DF804FB 		ldr	pc, [sp], #4
+ 415              	.L15:
+ 416 0066 00BF     		.align	3
+ 417              	.L14:
+ 418 0068 00020000 		.word	512
+ 419 006c 00000000 		.word	0
+ 420 0070 00000000 		.word	0
+ 421 0074 08000000 		.word	8
+ 422 0078 00000000 		.word	0
+ 423 007c 00000000 		.word	0
+ 424 0080 00000000 		.word	tx_buffer
+ 425              		.cfi_endproc
+ 426              	.LFE147:
+ 428              		.section	.text.BSP_FDCAN_Clear_Error,"ax",%progbits
+ 429              		.align	1
+ 430              		.p2align 2,,3
+ 431              		.global	BSP_FDCAN_Clear_Error
+ 432              		.syntax unified
+ 433              		.thumb
+ 434              		.thumb_func
+ 436              	BSP_FDCAN_Clear_Error:
+ 437              	.LVL25:
+ 438              	.LFB148:
+ 110:Bsp/Src/bsp_fdcan.c **** 
+ 111:Bsp/Src/bsp_fdcan.c **** /**
+ 112:Bsp/Src/bsp_fdcan.c ****   * @brief  Clear error for a specific motor
+ 113:Bsp/Src/bsp_fdcan.c ****   * @param  hfdcan: FDCAN handle
+ 114:Bsp/Src/bsp_fdcan.c ****   * @param  motor_id: Motor ID (1-4)
+ 115:Bsp/Src/bsp_fdcan.c ****   * @retval HAL status
+ 116:Bsp/Src/bsp_fdcan.c ****   */
+ 117:Bsp/Src/bsp_fdcan.c **** HAL_StatusTypeDef BSP_FDCAN_Clear_Error(FDCAN_HandleTypeDef *hfdcan, uint8_t motor_id)
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 12
+
+
+ 118:Bsp/Src/bsp_fdcan.c **** {
+ 439              		.loc 1 118 1 is_stmt 1 view -0
+ 440              		.cfi_startproc
+ 441              		@ args = 0, pretend = 0, frame = 40
+ 442              		@ frame_needed = 0, uses_anonymous_args = 0
+ 119:Bsp/Src/bsp_fdcan.c ****     // Prepare error clear command
+ 120:Bsp/Src/bsp_fdcan.c ****     tx_buffer[0] = motor_id & 0xFF;        // CANID_L
+ 443              		.loc 1 120 5 view .LVU124
+ 444              	.LBB19:
+ 445              	.LBB20:
+  79:Bsp/Src/bsp_fdcan.c ****     tx_header.IdType = FDCAN_STANDARD_ID;
+ 446              		.loc 1 79 26 is_stmt 0 view .LVU125
+ 447 0000 9FED0F7B 		vldr.64	d7, .L18	@ int
+ 448              	.LBE20:
+ 449              	.LBE19:
+ 118:Bsp/Src/bsp_fdcan.c ****     // Prepare error clear command
+ 450              		.loc 1 118 1 view .LVU126
+ 451 0004 00B5     		push	{lr}
+ 452              	.LCFI11:
+ 453              		.cfi_def_cfa_offset 4
+ 454              		.cfi_offset 14, -4
+ 455 0006 8BB0     		sub	sp, sp, #44
+ 456              	.LCFI12:
+ 457              		.cfi_def_cfa_offset 48
+ 458              		.loc 1 120 18 view .LVU127
+ 459 0008 134A     		ldr	r2, .L18+24
+ 121:Bsp/Src/bsp_fdcan.c ****     tx_buffer[1] = (motor_id >> 8) & 0xFF; // CANID_H
+ 460              		.loc 1 121 18 view .LVU128
+ 461 000a 0023     		movs	r3, #0
+ 122:Bsp/Src/bsp_fdcan.c ****     tx_buffer[2] = 0x55;
+ 462              		.loc 1 122 18 view .LVU129
+ 463 000c 43F6554C 		movw	ip, #15445
+ 120:Bsp/Src/bsp_fdcan.c ****     tx_buffer[1] = (motor_id >> 8) & 0xFF; // CANID_H
+ 464              		.loc 1 120 18 view .LVU130
+ 465 0010 1170     		strb	r1, [r2]
+ 121:Bsp/Src/bsp_fdcan.c ****     tx_buffer[1] = (motor_id >> 8) & 0xFF; // CANID_H
+ 466              		.loc 1 121 5 is_stmt 1 view .LVU131
+ 467              		.loc 1 122 5 view .LVU132
+ 123:Bsp/Src/bsp_fdcan.c ****     tx_buffer[3] = 0x3C;
+ 468              		.loc 1 123 5 view .LVU133
+ 124:Bsp/Src/bsp_fdcan.c ****     tx_buffer[4] = 0x00;
+ 469              		.loc 1 124 5 view .LVU134
+ 125:Bsp/Src/bsp_fdcan.c ****     tx_buffer[5] = 0x00;
+ 470              		.loc 1 125 5 view .LVU135
+ 126:Bsp/Src/bsp_fdcan.c ****     tx_buffer[6] = 0x00;
+ 471              		.loc 1 126 5 view .LVU136
+ 127:Bsp/Src/bsp_fdcan.c ****     tx_buffer[7] = 0x00;
+ 472              		.loc 1 127 5 view .LVU137
+ 128:Bsp/Src/bsp_fdcan.c ****     
+ 129:Bsp/Src/bsp_fdcan.c ****     // Send error clear command
+ 130:Bsp/Src/bsp_fdcan.c ****     return BSP_FDCAN_Send_Message(hfdcan, FDCAN_MSG_ID_ERROR_CLEAR, tx_buffer, 8);
+ 473              		.loc 1 130 5 view .LVU138
+ 474              	.LVL26:
+ 475              	.LBB24:
+ 476              	.LBI19:
+  74:Bsp/Src/bsp_fdcan.c **** {
+ 477              		.loc 1 74 19 view .LVU139
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 13
+
+
+ 478              	.LBB21:
+  76:Bsp/Src/bsp_fdcan.c ****     
+ 479              		.loc 1 76 5 view .LVU140
+  79:Bsp/Src/bsp_fdcan.c ****     tx_header.IdType = FDCAN_STANDARD_ID;
+ 480              		.loc 1 79 5 view .LVU141
+  80:Bsp/Src/bsp_fdcan.c ****     tx_header.TxFrameType = FDCAN_DATA_FRAME;
+ 481              		.loc 1 80 5 view .LVU142
+  81:Bsp/Src/bsp_fdcan.c ****     tx_header.DataLength = FDCAN_DLC_BYTES_8;
+ 482              		.loc 1 81 5 view .LVU143
+  82:Bsp/Src/bsp_fdcan.c ****     tx_header.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+ 483              		.loc 1 82 5 view .LVU144
+  83:Bsp/Src/bsp_fdcan.c ****     tx_header.BitRateSwitch = FDCAN_BRS_OFF;
+ 484              		.loc 1 83 5 view .LVU145
+  84:Bsp/Src/bsp_fdcan.c ****     tx_header.FDFormat = FDCAN_CLASSIC_CAN;
+ 485              		.loc 1 84 5 view .LVU146
+  85:Bsp/Src/bsp_fdcan.c ****     tx_header.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+ 486              		.loc 1 85 5 view .LVU147
+  86:Bsp/Src/bsp_fdcan.c ****     tx_header.MessageMarker = 0;
+ 487              		.loc 1 86 5 view .LVU148
+  90:Bsp/Src/bsp_fdcan.c **** }
+ 488              		.loc 1 90 12 is_stmt 0 view .LVU149
+ 489 0012 6946     		mov	r1, sp
+ 490              	.LVL27:
+  90:Bsp/Src/bsp_fdcan.c **** }
+ 491              		.loc 1 90 12 view .LVU150
+ 492              	.LBE21:
+ 493              	.LBE24:
+ 121:Bsp/Src/bsp_fdcan.c ****     tx_buffer[2] = 0x55;
+ 494              		.loc 1 121 18 view .LVU151
+ 495 0014 5370     		strb	r3, [r2, #1]
+ 124:Bsp/Src/bsp_fdcan.c ****     tx_buffer[5] = 0x00;
+ 496              		.loc 1 124 18 view .LVU152
+ 497 0016 5360     		str	r3, [r2, #4]
+ 498              	.LBB25:
+ 499              	.LBB22:
+  87:Bsp/Src/bsp_fdcan.c ****     
+ 500              		.loc 1 87 29 view .LVU153
+ 501 0018 0893     		str	r3, [sp, #32]
+ 502              	.LBE22:
+ 503              	.LBE25:
+ 122:Bsp/Src/bsp_fdcan.c ****     tx_buffer[3] = 0x3C;
+ 504              		.loc 1 122 18 view .LVU154
+ 505 001a A2F802C0 		strh	ip, [r2, #2]	@ movhi
+ 506              	.LBB26:
+ 507              	.LBB23:
+  79:Bsp/Src/bsp_fdcan.c ****     tx_header.IdType = FDCAN_STANDARD_ID;
+ 508              		.loc 1 79 26 view .LVU155
+ 509 001e 8DED007B 		vstr.64	d7, [sp]	@ int
+ 510 0022 9FED097B 		vldr.64	d7, .L18+8	@ int
+ 511 0026 8DED027B 		vstr.64	d7, [sp, #8]	@ int
+ 512 002a 9FED097B 		vldr.64	d7, .L18+16	@ int
+ 513 002e 8DED047B 		vstr.64	d7, [sp, #16]	@ int
+ 514 0032 8DED067B 		vstr.64	d7, [sp, #24]	@ int
+  87:Bsp/Src/bsp_fdcan.c ****     
+ 515              		.loc 1 87 5 is_stmt 1 view .LVU156
+  90:Bsp/Src/bsp_fdcan.c **** }
+ 516              		.loc 1 90 5 view .LVU157
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 14
+
+
+  90:Bsp/Src/bsp_fdcan.c **** }
+ 517              		.loc 1 90 12 is_stmt 0 view .LVU158
+ 518 0036 FFF7FEFF 		bl	HAL_FDCAN_AddMessageToTxFifoQ
+ 519              	.LVL28:
+  90:Bsp/Src/bsp_fdcan.c **** }
+ 520              		.loc 1 90 12 view .LVU159
+ 521              	.LBE23:
+ 522              	.LBE26:
+ 131:Bsp/Src/bsp_fdcan.c **** }
+ 523              		.loc 1 131 1 view .LVU160
+ 524 003a 0BB0     		add	sp, sp, #44
+ 525              	.LCFI13:
+ 526              		.cfi_def_cfa_offset 4
+ 527              		@ sp needed
+ 528 003c 5DF804FB 		ldr	pc, [sp], #4
+ 529              	.L19:
+ 530              		.align	3
+ 531              	.L18:
+ 532 0040 FF070000 		.word	2047
+ 533 0044 00000000 		.word	0
+ 534 0048 00000000 		.word	0
+ 535 004c 08000000 		.word	8
+ 536 0050 00000000 		.word	0
+ 537 0054 00000000 		.word	0
+ 538 0058 00000000 		.word	tx_buffer
+ 539              		.cfi_endproc
+ 540              	.LFE148:
+ 542              		.section	.text.BSP_FDCAN_Receive_Message,"ax",%progbits
+ 543              		.align	1
+ 544              		.p2align 2,,3
+ 545              		.global	BSP_FDCAN_Receive_Message
+ 546              		.syntax unified
+ 547              		.thumb
+ 548              		.thumb_func
+ 550              	BSP_FDCAN_Receive_Message:
+ 551              	.LVL29:
+ 552              	.LFB150:
+ 132:Bsp/Src/bsp_fdcan.c **** 
+ 133:Bsp/Src/bsp_fdcan.c **** /**
+ 134:Bsp/Src/bsp_fdcan.c ****   * @brief  Process received feedback message
+ 135:Bsp/Src/bsp_fdcan.c ****   * @param  rx_header: Pointer to CAN message header
+ 136:Bsp/Src/bsp_fdcan.c ****   * @param  data: Pointer to received data
+ 137:Bsp/Src/bsp_fdcan.c ****   * @retval None
+ 138:Bsp/Src/bsp_fdcan.c ****   */
+ 139:Bsp/Src/bsp_fdcan.c **** static void ProcessFeedbackMessage(FDCAN_RxHeaderTypeDef *rx_header, uint8_t *data)
+ 140:Bsp/Src/bsp_fdcan.c **** {
+ 141:Bsp/Src/bsp_fdcan.c ****     // Get motor ID from CAN ID (0x201 -> 1, 0x202 -> 2, etc.)
+ 142:Bsp/Src/bsp_fdcan.c ****     uint8_t motor_id = rx_header->Identifier - 0x200;
+ 143:Bsp/Src/bsp_fdcan.c ****     
+ 144:Bsp/Src/bsp_fdcan.c ****     // Process through motor feedback system if it's a valid motor ID
+ 145:Bsp/Src/bsp_fdcan.c ****     if(motor_id >= 1 && motor_id <= 4) {
+ 146:Bsp/Src/bsp_fdcan.c ****         BSP_MotorFeedback_ProcessMessage(motor_id, data);
+ 147:Bsp/Src/bsp_fdcan.c ****     }
+ 148:Bsp/Src/bsp_fdcan.c **** }
+ 149:Bsp/Src/bsp_fdcan.c **** 
+ 150:Bsp/Src/bsp_fdcan.c **** /**
+ 151:Bsp/Src/bsp_fdcan.c ****   * @brief  Receive message from FDCAN
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 15
+
+
+ 152:Bsp/Src/bsp_fdcan.c ****   * @param  hfdcan: FDCAN handle
+ 153:Bsp/Src/bsp_fdcan.c ****   * @param  data: Pointer to data buffer
+ 154:Bsp/Src/bsp_fdcan.c ****   * @retval HAL status
+ 155:Bsp/Src/bsp_fdcan.c ****   */
+ 156:Bsp/Src/bsp_fdcan.c **** HAL_StatusTypeDef BSP_FDCAN_Receive_Message(FDCAN_HandleTypeDef *hfdcan, uint8_t *data)
+ 157:Bsp/Src/bsp_fdcan.c **** {
+ 553              		.loc 1 157 1 is_stmt 1 view -0
+ 554              		.cfi_startproc
+ 555              		@ args = 0, pretend = 0, frame = 40
+ 556              		@ frame_needed = 0, uses_anonymous_args = 0
+ 158:Bsp/Src/bsp_fdcan.c ****     FDCAN_RxHeaderTypeDef rx_header;
+ 557              		.loc 1 158 5 view .LVU162
+ 159:Bsp/Src/bsp_fdcan.c ****     
+ 160:Bsp/Src/bsp_fdcan.c ****     /* Get message from FIFO */
+ 161:Bsp/Src/bsp_fdcan.c ****     if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &rx_header, data) == HAL_OK)
+ 558              		.loc 1 161 5 view .LVU163
+ 157:Bsp/Src/bsp_fdcan.c ****     FDCAN_RxHeaderTypeDef rx_header;
+ 559              		.loc 1 157 1 is_stmt 0 view .LVU164
+ 560 0000 30B5     		push	{r4, r5, lr}
+ 561              	.LCFI14:
+ 562              		.cfi_def_cfa_offset 12
+ 563              		.cfi_offset 4, -12
+ 564              		.cfi_offset 5, -8
+ 565              		.cfi_offset 14, -4
+ 566 0002 0D46     		mov	r5, r1
+ 567 0004 8BB0     		sub	sp, sp, #44
+ 568              	.LCFI15:
+ 569              		.cfi_def_cfa_offset 56
+ 570              		.loc 1 161 9 view .LVU165
+ 571 0006 4021     		movs	r1, #64
+ 572              	.LVL30:
+ 573              		.loc 1 161 9 view .LVU166
+ 574 0008 6A46     		mov	r2, sp
+ 575 000a 2B46     		mov	r3, r5
+ 576 000c FFF7FEFF 		bl	HAL_FDCAN_GetRxMessage
+ 577              	.LVL31:
+ 578              		.loc 1 161 8 view .LVU167
+ 579 0010 18B1     		cbz	r0, .L25
+ 162:Bsp/Src/bsp_fdcan.c ****     {
+ 163:Bsp/Src/bsp_fdcan.c ****         ProcessFeedbackMessage(&rx_header, data);
+ 164:Bsp/Src/bsp_fdcan.c ****         return HAL_OK;
+ 165:Bsp/Src/bsp_fdcan.c ****     }
+ 166:Bsp/Src/bsp_fdcan.c ****     
+ 167:Bsp/Src/bsp_fdcan.c ****     return HAL_ERROR;
+ 580              		.loc 1 167 12 view .LVU168
+ 581 0012 0124     		movs	r4, #1
+ 582              	.L21:
+ 168:Bsp/Src/bsp_fdcan.c **** }
+ 583              		.loc 1 168 1 view .LVU169
+ 584 0014 2046     		mov	r0, r4
+ 585 0016 0BB0     		add	sp, sp, #44
+ 586              	.LCFI16:
+ 587              		.cfi_remember_state
+ 588              		.cfi_def_cfa_offset 12
+ 589              		@ sp needed
+ 590 0018 30BD     		pop	{r4, r5, pc}
+ 591              	.LVL32:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 16
+
+
+ 592              	.L25:
+ 593              	.LCFI17:
+ 594              		.cfi_restore_state
+ 595              		.loc 1 168 1 view .LVU170
+ 596 001a 0446     		mov	r4, r0
+ 163:Bsp/Src/bsp_fdcan.c ****         return HAL_OK;
+ 597              		.loc 1 163 9 is_stmt 1 view .LVU171
+ 598              	.LVL33:
+ 599              	.LBB29:
+ 600              	.LBI29:
+ 139:Bsp/Src/bsp_fdcan.c **** {
+ 601              		.loc 1 139 13 view .LVU172
+ 602              	.LBB30:
+ 142:Bsp/Src/bsp_fdcan.c ****     
+ 603              		.loc 1 142 5 view .LVU173
+ 142:Bsp/Src/bsp_fdcan.c ****     
+ 604              		.loc 1 142 33 is_stmt 0 view .LVU174
+ 605 001c 0098     		ldr	r0, [sp]
+ 606              	.LVL34:
+ 145:Bsp/Src/bsp_fdcan.c ****         BSP_MotorFeedback_ProcessMessage(motor_id, data);
+ 607              		.loc 1 145 5 is_stmt 1 view .LVU175
+ 145:Bsp/Src/bsp_fdcan.c ****         BSP_MotorFeedback_ProcessMessage(motor_id, data);
+ 608              		.loc 1 145 22 is_stmt 0 view .LVU176
+ 609 001e 431E     		subs	r3, r0, #1
+ 145:Bsp/Src/bsp_fdcan.c ****         BSP_MotorFeedback_ProcessMessage(motor_id, data);
+ 610              		.loc 1 145 7 view .LVU177
+ 611 0020 DBB2     		uxtb	r3, r3
+ 612 0022 032B     		cmp	r3, #3
+ 613 0024 F6D8     		bhi	.L21
+ 146:Bsp/Src/bsp_fdcan.c ****     }
+ 614              		.loc 1 146 9 is_stmt 1 view .LVU178
+ 615 0026 2946     		mov	r1, r5
+ 616 0028 C0B2     		uxtb	r0, r0
+ 146:Bsp/Src/bsp_fdcan.c ****     }
+ 617              		.loc 1 146 9 is_stmt 0 view .LVU179
+ 618 002a FFF7FEFF 		bl	BSP_MotorFeedback_ProcessMessage
+ 619              	.LVL35:
+ 146:Bsp/Src/bsp_fdcan.c ****     }
+ 620              		.loc 1 146 9 view .LVU180
+ 621              	.LBE30:
+ 622              	.LBE29:
+ 623              		.loc 1 168 1 view .LVU181
+ 624 002e 2046     		mov	r0, r4
+ 625 0030 0BB0     		add	sp, sp, #44
+ 626              	.LCFI18:
+ 627              		.cfi_def_cfa_offset 12
+ 628              		@ sp needed
+ 629 0032 30BD     		pop	{r4, r5, pc}
+ 630              		.loc 1 168 1 view .LVU182
+ 631              		.cfi_endproc
+ 632              	.LFE150:
+ 634              		.section	.text.BSP_FDCAN1_RxCallback,"ax",%progbits
+ 635              		.align	1
+ 636              		.p2align 2,,3
+ 637              		.global	BSP_FDCAN1_RxCallback
+ 638              		.syntax unified
+ 639              		.thumb
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 17
+
+
+ 640              		.thumb_func
+ 642              	BSP_FDCAN1_RxCallback:
+ 643              	.LFB151:
+ 169:Bsp/Src/bsp_fdcan.c **** 
+ 170:Bsp/Src/bsp_fdcan.c **** /**
+ 171:Bsp/Src/bsp_fdcan.c ****   * @brief  FDCAN1 Rx callback
+ 172:Bsp/Src/bsp_fdcan.c ****   * @param  None
+ 173:Bsp/Src/bsp_fdcan.c ****   * @retval None
+ 174:Bsp/Src/bsp_fdcan.c ****   */
+ 175:Bsp/Src/bsp_fdcan.c **** void BSP_FDCAN1_RxCallback(void)
+ 176:Bsp/Src/bsp_fdcan.c **** {
+ 644              		.loc 1 176 1 is_stmt 1 view -0
+ 645              		.cfi_startproc
+ 646              		@ args = 0, pretend = 0, frame = 40
+ 647              		@ frame_needed = 0, uses_anonymous_args = 0
+ 177:Bsp/Src/bsp_fdcan.c ****     can1_rx_count++;
+ 648              		.loc 1 177 5 view .LVU184
+ 176:Bsp/Src/bsp_fdcan.c ****     can1_rx_count++;
+ 649              		.loc 1 176 1 is_stmt 0 view .LVU185
+ 650 0000 10B5     		push	{r4, lr}
+ 651              	.LCFI19:
+ 652              		.cfi_def_cfa_offset 8
+ 653              		.cfi_offset 4, -8
+ 654              		.cfi_offset 14, -4
+ 655              		.loc 1 177 18 view .LVU186
+ 656 0002 0C4C     		ldr	r4, .L30
+ 176:Bsp/Src/bsp_fdcan.c ****     can1_rx_count++;
+ 657              		.loc 1 176 1 view .LVU187
+ 658 0004 8AB0     		sub	sp, sp, #40
+ 659              	.LCFI20:
+ 660              		.cfi_def_cfa_offset 48
+ 661              	.LBB35:
+ 662              	.LBB36:
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 663              		.loc 1 161 9 view .LVU188
+ 664 0006 0C4B     		ldr	r3, .L30+4
+ 665 0008 4021     		movs	r1, #64
+ 666              	.LBE36:
+ 667              	.LBE35:
+ 668              		.loc 1 177 18 view .LVU189
+ 669 000a 2068     		ldr	r0, [r4]
+ 670              	.LBB42:
+ 671              	.LBB39:
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 672              		.loc 1 161 9 view .LVU190
+ 673 000c 6A46     		mov	r2, sp
+ 674              	.LBE39:
+ 675              	.LBE42:
+ 676              		.loc 1 177 18 view .LVU191
+ 677 000e 0130     		adds	r0, r0, #1
+ 678 0010 2060     		str	r0, [r4]
+ 178:Bsp/Src/bsp_fdcan.c ****     BSP_FDCAN_Receive_Message(&hfdcan1, rx_buffer);
+ 679              		.loc 1 178 5 is_stmt 1 view .LVU192
+ 680              	.LVL36:
+ 681              	.LBB43:
+ 682              	.LBI35:
+ 156:Bsp/Src/bsp_fdcan.c **** {
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 18
+
+
+ 683              		.loc 1 156 19 view .LVU193
+ 684              	.LBB40:
+ 158:Bsp/Src/bsp_fdcan.c ****     
+ 685              		.loc 1 158 5 view .LVU194
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 686              		.loc 1 161 5 view .LVU195
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 687              		.loc 1 161 9 is_stmt 0 view .LVU196
+ 688 0012 0A48     		ldr	r0, .L30+8
+ 689 0014 FFF7FEFF 		bl	HAL_FDCAN_GetRxMessage
+ 690              	.LVL37:
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 691              		.loc 1 161 8 view .LVU197
+ 692 0018 08B1     		cbz	r0, .L29
+ 693              	.L26:
+ 694              	.LBE40:
+ 695              	.LBE43:
+ 179:Bsp/Src/bsp_fdcan.c **** }
+ 696              		.loc 1 179 1 view .LVU198
+ 697 001a 0AB0     		add	sp, sp, #40
+ 698              	.LCFI21:
+ 699              		.cfi_remember_state
+ 700              		.cfi_def_cfa_offset 8
+ 701              		@ sp needed
+ 702 001c 10BD     		pop	{r4, pc}
+ 703              	.L29:
+ 704              	.LCFI22:
+ 705              		.cfi_restore_state
+ 706              	.LBB44:
+ 707              	.LBB41:
+ 163:Bsp/Src/bsp_fdcan.c ****         return HAL_OK;
+ 708              		.loc 1 163 9 is_stmt 1 view .LVU199
+ 709              	.LVL38:
+ 710              	.LBB37:
+ 711              	.LBI37:
+ 139:Bsp/Src/bsp_fdcan.c **** {
+ 712              		.loc 1 139 13 view .LVU200
+ 713              	.LBB38:
+ 142:Bsp/Src/bsp_fdcan.c ****     
+ 714              		.loc 1 142 5 view .LVU201
+ 142:Bsp/Src/bsp_fdcan.c ****     
+ 715              		.loc 1 142 33 is_stmt 0 view .LVU202
+ 716 001e 0098     		ldr	r0, [sp]
+ 717              	.LVL39:
+ 145:Bsp/Src/bsp_fdcan.c ****         BSP_MotorFeedback_ProcessMessage(motor_id, data);
+ 718              		.loc 1 145 5 is_stmt 1 view .LVU203
+ 145:Bsp/Src/bsp_fdcan.c ****         BSP_MotorFeedback_ProcessMessage(motor_id, data);
+ 719              		.loc 1 145 22 is_stmt 0 view .LVU204
+ 720 0020 431E     		subs	r3, r0, #1
+ 145:Bsp/Src/bsp_fdcan.c ****         BSP_MotorFeedback_ProcessMessage(motor_id, data);
+ 721              		.loc 1 145 7 view .LVU205
+ 722 0022 DBB2     		uxtb	r3, r3
+ 723 0024 032B     		cmp	r3, #3
+ 724 0026 F8D8     		bhi	.L26
+ 146:Bsp/Src/bsp_fdcan.c ****     }
+ 725              		.loc 1 146 9 is_stmt 1 view .LVU206
+ 726 0028 0349     		ldr	r1, .L30+4
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 19
+
+
+ 727 002a C0B2     		uxtb	r0, r0
+ 146:Bsp/Src/bsp_fdcan.c ****     }
+ 728              		.loc 1 146 9 is_stmt 0 view .LVU207
+ 729 002c FFF7FEFF 		bl	BSP_MotorFeedback_ProcessMessage
+ 730              	.LVL40:
+ 146:Bsp/Src/bsp_fdcan.c ****     }
+ 731              		.loc 1 146 9 view .LVU208
+ 732              	.LBE38:
+ 733              	.LBE37:
+ 734              	.LBE41:
+ 735              	.LBE44:
+ 736              		.loc 1 179 1 view .LVU209
+ 737 0030 0AB0     		add	sp, sp, #40
+ 738              	.LCFI23:
+ 739              		.cfi_def_cfa_offset 8
+ 740              		@ sp needed
+ 741 0032 10BD     		pop	{r4, pc}
+ 742              	.L31:
+ 743              		.align	2
+ 744              	.L30:
+ 745 0034 00000000 		.word	can1_rx_count
+ 746 0038 00000000 		.word	rx_buffer
+ 747 003c 00000000 		.word	hfdcan1
+ 748              		.cfi_endproc
+ 749              	.LFE151:
+ 751              		.section	.text.BSP_FDCAN2_RxCallback,"ax",%progbits
+ 752              		.align	1
+ 753              		.p2align 2,,3
+ 754              		.global	BSP_FDCAN2_RxCallback
+ 755              		.syntax unified
+ 756              		.thumb
+ 757              		.thumb_func
+ 759              	BSP_FDCAN2_RxCallback:
+ 760              	.LFB152:
+ 180:Bsp/Src/bsp_fdcan.c **** 
+ 181:Bsp/Src/bsp_fdcan.c **** /**
+ 182:Bsp/Src/bsp_fdcan.c ****   * @brief  FDCAN2 Rx callback
+ 183:Bsp/Src/bsp_fdcan.c ****   * @param  None
+ 184:Bsp/Src/bsp_fdcan.c ****   * @retval None
+ 185:Bsp/Src/bsp_fdcan.c ****   */
+ 186:Bsp/Src/bsp_fdcan.c **** void BSP_FDCAN2_RxCallback(void)
+ 187:Bsp/Src/bsp_fdcan.c **** {
+ 761              		.loc 1 187 1 is_stmt 1 view -0
+ 762              		.cfi_startproc
+ 763              		@ args = 0, pretend = 0, frame = 40
+ 764              		@ frame_needed = 0, uses_anonymous_args = 0
+ 188:Bsp/Src/bsp_fdcan.c ****     can2_rx_count++;
+ 765              		.loc 1 188 5 view .LVU211
+ 187:Bsp/Src/bsp_fdcan.c ****     can2_rx_count++;
+ 766              		.loc 1 187 1 is_stmt 0 view .LVU212
+ 767 0000 10B5     		push	{r4, lr}
+ 768              	.LCFI24:
+ 769              		.cfi_def_cfa_offset 8
+ 770              		.cfi_offset 4, -8
+ 771              		.cfi_offset 14, -4
+ 772              		.loc 1 188 18 view .LVU213
+ 773 0002 0C4C     		ldr	r4, .L36
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 20
+
+
+ 187:Bsp/Src/bsp_fdcan.c ****     can2_rx_count++;
+ 774              		.loc 1 187 1 view .LVU214
+ 775 0004 8AB0     		sub	sp, sp, #40
+ 776              	.LCFI25:
+ 777              		.cfi_def_cfa_offset 48
+ 778              	.LBB49:
+ 779              	.LBB50:
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 780              		.loc 1 161 9 view .LVU215
+ 781 0006 0C4B     		ldr	r3, .L36+4
+ 782 0008 4021     		movs	r1, #64
+ 783              	.LBE50:
+ 784              	.LBE49:
+ 785              		.loc 1 188 18 view .LVU216
+ 786 000a 2068     		ldr	r0, [r4]
+ 787              	.LBB56:
+ 788              	.LBB53:
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 789              		.loc 1 161 9 view .LVU217
+ 790 000c 6A46     		mov	r2, sp
+ 791              	.LBE53:
+ 792              	.LBE56:
+ 793              		.loc 1 188 18 view .LVU218
+ 794 000e 0130     		adds	r0, r0, #1
+ 795 0010 2060     		str	r0, [r4]
+ 189:Bsp/Src/bsp_fdcan.c ****     BSP_FDCAN_Receive_Message(&hfdcan2, rx_buffer);
+ 796              		.loc 1 189 5 is_stmt 1 view .LVU219
+ 797              	.LVL41:
+ 798              	.LBB57:
+ 799              	.LBI49:
+ 156:Bsp/Src/bsp_fdcan.c **** {
+ 800              		.loc 1 156 19 view .LVU220
+ 801              	.LBB54:
+ 158:Bsp/Src/bsp_fdcan.c ****     
+ 802              		.loc 1 158 5 view .LVU221
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 803              		.loc 1 161 5 view .LVU222
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 804              		.loc 1 161 9 is_stmt 0 view .LVU223
+ 805 0012 0A48     		ldr	r0, .L36+8
+ 806 0014 FFF7FEFF 		bl	HAL_FDCAN_GetRxMessage
+ 807              	.LVL42:
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 808              		.loc 1 161 8 view .LVU224
+ 809 0018 08B1     		cbz	r0, .L35
+ 810              	.L32:
+ 811              	.LBE54:
+ 812              	.LBE57:
+ 190:Bsp/Src/bsp_fdcan.c **** }
+ 813              		.loc 1 190 1 view .LVU225
+ 814 001a 0AB0     		add	sp, sp, #40
+ 815              	.LCFI26:
+ 816              		.cfi_remember_state
+ 817              		.cfi_def_cfa_offset 8
+ 818              		@ sp needed
+ 819 001c 10BD     		pop	{r4, pc}
+ 820              	.L35:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 21
+
+
+ 821              	.LCFI27:
+ 822              		.cfi_restore_state
+ 823              	.LBB58:
+ 824              	.LBB55:
+ 163:Bsp/Src/bsp_fdcan.c ****         return HAL_OK;
+ 825              		.loc 1 163 9 is_stmt 1 view .LVU226
+ 826              	.LVL43:
+ 827              	.LBB51:
+ 828              	.LBI51:
+ 139:Bsp/Src/bsp_fdcan.c **** {
+ 829              		.loc 1 139 13 view .LVU227
+ 830              	.LBB52:
+ 142:Bsp/Src/bsp_fdcan.c ****     
+ 831              		.loc 1 142 5 view .LVU228
+ 142:Bsp/Src/bsp_fdcan.c ****     
+ 832              		.loc 1 142 33 is_stmt 0 view .LVU229
+ 833 001e 0098     		ldr	r0, [sp]
+ 834              	.LVL44:
+ 145:Bsp/Src/bsp_fdcan.c ****         BSP_MotorFeedback_ProcessMessage(motor_id, data);
+ 835              		.loc 1 145 5 is_stmt 1 view .LVU230
+ 145:Bsp/Src/bsp_fdcan.c ****         BSP_MotorFeedback_ProcessMessage(motor_id, data);
+ 836              		.loc 1 145 22 is_stmt 0 view .LVU231
+ 837 0020 431E     		subs	r3, r0, #1
+ 145:Bsp/Src/bsp_fdcan.c ****         BSP_MotorFeedback_ProcessMessage(motor_id, data);
+ 838              		.loc 1 145 7 view .LVU232
+ 839 0022 DBB2     		uxtb	r3, r3
+ 840 0024 032B     		cmp	r3, #3
+ 841 0026 F8D8     		bhi	.L32
+ 146:Bsp/Src/bsp_fdcan.c ****     }
+ 842              		.loc 1 146 9 is_stmt 1 view .LVU233
+ 843 0028 0349     		ldr	r1, .L36+4
+ 844 002a C0B2     		uxtb	r0, r0
+ 146:Bsp/Src/bsp_fdcan.c ****     }
+ 845              		.loc 1 146 9 is_stmt 0 view .LVU234
+ 846 002c FFF7FEFF 		bl	BSP_MotorFeedback_ProcessMessage
+ 847              	.LVL45:
+ 146:Bsp/Src/bsp_fdcan.c ****     }
+ 848              		.loc 1 146 9 view .LVU235
+ 849              	.LBE52:
+ 850              	.LBE51:
+ 851              	.LBE55:
+ 852              	.LBE58:
+ 853              		.loc 1 190 1 view .LVU236
+ 854 0030 0AB0     		add	sp, sp, #40
+ 855              	.LCFI28:
+ 856              		.cfi_def_cfa_offset 8
+ 857              		@ sp needed
+ 858 0032 10BD     		pop	{r4, pc}
+ 859              	.L37:
+ 860              		.align	2
+ 861              	.L36:
+ 862 0034 00000000 		.word	can2_rx_count
+ 863 0038 00000000 		.word	rx_buffer
+ 864 003c 00000000 		.word	hfdcan2
+ 865              		.cfi_endproc
+ 866              	.LFE152:
+ 868              		.section	.text.BSP_FDCAN3_RxCallback,"ax",%progbits
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 22
+
+
+ 869              		.align	1
+ 870              		.p2align 2,,3
+ 871              		.global	BSP_FDCAN3_RxCallback
+ 872              		.syntax unified
+ 873              		.thumb
+ 874              		.thumb_func
+ 876              	BSP_FDCAN3_RxCallback:
+ 877              	.LFB153:
+ 191:Bsp/Src/bsp_fdcan.c **** 
+ 192:Bsp/Src/bsp_fdcan.c **** /**
+ 193:Bsp/Src/bsp_fdcan.c ****   * @brief  FDCAN3 Rx callback
+ 194:Bsp/Src/bsp_fdcan.c ****   * @param  None
+ 195:Bsp/Src/bsp_fdcan.c ****   * @retval None
+ 196:Bsp/Src/bsp_fdcan.c ****   */
+ 197:Bsp/Src/bsp_fdcan.c **** void BSP_FDCAN3_RxCallback(void)
+ 198:Bsp/Src/bsp_fdcan.c **** {
+ 878              		.loc 1 198 1 is_stmt 1 view -0
+ 879              		.cfi_startproc
+ 880              		@ args = 0, pretend = 0, frame = 40
+ 881              		@ frame_needed = 0, uses_anonymous_args = 0
+ 199:Bsp/Src/bsp_fdcan.c ****     can3_rx_count++;
+ 882              		.loc 1 199 5 view .LVU238
+ 198:Bsp/Src/bsp_fdcan.c ****     can3_rx_count++;
+ 883              		.loc 1 198 1 is_stmt 0 view .LVU239
+ 884 0000 10B5     		push	{r4, lr}
+ 885              	.LCFI29:
+ 886              		.cfi_def_cfa_offset 8
+ 887              		.cfi_offset 4, -8
+ 888              		.cfi_offset 14, -4
+ 889              		.loc 1 199 18 view .LVU240
+ 890 0002 0C4C     		ldr	r4, .L42
+ 198:Bsp/Src/bsp_fdcan.c ****     can3_rx_count++;
+ 891              		.loc 1 198 1 view .LVU241
+ 892 0004 8AB0     		sub	sp, sp, #40
+ 893              	.LCFI30:
+ 894              		.cfi_def_cfa_offset 48
+ 895              	.LBB63:
+ 896              	.LBB64:
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 897              		.loc 1 161 9 view .LVU242
+ 898 0006 0C4B     		ldr	r3, .L42+4
+ 899 0008 4021     		movs	r1, #64
+ 900              	.LBE64:
+ 901              	.LBE63:
+ 902              		.loc 1 199 18 view .LVU243
+ 903 000a 2068     		ldr	r0, [r4]
+ 904              	.LBB70:
+ 905              	.LBB67:
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 906              		.loc 1 161 9 view .LVU244
+ 907 000c 6A46     		mov	r2, sp
+ 908              	.LBE67:
+ 909              	.LBE70:
+ 910              		.loc 1 199 18 view .LVU245
+ 911 000e 0130     		adds	r0, r0, #1
+ 912 0010 2060     		str	r0, [r4]
+ 200:Bsp/Src/bsp_fdcan.c ****     BSP_FDCAN_Receive_Message(&hfdcan3, rx_buffer);
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 23
+
+
+ 913              		.loc 1 200 5 is_stmt 1 view .LVU246
+ 914              	.LVL46:
+ 915              	.LBB71:
+ 916              	.LBI63:
+ 156:Bsp/Src/bsp_fdcan.c **** {
+ 917              		.loc 1 156 19 view .LVU247
+ 918              	.LBB68:
+ 158:Bsp/Src/bsp_fdcan.c ****     
+ 919              		.loc 1 158 5 view .LVU248
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 920              		.loc 1 161 5 view .LVU249
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 921              		.loc 1 161 9 is_stmt 0 view .LVU250
+ 922 0012 0A48     		ldr	r0, .L42+8
+ 923 0014 FFF7FEFF 		bl	HAL_FDCAN_GetRxMessage
+ 924              	.LVL47:
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 925              		.loc 1 161 8 view .LVU251
+ 926 0018 08B1     		cbz	r0, .L41
+ 927              	.L38:
+ 928              	.LBE68:
+ 929              	.LBE71:
+ 201:Bsp/Src/bsp_fdcan.c **** }
+ 930              		.loc 1 201 1 view .LVU252
+ 931 001a 0AB0     		add	sp, sp, #40
+ 932              	.LCFI31:
+ 933              		.cfi_remember_state
+ 934              		.cfi_def_cfa_offset 8
+ 935              		@ sp needed
+ 936 001c 10BD     		pop	{r4, pc}
+ 937              	.L41:
+ 938              	.LCFI32:
+ 939              		.cfi_restore_state
+ 940              	.LBB72:
+ 941              	.LBB69:
+ 163:Bsp/Src/bsp_fdcan.c ****         return HAL_OK;
+ 942              		.loc 1 163 9 is_stmt 1 view .LVU253
+ 943              	.LVL48:
+ 944              	.LBB65:
+ 945              	.LBI65:
+ 139:Bsp/Src/bsp_fdcan.c **** {
+ 946              		.loc 1 139 13 view .LVU254
+ 947              	.LBB66:
+ 142:Bsp/Src/bsp_fdcan.c ****     
+ 948              		.loc 1 142 5 view .LVU255
+ 142:Bsp/Src/bsp_fdcan.c ****     
+ 949              		.loc 1 142 33 is_stmt 0 view .LVU256
+ 950 001e 0098     		ldr	r0, [sp]
+ 951              	.LVL49:
+ 145:Bsp/Src/bsp_fdcan.c ****         BSP_MotorFeedback_ProcessMessage(motor_id, data);
+ 952              		.loc 1 145 5 is_stmt 1 view .LVU257
+ 145:Bsp/Src/bsp_fdcan.c ****         BSP_MotorFeedback_ProcessMessage(motor_id, data);
+ 953              		.loc 1 145 22 is_stmt 0 view .LVU258
+ 954 0020 431E     		subs	r3, r0, #1
+ 145:Bsp/Src/bsp_fdcan.c ****         BSP_MotorFeedback_ProcessMessage(motor_id, data);
+ 955              		.loc 1 145 7 view .LVU259
+ 956 0022 DBB2     		uxtb	r3, r3
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 24
+
+
+ 957 0024 032B     		cmp	r3, #3
+ 958 0026 F8D8     		bhi	.L38
+ 146:Bsp/Src/bsp_fdcan.c ****     }
+ 959              		.loc 1 146 9 is_stmt 1 view .LVU260
+ 960 0028 0349     		ldr	r1, .L42+4
+ 961 002a C0B2     		uxtb	r0, r0
+ 146:Bsp/Src/bsp_fdcan.c ****     }
+ 962              		.loc 1 146 9 is_stmt 0 view .LVU261
+ 963 002c FFF7FEFF 		bl	BSP_MotorFeedback_ProcessMessage
+ 964              	.LVL50:
+ 146:Bsp/Src/bsp_fdcan.c ****     }
+ 965              		.loc 1 146 9 view .LVU262
+ 966              	.LBE66:
+ 967              	.LBE65:
+ 968              	.LBE69:
+ 969              	.LBE72:
+ 970              		.loc 1 201 1 view .LVU263
+ 971 0030 0AB0     		add	sp, sp, #40
+ 972              	.LCFI33:
+ 973              		.cfi_def_cfa_offset 8
+ 974              		@ sp needed
+ 975 0032 10BD     		pop	{r4, pc}
+ 976              	.L43:
+ 977              		.align	2
+ 978              	.L42:
+ 979 0034 00000000 		.word	can3_rx_count
+ 980 0038 00000000 		.word	rx_buffer
+ 981 003c 00000000 		.word	hfdcan3
+ 982              		.cfi_endproc
+ 983              	.LFE153:
+ 985              		.section	.text.HAL_FDCAN_RxFifo0Callback,"ax",%progbits
+ 986              		.align	1
+ 987              		.p2align 2,,3
+ 988              		.global	HAL_FDCAN_RxFifo0Callback
+ 989              		.syntax unified
+ 990              		.thumb
+ 991              		.thumb_func
+ 993              	HAL_FDCAN_RxFifo0Callback:
+ 994              	.LVL51:
+ 995              	.LFB154:
+ 202:Bsp/Src/bsp_fdcan.c **** 
+ 203:Bsp/Src/bsp_fdcan.c **** /**
+ 204:Bsp/Src/bsp_fdcan.c ****   * @brief  FDCAN Rx FIFO 0 callback
+ 205:Bsp/Src/bsp_fdcan.c ****   * @param  hfdcan: FDCAN handle
+ 206:Bsp/Src/bsp_fdcan.c ****   * @param  RxFifo0ITs: indicates which interrupts are signalled
+ 207:Bsp/Src/bsp_fdcan.c ****   * @retval None
+ 208:Bsp/Src/bsp_fdcan.c ****   */
+ 209:Bsp/Src/bsp_fdcan.c **** void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
+ 210:Bsp/Src/bsp_fdcan.c **** {
+ 996              		.loc 1 210 1 is_stmt 1 view -0
+ 997              		.cfi_startproc
+ 998              		@ args = 0, pretend = 0, frame = 40
+ 999              		@ frame_needed = 0, uses_anonymous_args = 0
+ 211:Bsp/Src/bsp_fdcan.c ****     // Check if new message received
+ 212:Bsp/Src/bsp_fdcan.c ****     if(RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE)
+ 1000              		.loc 1 212 5 view .LVU265
+ 1001              		.loc 1 212 7 is_stmt 0 view .LVU266
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 25
+
+
+ 1002 0000 CB07     		lsls	r3, r1, #31
+ 1003 0002 00D4     		bmi	.L54
+ 1004 0004 7047     		bx	lr
+ 1005              	.L54:
+ 213:Bsp/Src/bsp_fdcan.c ****     {
+ 214:Bsp/Src/bsp_fdcan.c ****         BSP_FDCAN_Receive_Message(hfdcan, rx_buffer);
+ 1006              		.loc 1 214 9 is_stmt 1 view .LVU267
+ 1007              	.LVL52:
+ 1008              	.LBB77:
+ 1009              	.LBI77:
+ 156:Bsp/Src/bsp_fdcan.c **** {
+ 1010              		.loc 1 156 19 view .LVU268
+ 1011              	.LBB78:
+ 158:Bsp/Src/bsp_fdcan.c ****     
+ 1012              		.loc 1 158 5 view .LVU269
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 1013              		.loc 1 161 5 view .LVU270
+ 1014              	.LBE78:
+ 1015              	.LBE77:
+ 210:Bsp/Src/bsp_fdcan.c ****     // Check if new message received
+ 1016              		.loc 1 210 1 is_stmt 0 view .LVU271
+ 1017 0006 00B5     		push	{lr}
+ 1018              	.LCFI34:
+ 1019              		.cfi_def_cfa_offset 4
+ 1020              		.cfi_offset 14, -4
+ 1021 0008 8BB0     		sub	sp, sp, #44
+ 1022              	.LCFI35:
+ 1023              		.cfi_def_cfa_offset 48
+ 1024              	.LBB83:
+ 1025              	.LBB81:
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 1026              		.loc 1 161 9 view .LVU272
+ 1027 000a 094B     		ldr	r3, .L56
+ 1028 000c 4021     		movs	r1, #64
+ 1029              	.LVL53:
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 1030              		.loc 1 161 9 view .LVU273
+ 1031 000e 6A46     		mov	r2, sp
+ 1032 0010 FFF7FEFF 		bl	HAL_FDCAN_GetRxMessage
+ 1033              	.LVL54:
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 1034              		.loc 1 161 8 view .LVU274
+ 1035 0014 10B1     		cbz	r0, .L55
+ 1036              	.LVL55:
+ 1037              	.L44:
+ 161:Bsp/Src/bsp_fdcan.c ****     {
+ 1038              		.loc 1 161 8 view .LVU275
+ 1039              	.LBE81:
+ 1040              	.LBE83:
+ 215:Bsp/Src/bsp_fdcan.c ****     }
+ 216:Bsp/Src/bsp_fdcan.c **** } ...
+ 1041              		.loc 1 216 1 view .LVU276
+ 1042 0016 0BB0     		add	sp, sp, #44
+ 1043              	.LCFI36:
+ 1044              		.cfi_remember_state
+ 1045              		.cfi_def_cfa_offset 4
+ 1046              		@ sp needed
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 26
+
+
+ 1047 0018 5DF804FB 		ldr	pc, [sp], #4
+ 1048              	.LVL56:
+ 1049              	.L55:
+ 1050              	.LCFI37:
+ 1051              		.cfi_restore_state
+ 1052              	.LBB84:
+ 1053              	.LBB82:
+ 163:Bsp/Src/bsp_fdcan.c ****         ProcessFeedbackMessage(&rx_header, data);
+ 1054              		.loc 1 163 9 is_stmt 1 view .LVU277
+ 1055              	.LBB79:
+ 1056              	.LBI79:
+ 139:Bsp/Src/bsp_fdcan.c **** static void ProcessFeedbackMessage(FDCAN_RxHeaderTypeDef *rx_header, uint8_t *data)
+ 1057              		.loc 1 139 13 view .LVU278
+ 1058              	.LBB80:
+ 142:Bsp/Src/bsp_fdcan.c ****     uint8_t motor_id = rx_header->Identifier - 0x200;
+ 1059              		.loc 1 142 5 view .LVU279
+ 142:Bsp/Src/bsp_fdcan.c ****     uint8_t motor_id = rx_header->Identifier - 0x200;
+ 1060              		.loc 1 142 33 is_stmt 0 view .LVU280
+ 1061 001c 0098     		ldr	r0, [sp]
+ 1062              	.LVL57:
+ 145:Bsp/Src/bsp_fdcan.c ****     if(motor_id >= 1 && motor_id <= 4) {
+ 1063              		.loc 1 145 5 is_stmt 1 view .LVU281
+ 145:Bsp/Src/bsp_fdcan.c ****     if(motor_id >= 1 && motor_id <= 4) {
+ 1064              		.loc 1 145 22 is_stmt 0 view .LVU282
+ 1065 001e 431E     		subs	r3, r0, #1
+ 145:Bsp/Src/bsp_fdcan.c ****     if(motor_id >= 1 && motor_id <= 4) {
+ 1066              		.loc 1 145 7 view .LVU283
+ 1067 0020 DBB2     		uxtb	r3, r3
+ 1068 0022 032B     		cmp	r3, #3
+ 1069 0024 F7D8     		bhi	.L44
+ 146:Bsp/Src/bsp_fdcan.c ****         BSP_MotorFeedback_ProcessMessage(motor_id, data);
+ 1070              		.loc 1 146 9 is_stmt 1 view .LVU284
+ 1071 0026 0249     		ldr	r1, .L56
+ 1072 0028 C0B2     		uxtb	r0, r0
+ 146:Bsp/Src/bsp_fdcan.c ****         BSP_MotorFeedback_ProcessMessage(motor_id, data);
+ 1073              		.loc 1 146 9 is_stmt 0 view .LVU285
+ 1074 002a FFF7FEFF 		bl	BSP_MotorFeedback_ProcessMessage
+ 1075              	.LVL58:
+ 146:Bsp/Src/bsp_fdcan.c ****         BSP_MotorFeedback_ProcessMessage(motor_id, data);
+ 1076              		.loc 1 146 9 view .LVU286
+ 1077              	.LBE80:
+ 1078              	.LBE79:
+ 1079              	.LBE82:
+ 1080              	.LBE84:
+ 1081              		.loc 1 216 1 view .LVU287
+ 1082 002e F2E7     		b	.L44
+ 1083              	.L57:
+ 1084              		.align	2
+ 1085              	.L56:
+ 1086 0030 00000000 		.word	rx_buffer
+ 1087              		.cfi_endproc
+ 1088              	.LFE154:
+ 1090              		.global	can3_rx_count
+ 1091              		.section	.bss.can3_rx_count,"aw",%nobits
+ 1092              		.align	2
+ 1095              	can3_rx_count:
+ 1096 0000 00000000 		.space	4
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 27
+
+
+ 1097              		.global	can2_rx_count
+ 1098              		.section	.bss.can2_rx_count,"aw",%nobits
+ 1099              		.align	2
+ 1102              	can2_rx_count:
+ 1103 0000 00000000 		.space	4
+ 1104              		.global	can1_rx_count
+ 1105              		.section	.bss.can1_rx_count,"aw",%nobits
+ 1106              		.align	2
+ 1109              	can1_rx_count:
+ 1110 0000 00000000 		.space	4
+ 1111              		.section	.bss.tx_buffer,"aw",%nobits
+ 1112              		.align	2
+ 1115              	tx_buffer:
+ 1116 0000 00000000 		.space	8
+ 1116      00000000 
+ 1117              		.section	.bss.rx_buffer,"aw",%nobits
+ 1118              		.align	2
+ 1121              	rx_buffer:
+ 1122 0000 00000000 		.space	8
+ 1122      00000000 
+ 1123              		.text
+ 1124              	.Letext0:
+ 1125              		.file 2 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\machine\\_default_types.h"
+ 1126              		.file 3 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\sys\\_stdint.h"
+ 1127              		.file 4 "Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h723xx.h"
+ 1128              		.file 5 "Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h"
+ 1129              		.file 6 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
+ 1130              		.file 7 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_fdcan.h"
+ 1131              		.file 8 "Core/Inc/fdcan.h"
+ 1132              		.file 9 "Bsp/Inc/bsp_motor_feedback.h"
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s 			page 28
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 bsp_fdcan.c
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:20     .text.BSP_FDCAN_Filter_Init:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:27     .text.BSP_FDCAN_Filter_Init:00000000 BSP_FDCAN_Filter_Init
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:124    .text.BSP_FDCAN_Filter_Init:00000070 $d
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:131    .text.BSP_FDCAN_Init:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:138    .text.BSP_FDCAN_Init:00000000 BSP_FDCAN_Init
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:209    .text.BSP_FDCAN_Init:00000044 $d
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:216    .text.BSP_FDCAN_Send_Message:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:223    .text.BSP_FDCAN_Send_Message:00000000 BSP_FDCAN_Send_Message
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:278    .text.BSP_FDCAN_Send_Motor_Command:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:285    .text.BSP_FDCAN_Send_Motor_Command:00000000 BSP_FDCAN_Send_Motor_Command
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:418    .text.BSP_FDCAN_Send_Motor_Command:00000068 $d
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:1115   .bss.tx_buffer:00000000 tx_buffer
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:429    .text.BSP_FDCAN_Clear_Error:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:436    .text.BSP_FDCAN_Clear_Error:00000000 BSP_FDCAN_Clear_Error
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:532    .text.BSP_FDCAN_Clear_Error:00000040 $d
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:543    .text.BSP_FDCAN_Receive_Message:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:550    .text.BSP_FDCAN_Receive_Message:00000000 BSP_FDCAN_Receive_Message
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:635    .text.BSP_FDCAN1_RxCallback:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:642    .text.BSP_FDCAN1_RxCallback:00000000 BSP_FDCAN1_RxCallback
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:745    .text.BSP_FDCAN1_RxCallback:00000034 $d
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:1109   .bss.can1_rx_count:00000000 can1_rx_count
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:1121   .bss.rx_buffer:00000000 rx_buffer
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:752    .text.BSP_FDCAN2_RxCallback:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:759    .text.BSP_FDCAN2_RxCallback:00000000 BSP_FDCAN2_RxCallback
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:862    .text.BSP_FDCAN2_RxCallback:00000034 $d
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:1102   .bss.can2_rx_count:00000000 can2_rx_count
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:869    .text.BSP_FDCAN3_RxCallback:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:876    .text.BSP_FDCAN3_RxCallback:00000000 BSP_FDCAN3_RxCallback
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:979    .text.BSP_FDCAN3_RxCallback:00000034 $d
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:1095   .bss.can3_rx_count:00000000 can3_rx_count
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:986    .text.HAL_FDCAN_RxFifo0Callback:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:993    .text.HAL_FDCAN_RxFifo0Callback:00000000 HAL_FDCAN_RxFifo0Callback
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:1086   .text.HAL_FDCAN_RxFifo0Callback:00000030 $d
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:1092   .bss.can3_rx_count:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:1099   .bss.can2_rx_count:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:1106   .bss.can1_rx_count:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:1112   .bss.tx_buffer:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccGc3YeR.s:1118   .bss.rx_buffer:00000000 $d
+
+UNDEFINED SYMBOLS
+HAL_FDCAN_ConfigFilter
+HAL_FDCAN_ConfigGlobalFilter
+hfdcan2
+hfdcan3
+hfdcan1
+BSP_MotorFeedback_Init
+HAL_FDCAN_Start
+HAL_FDCAN_ActivateNotification
+HAL_FDCAN_AddMessageToTxFifoQ
+HAL_FDCAN_GetRxMessage
+BSP_MotorFeedback_ProcessMessage

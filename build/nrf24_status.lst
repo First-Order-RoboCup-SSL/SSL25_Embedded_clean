@@ -1,0 +1,460 @@
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccV4EN1f.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 2
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"nrf24_status.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "Core/Src/radio/nrf24_status.c"
+  19              		.section	.text.NRF24_UpdateStatus,"ax",%progbits
+  20              		.align	1
+  21              		.p2align 2,,3
+  22              		.global	NRF24_UpdateStatus
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	NRF24_UpdateStatus:
+  28              	.LVL0:
+  29              	.LFB150:
+   1:Core/Src/radio/nrf24_status.c **** #include "../../Inc/radio/nrf24_status.h"
+   2:Core/Src/radio/nrf24_status.c **** 
+   3:Core/Src/radio/nrf24_status.c **** void NRF24_UpdateStatus(const NRF24_TypeDef *nrf, NRF24_Status_TypeDef *status) {
+  30              		.loc 1 3 81 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+   4:Core/Src/radio/nrf24_status.c ****     // Read general status registers
+   5:Core/Src/radio/nrf24_status.c ****     status->config = nRF24_ReadReg(nrf, nRF24_REG_CONFIG);
+  34              		.loc 1 5 5 view .LVU1
+   3:Core/Src/radio/nrf24_status.c ****     // Read general status registers
+  35              		.loc 1 3 81 is_stmt 0 view .LVU2
+  36 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+  37              	.LCFI0:
+  38              		.cfi_def_cfa_offset 24
+  39              		.cfi_offset 4, -24
+  40              		.cfi_offset 5, -20
+  41              		.cfi_offset 6, -16
+  42              		.cfi_offset 7, -12
+  43              		.cfi_offset 8, -8
+  44              		.cfi_offset 14, -4
+   3:Core/Src/radio/nrf24_status.c ****     // Read general status registers
+  45              		.loc 1 3 81 view .LVU3
+  46 0004 0C46     		mov	r4, r1
+  47              		.loc 1 5 22 view .LVU4
+  48 0006 0021     		movs	r1, #0
+  49              	.LVL1:
+   3:Core/Src/radio/nrf24_status.c ****     // Read general status registers
+  50              		.loc 1 3 81 view .LVU5
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccV4EN1f.s 			page 2
+
+
+  51 0008 0546     		mov	r5, r0
+  52              		.loc 1 5 22 view .LVU6
+  53 000a FFF7FEFF 		bl	nRF24_ReadReg
+  54              	.LVL2:
+  55              		.loc 1 5 22 view .LVU7
+  56 000e 0346     		mov	r3, r0
+   6:Core/Src/radio/nrf24_status.c ****     status->status = nRF24_ReadReg(nrf, nRF24_REG_STATUS);
+  57              		.loc 1 6 22 view .LVU8
+  58 0010 0721     		movs	r1, #7
+  59 0012 2846     		mov	r0, r5
+   7:Core/Src/radio/nrf24_status.c ****     status->fifo_status = nRF24_ReadReg(nrf, nRF24_REG_FIFO_STATUS);
+   8:Core/Src/radio/nrf24_status.c ****     
+   9:Core/Src/radio/nrf24_status.c ****     // Read RF setup
+  10:Core/Src/radio/nrf24_status.c ****     status->rf_channel = nRF24_GetRFChannel(nrf);
+  11:Core/Src/radio/nrf24_status.c ****     status->rf_setup = nRF24_ReadReg(nrf, nRF24_REG_RF_SETUP);
+  12:Core/Src/radio/nrf24_status.c ****     status->data_rate = status->rf_setup & nRF24_MASK_DATARATE;
+  13:Core/Src/radio/nrf24_status.c ****     status->tx_power = status->rf_setup & nRF24_MASK_RF_PWR;
+  14:Core/Src/radio/nrf24_status.c ****     
+  15:Core/Src/radio/nrf24_status.c ****     // Read auto retransmit info
+  16:Core/Src/radio/nrf24_status.c ****     status->observe_tx = nRF24_ReadReg(nrf, nRF24_REG_OBSERVE_TX);
+  17:Core/Src/radio/nrf24_status.c ****     status->lost_packets = (status->observe_tx & nRF24_MASK_PLOS_CNT) >> 4;
+  18:Core/Src/radio/nrf24_status.c ****     status->retrans_count = status->observe_tx & nRF24_MASK_ARC_CNT;
+  19:Core/Src/radio/nrf24_status.c ****     
+  20:Core/Src/radio/nrf24_status.c ****     // Read addresses
+  21:Core/Src/radio/nrf24_status.c ****     nRF24_ReadMBReg(nrf, nRF24_CMD_R_REGISTER | nRF24_REG_TX_ADDR, status->tx_addr, 5);
+  22:Core/Src/radio/nrf24_status.c ****     nRF24_ReadMBReg(nrf, nRF24_CMD_R_REGISTER | nRF24_REG_RX_ADDR_P0, status->rx_addr_p0, 5);
+  23:Core/Src/radio/nrf24_status.c ****     nRF24_ReadMBReg(nrf, nRF24_CMD_R_REGISTER | nRF24_REG_RX_ADDR_P1, status->rx_addr_p1, 5);
+  24:Core/Src/radio/nrf24_status.c ****     status->rx_addr_p2 = nRF24_ReadReg(nrf, nRF24_REG_RX_ADDR_P2);
+  25:Core/Src/radio/nrf24_status.c ****     status->rx_addr_p3 = nRF24_ReadReg(nrf, nRF24_REG_RX_ADDR_P3);
+  26:Core/Src/radio/nrf24_status.c ****     status->rx_addr_p4 = nRF24_ReadReg(nrf, nRF24_REG_RX_ADDR_P4);
+  27:Core/Src/radio/nrf24_status.c ****     status->rx_addr_p5 = nRF24_ReadReg(nrf, nRF24_REG_RX_ADDR_P5);
+  28:Core/Src/radio/nrf24_status.c ****     
+  29:Core/Src/radio/nrf24_status.c ****     // Read pipe configurations
+  30:Core/Src/radio/nrf24_status.c ****     status->en_aa = nRF24_ReadReg(nrf, nRF24_REG_EN_AA);
+  31:Core/Src/radio/nrf24_status.c ****     status->en_rxaddr = nRF24_ReadReg(nrf, nRF24_REG_EN_RXADDR);
+  60              		.loc 1 31 23 view .LVU9
+  61 0014 2646     		mov	r6, r4
+   5:Core/Src/radio/nrf24_status.c ****     status->status = nRF24_ReadReg(nrf, nRF24_REG_STATUS);
+  62              		.loc 1 5 20 view .LVU10
+  63 0016 2370     		strb	r3, [r4]
+   6:Core/Src/radio/nrf24_status.c ****     status->status = nRF24_ReadReg(nrf, nRF24_REG_STATUS);
+  64              		.loc 1 6 5 is_stmt 1 view .LVU11
+  65 0018 04F12408 		add	r8, r4, #36
+   6:Core/Src/radio/nrf24_status.c ****     status->status = nRF24_ReadReg(nrf, nRF24_REG_STATUS);
+  66              		.loc 1 6 22 is_stmt 0 view .LVU12
+  67 001c FFF7FEFF 		bl	nRF24_ReadReg
+  68              	.LVL3:
+  69 0020 0346     		mov	r3, r0
+   7:Core/Src/radio/nrf24_status.c ****     status->fifo_status = nRF24_ReadReg(nrf, nRF24_REG_FIFO_STATUS);
+  70              		.loc 1 7 27 view .LVU13
+  71 0022 1721     		movs	r1, #23
+  72 0024 2846     		mov	r0, r5
+   6:Core/Src/radio/nrf24_status.c ****     status->status = nRF24_ReadReg(nrf, nRF24_REG_STATUS);
+  73              		.loc 1 6 20 view .LVU14
+  74 0026 6370     		strb	r3, [r4, #1]
+   7:Core/Src/radio/nrf24_status.c ****     status->fifo_status = nRF24_ReadReg(nrf, nRF24_REG_FIFO_STATUS);
+  75              		.loc 1 7 5 is_stmt 1 view .LVU15
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccV4EN1f.s 			page 3
+
+
+   7:Core/Src/radio/nrf24_status.c ****     status->fifo_status = nRF24_ReadReg(nrf, nRF24_REG_FIFO_STATUS);
+  76              		.loc 1 7 27 is_stmt 0 view .LVU16
+  77 0028 FFF7FEFF 		bl	nRF24_ReadReg
+  78              	.LVL4:
+  79 002c 0346     		mov	r3, r0
+  10:Core/Src/radio/nrf24_status.c ****     status->rf_setup = nRF24_ReadReg(nrf, nRF24_REG_RF_SETUP);
+  80              		.loc 1 10 26 view .LVU17
+  81 002e 2846     		mov	r0, r5
+  82 0030 454F     		ldr	r7, .L6
+   7:Core/Src/radio/nrf24_status.c ****     status->fifo_status = nRF24_ReadReg(nrf, nRF24_REG_FIFO_STATUS);
+  83              		.loc 1 7 25 view .LVU18
+  84 0032 A370     		strb	r3, [r4, #2]
+  10:Core/Src/radio/nrf24_status.c ****     status->rf_setup = nRF24_ReadReg(nrf, nRF24_REG_RF_SETUP);
+  85              		.loc 1 10 5 is_stmt 1 view .LVU19
+  10:Core/Src/radio/nrf24_status.c ****     status->rf_setup = nRF24_ReadReg(nrf, nRF24_REG_RF_SETUP);
+  86              		.loc 1 10 26 is_stmt 0 view .LVU20
+  87 0034 FFF7FEFF 		bl	nRF24_GetRFChannel
+  88              	.LVL5:
+  89 0038 0346     		mov	r3, r0
+  11:Core/Src/radio/nrf24_status.c ****     status->data_rate = status->rf_setup & nRF24_MASK_DATARATE;
+  90              		.loc 1 11 24 view .LVU21
+  91 003a 0621     		movs	r1, #6
+  92 003c 2846     		mov	r0, r5
+  10:Core/Src/radio/nrf24_status.c ****     status->rf_setup = nRF24_ReadReg(nrf, nRF24_REG_RF_SETUP);
+  93              		.loc 1 10 24 view .LVU22
+  94 003e E370     		strb	r3, [r4, #3]
+  11:Core/Src/radio/nrf24_status.c ****     status->data_rate = status->rf_setup & nRF24_MASK_DATARATE;
+  95              		.loc 1 11 5 is_stmt 1 view .LVU23
+  11:Core/Src/radio/nrf24_status.c ****     status->data_rate = status->rf_setup & nRF24_MASK_DATARATE;
+  96              		.loc 1 11 24 is_stmt 0 view .LVU24
+  97 0040 FFF7FEFF 		bl	nRF24_ReadReg
+  98              	.LVL6:
+  99 0044 0346     		mov	r3, r0
+  16:Core/Src/radio/nrf24_status.c ****     status->lost_packets = (status->observe_tx & nRF24_MASK_PLOS_CNT) >> 4;
+ 100              		.loc 1 16 26 view .LVU25
+ 101 0046 0821     		movs	r1, #8
+ 102 0048 2846     		mov	r0, r5
+  12:Core/Src/radio/nrf24_status.c ****     status->tx_power = status->rf_setup & nRF24_MASK_RF_PWR;
+ 103              		.loc 1 12 42 view .LVU26
+ 104 004a 03F02802 		and	r2, r3, #40
+  11:Core/Src/radio/nrf24_status.c ****     status->data_rate = status->rf_setup & nRF24_MASK_DATARATE;
+ 105              		.loc 1 11 22 view .LVU27
+ 106 004e 2371     		strb	r3, [r4, #4]
+  12:Core/Src/radio/nrf24_status.c ****     status->tx_power = status->rf_setup & nRF24_MASK_RF_PWR;
+ 107              		.loc 1 12 5 is_stmt 1 view .LVU28
+  13:Core/Src/radio/nrf24_status.c ****     
+ 108              		.loc 1 13 5 view .LVU29
+  13:Core/Src/radio/nrf24_status.c ****     
+ 109              		.loc 1 13 41 is_stmt 0 view .LVU30
+ 110 0050 03F00603 		and	r3, r3, #6
+  12:Core/Src/radio/nrf24_status.c ****     status->tx_power = status->rf_setup & nRF24_MASK_RF_PWR;
+ 111              		.loc 1 12 23 view .LVU31
+ 112 0054 6271     		strb	r2, [r4, #5]
+  13:Core/Src/radio/nrf24_status.c ****     
+ 113              		.loc 1 13 22 view .LVU32
+ 114 0056 A371     		strb	r3, [r4, #6]
+  16:Core/Src/radio/nrf24_status.c ****     status->lost_packets = (status->observe_tx & nRF24_MASK_PLOS_CNT) >> 4;
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccV4EN1f.s 			page 4
+
+
+ 115              		.loc 1 16 5 is_stmt 1 view .LVU33
+  16:Core/Src/radio/nrf24_status.c ****     status->lost_packets = (status->observe_tx & nRF24_MASK_PLOS_CNT) >> 4;
+ 116              		.loc 1 16 26 is_stmt 0 view .LVU34
+ 117 0058 FFF7FEFF 		bl	nRF24_ReadReg
+ 118              	.LVL7:
+  16:Core/Src/radio/nrf24_status.c ****     status->lost_packets = (status->observe_tx & nRF24_MASK_PLOS_CNT) >> 4;
+ 119              		.loc 1 16 24 view .LVU35
+ 120 005c E071     		strb	r0, [r4, #7]
+  17:Core/Src/radio/nrf24_status.c ****     status->retrans_count = status->observe_tx & nRF24_MASK_ARC_CNT;
+ 121              		.loc 1 17 5 is_stmt 1 view .LVU36
+  18:Core/Src/radio/nrf24_status.c ****     
+ 122              		.loc 1 18 5 view .LVU37
+  17:Core/Src/radio/nrf24_status.c ****     status->retrans_count = status->observe_tx & nRF24_MASK_ARC_CNT;
+ 123              		.loc 1 17 71 is_stmt 0 view .LVU38
+ 124 005e 0109     		lsrs	r1, r0, #4
+  18:Core/Src/radio/nrf24_status.c ****     
+ 125              		.loc 1 18 48 view .LVU39
+ 126 0060 00F00F00 		and	r0, r0, #15
+  21:Core/Src/radio/nrf24_status.c ****     nRF24_ReadMBReg(nrf, nRF24_CMD_R_REGISTER | nRF24_REG_RX_ADDR_P0, status->rx_addr_p0, 5);
+ 127              		.loc 1 21 5 view .LVU40
+ 128 0064 0523     		movs	r3, #5
+ 129 0066 04F10A02 		add	r2, r4, #10
+  17:Core/Src/radio/nrf24_status.c ****     status->retrans_count = status->observe_tx & nRF24_MASK_ARC_CNT;
+ 130              		.loc 1 17 26 view .LVU41
+ 131 006a 2172     		strb	r1, [r4, #8]
+  21:Core/Src/radio/nrf24_status.c ****     nRF24_ReadMBReg(nrf, nRF24_CMD_R_REGISTER | nRF24_REG_RX_ADDR_P0, status->rx_addr_p0, 5);
+ 132              		.loc 1 21 5 view .LVU42
+ 133 006c 1021     		movs	r1, #16
+  18:Core/Src/radio/nrf24_status.c ****     
+ 134              		.loc 1 18 27 view .LVU43
+ 135 006e 6072     		strb	r0, [r4, #9]
+  21:Core/Src/radio/nrf24_status.c ****     nRF24_ReadMBReg(nrf, nRF24_CMD_R_REGISTER | nRF24_REG_RX_ADDR_P0, status->rx_addr_p0, 5);
+ 136              		.loc 1 21 5 is_stmt 1 view .LVU44
+ 137 0070 2846     		mov	r0, r5
+ 138 0072 FFF7FEFF 		bl	nRF24_ReadMBReg
+ 139              	.LVL8:
+  22:Core/Src/radio/nrf24_status.c ****     nRF24_ReadMBReg(nrf, nRF24_CMD_R_REGISTER | nRF24_REG_RX_ADDR_P1, status->rx_addr_p1, 5);
+ 140              		.loc 1 22 5 view .LVU45
+ 141 0076 0523     		movs	r3, #5
+ 142 0078 04F10F02 		add	r2, r4, #15
+ 143 007c 0A21     		movs	r1, #10
+ 144 007e 2846     		mov	r0, r5
+ 145 0080 FFF7FEFF 		bl	nRF24_ReadMBReg
+ 146              	.LVL9:
+  23:Core/Src/radio/nrf24_status.c ****     status->rx_addr_p2 = nRF24_ReadReg(nrf, nRF24_REG_RX_ADDR_P2);
+ 147              		.loc 1 23 5 view .LVU46
+ 148 0084 0523     		movs	r3, #5
+ 149 0086 04F11402 		add	r2, r4, #20
+ 150 008a 0B21     		movs	r1, #11
+ 151 008c 2846     		mov	r0, r5
+ 152 008e FFF7FEFF 		bl	nRF24_ReadMBReg
+ 153              	.LVL10:
+  24:Core/Src/radio/nrf24_status.c ****     status->rx_addr_p3 = nRF24_ReadReg(nrf, nRF24_REG_RX_ADDR_P3);
+ 154              		.loc 1 24 5 view .LVU47
+  24:Core/Src/radio/nrf24_status.c ****     status->rx_addr_p3 = nRF24_ReadReg(nrf, nRF24_REG_RX_ADDR_P3);
+ 155              		.loc 1 24 26 is_stmt 0 view .LVU48
+ 156 0092 0C21     		movs	r1, #12
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccV4EN1f.s 			page 5
+
+
+ 157 0094 2846     		mov	r0, r5
+ 158 0096 FFF7FEFF 		bl	nRF24_ReadReg
+ 159              	.LVL11:
+  25:Core/Src/radio/nrf24_status.c ****     status->rx_addr_p4 = nRF24_ReadReg(nrf, nRF24_REG_RX_ADDR_P4);
+ 160              		.loc 1 25 26 view .LVU49
+ 161 009a 0D21     		movs	r1, #13
+  24:Core/Src/radio/nrf24_status.c ****     status->rx_addr_p3 = nRF24_ReadReg(nrf, nRF24_REG_RX_ADDR_P3);
+ 162              		.loc 1 24 24 view .LVU50
+ 163 009c 6076     		strb	r0, [r4, #25]
+  25:Core/Src/radio/nrf24_status.c ****     status->rx_addr_p4 = nRF24_ReadReg(nrf, nRF24_REG_RX_ADDR_P4);
+ 164              		.loc 1 25 5 is_stmt 1 view .LVU51
+  25:Core/Src/radio/nrf24_status.c ****     status->rx_addr_p4 = nRF24_ReadReg(nrf, nRF24_REG_RX_ADDR_P4);
+ 165              		.loc 1 25 26 is_stmt 0 view .LVU52
+ 166 009e 2846     		mov	r0, r5
+ 167 00a0 FFF7FEFF 		bl	nRF24_ReadReg
+ 168              	.LVL12:
+  26:Core/Src/radio/nrf24_status.c ****     status->rx_addr_p5 = nRF24_ReadReg(nrf, nRF24_REG_RX_ADDR_P5);
+ 169              		.loc 1 26 26 view .LVU53
+ 170 00a4 0E21     		movs	r1, #14
+  25:Core/Src/radio/nrf24_status.c ****     status->rx_addr_p4 = nRF24_ReadReg(nrf, nRF24_REG_RX_ADDR_P4);
+ 171              		.loc 1 25 24 view .LVU54
+ 172 00a6 A076     		strb	r0, [r4, #26]
+  26:Core/Src/radio/nrf24_status.c ****     status->rx_addr_p5 = nRF24_ReadReg(nrf, nRF24_REG_RX_ADDR_P5);
+ 173              		.loc 1 26 5 is_stmt 1 view .LVU55
+  26:Core/Src/radio/nrf24_status.c ****     status->rx_addr_p5 = nRF24_ReadReg(nrf, nRF24_REG_RX_ADDR_P5);
+ 174              		.loc 1 26 26 is_stmt 0 view .LVU56
+ 175 00a8 2846     		mov	r0, r5
+ 176 00aa FFF7FEFF 		bl	nRF24_ReadReg
+ 177              	.LVL13:
+  27:Core/Src/radio/nrf24_status.c ****     
+ 178              		.loc 1 27 26 view .LVU57
+ 179 00ae 0F21     		movs	r1, #15
+  26:Core/Src/radio/nrf24_status.c ****     status->rx_addr_p5 = nRF24_ReadReg(nrf, nRF24_REG_RX_ADDR_P5);
+ 180              		.loc 1 26 24 view .LVU58
+ 181 00b0 E076     		strb	r0, [r4, #27]
+  27:Core/Src/radio/nrf24_status.c ****     
+ 182              		.loc 1 27 5 is_stmt 1 view .LVU59
+  27:Core/Src/radio/nrf24_status.c ****     
+ 183              		.loc 1 27 26 is_stmt 0 view .LVU60
+ 184 00b2 2846     		mov	r0, r5
+ 185 00b4 FFF7FEFF 		bl	nRF24_ReadReg
+ 186              	.LVL14:
+  30:Core/Src/radio/nrf24_status.c ****     status->en_rxaddr = nRF24_ReadReg(nrf, nRF24_REG_EN_RXADDR);
+ 187              		.loc 1 30 21 view .LVU61
+ 188 00b8 0121     		movs	r1, #1
+  27:Core/Src/radio/nrf24_status.c ****     
+ 189              		.loc 1 27 24 view .LVU62
+ 190 00ba 2077     		strb	r0, [r4, #28]
+  30:Core/Src/radio/nrf24_status.c ****     status->en_rxaddr = nRF24_ReadReg(nrf, nRF24_REG_EN_RXADDR);
+ 191              		.loc 1 30 5 is_stmt 1 view .LVU63
+  30:Core/Src/radio/nrf24_status.c ****     status->en_rxaddr = nRF24_ReadReg(nrf, nRF24_REG_EN_RXADDR);
+ 192              		.loc 1 30 21 is_stmt 0 view .LVU64
+ 193 00bc 2846     		mov	r0, r5
+ 194 00be FFF7FEFF 		bl	nRF24_ReadReg
+ 195              	.LVL15:
+ 196              		.loc 1 31 25 view .LVU65
+ 197 00c2 0221     		movs	r1, #2
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccV4EN1f.s 			page 6
+
+
+  30:Core/Src/radio/nrf24_status.c ****     status->en_rxaddr = nRF24_ReadReg(nrf, nRF24_REG_EN_RXADDR);
+ 198              		.loc 1 30 19 view .LVU66
+ 199 00c4 6077     		strb	r0, [r4, #29]
+ 200              		.loc 1 31 5 is_stmt 1 view .LVU67
+ 201              		.loc 1 31 25 is_stmt 0 view .LVU68
+ 202 00c6 2846     		mov	r0, r5
+ 203 00c8 FFF7FEFF 		bl	nRF24_ReadReg
+ 204              	.LVL16:
+ 205              		.loc 1 31 23 view .LVU69
+ 206 00cc 06F81E0F 		strb	r0, [r6, #30]!
+  32:Core/Src/radio/nrf24_status.c ****     
+  33:Core/Src/radio/nrf24_status.c ****     // Read payload widths
+  34:Core/Src/radio/nrf24_status.c ****     for(int i = 0; i < 6; i++) {
+ 207              		.loc 1 34 5 is_stmt 1 view .LVU70
+ 208              	.LBB2:
+ 209              		.loc 1 34 9 view .LVU71
+ 210              	.LVL17:
+ 211              		.loc 1 34 22 view .LVU72
+ 212              	.L2:
+  35:Core/Src/radio/nrf24_status.c ****         status->rx_pw[i] = nRF24_ReadReg(nrf, nRF24_RX_PW_PIPE[i]);
+ 213              		.loc 1 35 9 discriminator 3 view .LVU73
+ 214              		.loc 1 35 28 is_stmt 0 discriminator 3 view .LVU74
+ 215 00d0 17F8011B 		ldrb	r1, [r7], #1	@ zero_extendqisi2
+ 216              	.LVL18:
+ 217              		.loc 1 35 28 discriminator 3 view .LVU75
+ 218 00d4 2846     		mov	r0, r5
+ 219 00d6 FFF7FEFF 		bl	nRF24_ReadReg
+ 220              	.LVL19:
+ 221              		.loc 1 35 26 discriminator 3 view .LVU76
+ 222 00da 06F8010F 		strb	r0, [r6, #1]!
+  34:Core/Src/radio/nrf24_status.c ****         status->rx_pw[i] = nRF24_ReadReg(nrf, nRF24_RX_PW_PIPE[i]);
+ 223              		.loc 1 34 28 is_stmt 1 discriminator 3 view .LVU77
+ 224              	.LVL20:
+  34:Core/Src/radio/nrf24_status.c ****         status->rx_pw[i] = nRF24_ReadReg(nrf, nRF24_RX_PW_PIPE[i]);
+ 225              		.loc 1 34 22 discriminator 3 view .LVU78
+ 226 00de 4645     		cmp	r6, r8
+ 227 00e0 F6D1     		bne	.L2
+ 228              	.LBE2:
+  36:Core/Src/radio/nrf24_status.c ****     }
+  37:Core/Src/radio/nrf24_status.c ****     
+  38:Core/Src/radio/nrf24_status.c ****     // Read dynamic payload and feature registers
+  39:Core/Src/radio/nrf24_status.c ****     status->dynpd = nRF24_ReadReg(nrf, nRF24_REG_DYNPD);
+ 229              		.loc 1 39 5 view .LVU79
+ 230              		.loc 1 39 21 is_stmt 0 view .LVU80
+ 231 00e2 1C21     		movs	r1, #28
+ 232 00e4 2846     		mov	r0, r5
+ 233 00e6 FFF7FEFF 		bl	nRF24_ReadReg
+ 234              	.LVL21:
+ 235 00ea 0346     		mov	r3, r0
+  40:Core/Src/radio/nrf24_status.c ****     status->feature = nRF24_ReadReg(nrf, nRF24_REG_FEATURE);
+ 236              		.loc 1 40 23 view .LVU81
+ 237 00ec 1D21     		movs	r1, #29
+ 238 00ee 2846     		mov	r0, r5
+  39:Core/Src/radio/nrf24_status.c ****     status->feature = nRF24_ReadReg(nrf, nRF24_REG_FEATURE);
+ 239              		.loc 1 39 19 view .LVU82
+ 240 00f0 84F82530 		strb	r3, [r4, #37]
+ 241              		.loc 1 40 5 is_stmt 1 view .LVU83
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccV4EN1f.s 			page 7
+
+
+ 242              		.loc 1 40 23 is_stmt 0 view .LVU84
+ 243 00f4 FFF7FEFF 		bl	nRF24_ReadReg
+ 244              	.LVL22:
+  41:Core/Src/radio/nrf24_status.c ****     
+  42:Core/Src/radio/nrf24_status.c ****     // Update flags
+  43:Core/Src/radio/nrf24_status.c ****     status->flags.rx_dr = (status->status & nRF24_FLAG_RX_DR) ? 1 : 0;
+ 245              		.loc 1 43 34 view .LVU85
+ 246 00f8 6278     		ldrb	r2, [r4, #1]	@ zero_extendqisi2
+  40:Core/Src/radio/nrf24_status.c ****     
+ 247              		.loc 1 40 21 view .LVU86
+ 248 00fa 84F82600 		strb	r0, [r4, #38]
+ 249              		.loc 1 43 5 is_stmt 1 view .LVU87
+  44:Core/Src/radio/nrf24_status.c ****     status->flags.tx_ds = (status->status & nRF24_FLAG_TX_DS) ? 1 : 0;
+ 250              		.loc 1 44 5 view .LVU88
+  45:Core/Src/radio/nrf24_status.c ****     status->flags.max_rt = (status->status & nRF24_FLAG_MAX_RT) ? 1 : 0;
+ 251              		.loc 1 45 5 view .LVU89
+  46:Core/Src/radio/nrf24_status.c ****     status->flags.rx_empty = (status->fifo_status & 0x01) ? 1 : 0;
+ 252              		.loc 1 46 5 view .LVU90
+  47:Core/Src/radio/nrf24_status.c ****     status->flags.tx_full = (status->status & 0x01) ? 1 : 0;
+ 253              		.loc 1 47 5 view .LVU91
+  48:Core/Src/radio/nrf24_status.c ****     status->flags.pwr_up = (status->config & nRF24_CONFIG_PWR_UP) ? 1 : 0;
+ 254              		.loc 1 48 5 view .LVU92
+  49:Core/Src/radio/nrf24_status.c ****     status->flags.rx_mode = (status->config & nRF24_CONFIG_PRIM_RX) ? 1 : 0;
+ 255              		.loc 1 49 5 view .LVU93
+  43:Core/Src/radio/nrf24_status.c ****     status->flags.tx_ds = (status->status & nRF24_FLAG_TX_DS) ? 1 : 0;
+ 256              		.loc 1 43 25 is_stmt 0 view .LVU94
+ 257 00fe C2F38013 		ubfx	r3, r2, #6, #1
+ 258 0102 C2F34010 		ubfx	r0, r2, #5, #1
+  48:Core/Src/radio/nrf24_status.c ****     status->flags.pwr_up = (status->config & nRF24_CONFIG_PWR_UP) ? 1 : 0;
+ 259              		.loc 1 48 35 view .LVU95
+ 260 0106 2178     		ldrb	r1, [r4]	@ zero_extendqisi2
+  43:Core/Src/radio/nrf24_status.c ****     status->flags.tx_ds = (status->status & nRF24_FLAG_TX_DS) ? 1 : 0;
+ 261              		.loc 1 43 25 view .LVU96
+ 262 0108 43EA4003 		orr	r3, r3, r0, lsl #1
+ 263 010c C2F30010 		ubfx	r0, r2, #4, #1
+ 264 0110 1201     		lsls	r2, r2, #4
+ 265 0112 43EA8003 		orr	r3, r3, r0, lsl #2
+ 266 0116 A078     		ldrb	r0, [r4, #2]	@ zero_extendqisi2
+ 267 0118 02F01002 		and	r2, r2, #16
+ 268 011c C000     		lsls	r0, r0, #3
+ 269 011e 00F00800 		and	r0, r0, #8
+ 270 0122 0343     		orrs	r3, r3, r0
+ 271 0124 C1F34000 		ubfx	r0, r1, #1, #1
+ 272 0128 8901     		lsls	r1, r1, #6
+ 273 012a 1343     		orrs	r3, r3, r2
+ 274 012c 94F82720 		ldrb	r2, [r4, #39]	@ zero_extendqisi2
+ 275 0130 01F04001 		and	r1, r1, #64
+ 276 0134 43EA4013 		orr	r3, r3, r0, lsl #5
+ 277 0138 22F07F02 		bic	r2, r2, #127
+ 278 013c 0B43     		orrs	r3, r3, r1
+ 279 013e 1343     		orrs	r3, r3, r2
+ 280 0140 84F82730 		strb	r3, [r4, #39]
+  50:Core/Src/radio/nrf24_status.c **** } ...
+ 281              		.loc 1 50 1 view .LVU97
+ 282 0144 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 283              	.LVL23:
+ 284              	.L7:
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccV4EN1f.s 			page 8
+
+
+ 285              		.loc 1 50 1 view .LVU98
+ 286              		.align	2
+ 287              	.L6:
+ 288 0148 00000000 		.word	nRF24_RX_PW_PIPE
+ 289              		.cfi_endproc
+ 290              	.LFE150:
+ 292              		.section	.rodata.nRF24_RX_PW_PIPE,"a"
+ 293              		.align	2
+ 296              	nRF24_RX_PW_PIPE:
+ 297 0000 11121314 		.ascii	"\021\022\023\024\025\026"
+ 297      1516
+ 298              		.text
+ 299              	.Letext0:
+ 300              		.file 2 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\machine\\_default_types.h"
+ 301              		.file 3 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\sys\\_stdint.h"
+ 302              		.file 4 "Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h723xx.h"
+ 303              		.file 5 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
+ 304              		.file 6 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h"
+ 305              		.file 7 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_spi.h"
+ 306              		.file 8 "Core/Src/radio/../../Inc/radio/support.h"
+ 307              		.file 9 "Core/Src/radio/../../Inc/radio/nrf24.h"
+ 308              		.file 10 "Core/Src/radio/../../Inc/radio/nrf24_status.h"
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccV4EN1f.s 			page 9
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 nrf24_status.c
+C:\Users\l1234\AppData\Local\Temp\ccV4EN1f.s:20     .text.NRF24_UpdateStatus:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccV4EN1f.s:27     .text.NRF24_UpdateStatus:00000000 NRF24_UpdateStatus
+C:\Users\l1234\AppData\Local\Temp\ccV4EN1f.s:288    .text.NRF24_UpdateStatus:00000148 $d
+C:\Users\l1234\AppData\Local\Temp\ccV4EN1f.s:296    .rodata.nRF24_RX_PW_PIPE:00000000 nRF24_RX_PW_PIPE
+C:\Users\l1234\AppData\Local\Temp\ccV4EN1f.s:293    .rodata.nRF24_RX_PW_PIPE:00000000 $d
+
+UNDEFINED SYMBOLS
+nRF24_ReadReg
+nRF24_GetRFChannel
+nRF24_ReadMBReg

@@ -1,0 +1,122 @@
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\cc6L3ZaF.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 2
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"usdelay.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "Core/Src/usdelay.c"
+  19              		.section	.text.delay_micro_sec,"ax",%progbits
+  20              		.align	1
+  21              		.p2align 2,,3
+  22              		.global	delay_micro_sec
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	delay_micro_sec:
+  28              	.LVL0:
+  29              	.LFB144:
+   1:Core/Src/usdelay.c **** #include "usdelay.h"
+   2:Core/Src/usdelay.c **** #include "main.h"
+   3:Core/Src/usdelay.c **** #include "tim.h"
+   4:Core/Src/usdelay.c **** //extern TIM_HandleTypeDef htim1; //外边已经定义好了结构体，直接引用，不是重新
+   5:Core/Src/usdelay.c **** 
+   6:Core/Src/usdelay.c **** void delay_micro_sec(uint8_t us)
+   7:Core/Src/usdelay.c **** {
+  30              		.loc 1 7 1 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+   8:Core/Src/usdelay.c ****     HAL_TIM_Base_Start(&htim1);
+  34              		.loc 1 8 5 view .LVU1
+   7:Core/Src/usdelay.c ****     HAL_TIM_Base_Start(&htim1);
+  35              		.loc 1 7 1 is_stmt 0 view .LVU2
+  36 0000 38B5     		push	{r3, r4, r5, lr}
+  37              	.LCFI0:
+  38              		.cfi_def_cfa_offset 16
+  39              		.cfi_offset 3, -16
+  40              		.cfi_offset 4, -12
+  41              		.cfi_offset 5, -8
+  42              		.cfi_offset 14, -4
+  43              		.loc 1 8 5 view .LVU3
+  44 0002 074D     		ldr	r5, .L6
+   7:Core/Src/usdelay.c ****     HAL_TIM_Base_Start(&htim1);
+  45              		.loc 1 7 1 view .LVU4
+  46 0004 0446     		mov	r4, r0
+  47              		.loc 1 8 5 view .LVU5
+  48 0006 2846     		mov	r0, r5
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\cc6L3ZaF.s 			page 2
+
+
+  49              	.LVL1:
+  50              		.loc 1 8 5 view .LVU6
+  51 0008 FFF7FEFF 		bl	HAL_TIM_Base_Start
+  52              	.LVL2:
+   9:Core/Src/usdelay.c ****     while(__HAL_TIM_GET_COUNTER(&htim1)<us);
+  53              		.loc 1 9 5 is_stmt 1 view .LVU7
+  54              		.loc 1 9 11 is_stmt 0 view .LVU8
+  55 000c 2A68     		ldr	r2, [r5]
+  56              	.L2:
+  57              		.loc 1 9 40 is_stmt 1 discriminator 1 view .LVU9
+  58              		.loc 1 9 11 is_stmt 0 discriminator 1 view .LVU10
+  59 000e 536A     		ldr	r3, [r2, #36]
+  60              		.loc 1 9 40 discriminator 1 view .LVU11
+  61 0010 A342     		cmp	r3, r4
+  62 0012 FCD3     		bcc	.L2
+  10:Core/Src/usdelay.c ****     HAL_TIM_Base_Stop(&htim1);
+  63              		.loc 1 10 5 is_stmt 1 view .LVU12
+  64 0014 0248     		ldr	r0, .L6
+  11:Core/Src/usdelay.c **** }...
+  65              		.loc 1 11 1 is_stmt 0 view .LVU13
+  66 0016 BDE83840 		pop	{r3, r4, r5, lr}
+  67              	.LCFI1:
+  68              		.cfi_restore 14
+  69              		.cfi_restore 5
+  70              		.cfi_restore 4
+  71              		.cfi_restore 3
+  72              		.cfi_def_cfa_offset 0
+  10:Core/Src/usdelay.c ****     HAL_TIM_Base_Stop(&htim1);
+  73              		.loc 1 10 5 view .LVU14
+  74 001a FFF7FEBF 		b	HAL_TIM_Base_Stop
+  75              	.LVL3:
+  76              	.L7:
+  77 001e 00BF     		.align	2
+  78              	.L6:
+  79 0020 00000000 		.word	htim1
+  80              		.cfi_endproc
+  81              	.LFE144:
+  83              		.text
+  84              	.Letext0:
+  85              		.file 2 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\machine\\_default_types.h"
+  86              		.file 3 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\sys\\_stdint.h"
+  87              		.file 4 "Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h723xx.h"
+  88              		.file 5 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
+  89              		.file 6 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h"
+  90              		.file 7 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim.h"
+  91              		.file 8 "Core/Inc/tim.h"
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\cc6L3ZaF.s 			page 3
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 usdelay.c
+C:\Users\l1234\AppData\Local\Temp\cc6L3ZaF.s:20     .text.delay_micro_sec:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\cc6L3ZaF.s:27     .text.delay_micro_sec:00000000 delay_micro_sec
+C:\Users\l1234\AppData\Local\Temp\cc6L3ZaF.s:79     .text.delay_micro_sec:00000020 $d
+
+UNDEFINED SYMBOLS
+HAL_TIM_Base_Start
+HAL_TIM_Base_Stop
+htim1
