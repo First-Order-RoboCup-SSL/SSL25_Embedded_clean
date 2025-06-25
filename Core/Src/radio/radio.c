@@ -11,6 +11,9 @@
 #include "../../Inc/usdelay.h"
 #include <string.h>
 
+// Global variables
+ProcessedPacket_t currentPacket;
+volatile NRF24_RxBuffer_t rawPacket;  // Raw buffer for debugging
 
 // Compute CRC-8 using polynomial 0x07 over the provided data buffer.
 uint8_t compute_crc(const uint8_t* data, size_t length) {
@@ -105,35 +108,91 @@ void RTT_PrintBool(const char* label, bool value) {
     // SEGGER_RTT_WriteString(0, "\n");
 }
 
-Packet currentPacket;
+float float16_to_float32(uint16_t h) {
+    uint32_t sign = (h >> 15) & 0x1;
+    uint32_t exponent = (h >> 10) & 0x1F;
+    uint32_t mantissa = h & 0x3FF;
 
-extern uint16_t decoded[6];
+    uint32_t f32_sign = sign << 31;
+    uint32_t f32_exponent;
+    uint32_t f32_mantissa;
+
+    if (exponent == 0) {
+        if (mantissa == 0) {
+            // Zero
+            f32_exponent = 0;
+            f32_mantissa = 0;
+        } else {
+            // Subnormal number
+            // Normalize the mantissa
+            int e = -1;
+            uint32_t m = mantissa;
+            while ((m & 0x400) == 0) { // While leading bit is not 1
+                m <<= 1;
+                e--;
+            }
+            m &= 0x3FF;  // remove leading 1
+
+            f32_exponent = (127 - 15 + e) << 23; // Adjust exponent bias difference (127 vs 15)
+            f32_mantissa = m << 13;
+        }
+    } else if (exponent == 0x1F) {
+        // Inf or NaN
+        f32_exponent = 0xFF << 23;
+        f32_mantissa = mantissa ? (mantissa << 13) : 0;
+    } else {
+        // Normalized number
+        f32_exponent = (exponent - 15 + 127) << 23;
+        f32_mantissa = mantissa << 13;
+    }
+
+    uint32_t f32_bits = f32_sign | f32_exponent | f32_mantissa;
+
+    union {
+        uint32_t u;
+        float f;
+    } conv;
+
+    conv.u = f32_bits;
+    return conv.f;
+}
 
 void poll(const NRF24_TypeDef *nrf) {
-    
     if (nRF24_GetStatus_RXFIFO(nrf) != nRF24_STATUS_RXFIFO_EMPTY) {
-        
-        uint8_t payload[8];
-        uint8_t length = 8;
+        uint8_t payload[10];  // 10 bytes for the complete packet
+        uint8_t length = 10;
 
         uint8_t pipe = nRF24_ReadPayload(nrf, payload, &length);
         uint8_t ackPayload = !HAL_GPIO_ReadPin(IR_SENSOR_GPIO_Port, IR_SENSOR_Pin);
         nRF24_WriteAckPayload(nrf, pipe, &ackPayload, 1);
-        // SEGGER_RTT_printf(0, "RX Pipe: %d, Status: %d\n", pipe, nRF24_GetStatus_RXFIFO(nrf));
 
-
-        // // Compute CRC for the first 7 bytes of the payload
-        // uint8_t computed_crc = compute_crc(payload, 7);
-        // // Compare computed CRC with the received CRC (8th byte)
-        // // if (computed_crc != payload[7]) {
-        // //     SEGGER_RTT_WriteString(0, "CRC error: Invalid packet. Discarding packet.\n");
-        // //     return;  // Discard the packet if CRC does not match
-        // // }
+        // Copy raw data to debug buffer first
+        memcpy((void*)&rawPacket, payload, sizeof(NRF24_RxBuffer_t));
+        
+        // Then parse into processed packet
         parsePacket(payload, &currentPacket);
     }
 
     // Flush TX FIFO and clear IRQ flags
     nRF24_ClearIRQFlags(nrf);
+}
+
+void parsePacket(uint8_t *bytes, ProcessedPacket_t* packet) {
+    // Use the already copied raw packet
+    packet->robot_id = rawPacket.robot_id;
+    
+    // Convert float16 velocities to float32
+    packet->forward_vel = float16_to_float32(rawPacket.forward_vel);
+    packet->left_vel = float16_to_float32(rawPacket.left_vel);
+    packet->angular_vel = float16_to_float32(rawPacket.angular_vel);
+    
+    // Parse dribbler state and speed
+    packet->dribbler_state = (rawPacket.dribbler >> 14) & 0x03;  // Top 2 bits
+    packet->dribbler_speed = rawPacket.dribbler & 0x3FFF;        // Bottom 14 bits
+    
+    // Parse kicker values
+    packet->upper_kicker = (rawPacket.kickers >> 4) & 0x0F;  // Upper 4 bits
+    packet->lower_kicker = rawPacket.kickers & 0x0F;         // Lower 4 bits
 }
 
 void radio(NRF24_TypeDef *nrf) {
@@ -176,7 +235,7 @@ void radio(NRF24_TypeDef *nrf) {
     uint8_t nRF24_ADDR[] = "edoN1";
     nRF24_SetTxAddr(nrf, nRF24_ADDR, 5);
     nRF24_SetAddr(nrf, nRF24_PIPE1, nRF24_ADDR); // Program address for RX pipe #1
-    nRF24_SetRXPipe(nrf, nRF24_PIPE1, nRF24_AA_ON, 10); // Auto-ACK: enabled, payload length: 8 bytes
+    nRF24_SetRXPipe(nrf, nRF24_PIPE1, nRF24_AA_ON, 10); // Auto-ACK: enabled, payload length: 10 bytes
     nRF24_ActivateFeatures(nrf);
     // Set operational mode (PRX == receiver)
     nRF24_SetOperationalMode(nrf, nRF24_MODE_RX);
@@ -194,9 +253,7 @@ void radio(NRF24_TypeDef *nrf) {
     nRF24_PrettyPrint(nrf);
     HAL_Delay(5000);
 
-    uint8_t *ptr = (uint8_t *)nRF24_TEST_ADDR;
     // The main loop
-
     nRF24_CE_H(nrf);
 }
 
@@ -218,17 +275,4 @@ float half_to_float(uint16_t half) {
         result = ldexpf((float)(fraction | 0x400), exponent - 15 - 10);
     }
     return sign ? -result : result;
-}
-
-void parsePacket(uint8_t *bytes, Packet* packet) {
-    // Parse the 16-bit half precision floats from the first 6 bytes
-    packet->forward = half_to_float((((uint16_t) bytes[0]) << 8) + bytes[1]);
-    packet->left = half_to_float((((uint16_t) bytes[2]) << 8) + bytes[3]);
-    packet->angular = half_to_float((((uint16_t) bytes[4]) << 8) + bytes[5]);
-
-    // Parse control flags from the 7th byte
-    uint8_t flags = bytes[6];
-    packet->kicker_bottom = (flags & 0x80) != 0;
-    packet->kicker_top = (flags & 0x40) != 0;
-    packet->dribble = (flags & 0x20) != 0;
 }
