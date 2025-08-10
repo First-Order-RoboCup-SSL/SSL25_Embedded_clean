@@ -34,9 +34,9 @@ build/main.o: Core/Src/main.c Core/Inc/main.h \
  Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h Core/Inc/dma.h \
  Core/Inc/main.h Core/Inc/fdcan.h Bsp/Inc/bsp_fdcan.h \
  Core/Inc/memorymap.h Core/Inc/spi.h Core/Inc/tim.h Core/Inc/usart.h \
- Core/Inc/gpio.h Bsp/Inc/bsp_pid.h Bsp/Inc/bsp_motor_feedback.h \
- Bsp/Inc/bsp_inverse_kinematics.h Bsp/Inc/bsp_sbus_controller.h \
- Core/Inc/radio/radio.h Core/Inc/radio/support.h Core/Inc/radio/nrf24.h
+ Core/Inc/gpio.h Core/Inc/radio/radio.h Core/Inc/radio/support.h \
+ Core/Inc/radio/nrf24.h Bsp/Inc/bsp_pid.h Bsp/Inc/bsp_motor_feedback.h \
+ Bsp/Inc/bsp_inverse_kinematics.h Bsp/Inc/bsp_sbus_controller.h
 Core/Inc/main.h:
 Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 Core/Inc/stm32h7xx_hal_conf.h:
@@ -82,10 +82,10 @@ Core/Inc/spi.h:
 Core/Inc/tim.h:
 Core/Inc/usart.h:
 Core/Inc/gpio.h:
+Core/Inc/radio/radio.h:
+Core/Inc/radio/support.h:
+Core/Inc/radio/nrf24.h:
 Bsp/Inc/bsp_pid.h:
 Bsp/Inc/bsp_motor_feedback.h:
 Bsp/Inc/bsp_inverse_kinematics.h:
 Bsp/Inc/bsp_sbus_controller.h:
-Core/Inc/radio/radio.h:
-Core/Inc/radio/support.h:
-Core/Inc/radio/nrf24.h:

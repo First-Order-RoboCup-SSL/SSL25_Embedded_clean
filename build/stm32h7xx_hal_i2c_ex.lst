@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 1
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s 			page 1
 
 
    1              		.cpu cortex-m7
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 1
   27:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c **** 
   28:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c ****   [..] Comparing to other previous devices, the I2C interface for STM32H7xx
   29:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c ****        devices contains the following additional features
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 2
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s 			page 2
 
 
   30:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c **** 
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 1
   84:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c **** 
   85:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c **** @endverbatim
   86:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c ****   * @{
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 3
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s 			page 3
 
 
   87:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c ****   */
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 1
   58 001a 00B5     		push	{lr}
   59              	.LCFI0:
   60              		.cfi_def_cfa_offset 4
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 4
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s 			page 4
 
 
   61              		.cfi_offset 14, -4
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 1
   90 0042 1160     		str	r1, [r2]
  120:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c **** 
   91              		.loc 1 120 5 discriminator 2 view .LVU27
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 5
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s 			page 5
 
 
  120:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c **** 
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 1
  127              		@ args = 0, pretend = 0, frame = 0
  128              		@ frame_needed = 0, uses_anonymous_args = 0
  142:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c ****   uint32_t tmpreg;
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 6
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s 			page 6
 
 
  129              		.loc 1 142 3 view .LVU37
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 1
  166:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c **** 
  167:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c ****     /* Store the new register value */
  168:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c ****     hi2c->Instance->CR1 = tmpreg;
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 7
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s 			page 7
 
 
  169:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c **** 
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 1
  190              		.loc 1 172 5 is_stmt 1 discriminator 2 view .LVU65
  172:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c **** 
  191              		.loc 1 172 17 is_stmt 0 discriminator 2 view .LVU66
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 8
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s 			page 8
 
 
  192 0042 83F841E0 		strb	lr, [r3, #65]
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 1
  187:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c **** 
  188:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c **** /** @defgroup I2CEx_Exported_Functions_Group2 WakeUp Mode Functions
  189:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c ****   * @brief    WakeUp Mode Functions
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 9
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s 			page 9
 
 
  190:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c ****   *
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 1
  218:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c ****     hi2c->State = HAL_I2C_STATE_BUSY;
  259              		.loc 1 218 5 discriminator 2 view .LVU86
  219:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c **** 
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 10
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s 			page 10
 
 
  220:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c ****     /* Disable the selected I2C peripheral */
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 1
  289              		.loc 1 231 5 is_stmt 1 discriminator 2 view .LVU100
  231:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c **** 
  290              		.loc 1 231 5 discriminator 2 view .LVU101
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 11
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s 			page 11
 
 
  291 0042 83F840C0 		strb	ip, [r3, #64]
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 1
  248:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c **** {
  330              		.loc 1 248 1 is_stmt 1 view -0
  331              		.cfi_startproc
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 12
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s 			page 12
 
 
  332              		@ args = 0, pretend = 0, frame = 0
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 1
  257:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c **** 
  362              		.loc 1 257 17 discriminator 2 view .LVU123
  363 0020 80F84110 		strb	r1, [r0, #65]
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 13
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s 			page 13
 
 
  260:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c **** 
@@ -778,7 +778,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 1
  398 004a 0220     		movs	r0, #2
  399              	.LVL25:
  400              		.loc 1 278 1 view .LVU139
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 14
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s 			page 14
 
 
  401 004c 7047     		bx	lr
@@ -838,7 +838,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 1
  309:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c ****   *        only by using I2C_FASTMODEPLUS_I2C3 parameter.
  310:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c ****   * @note  For all I2C4 pins fast mode plus driving capability can be enabled
  311:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c ****   *        only by using I2C_FASTMODEPLUS_I2C4 parameter.
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 15
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s 			page 15
 
 
  312:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c ****   * @note  For all I2C5 pins fast mode plus driving capability can be enabled
@@ -898,7 +898,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 1
  326:Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c **** }
  461              		.loc 1 326 1 is_stmt 0 view .LVU154
  462 0024 02B0     		add	sp, sp, #8
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 16
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s 			page 16
 
 
  463              	.LCFI12:
@@ -958,7 +958,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 1
  492              		.loc 1 353 3 view .LVU157
  493              	.LBB4:
  494              		.loc 1 353 3 view .LVU158
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 17
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s 			page 17
 
 
  495              		.loc 1 353 3 view .LVU159
@@ -1017,24 +1017,24 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 1
  540              		.file 5 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
  541              		.file 6 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h"
  542              		.file 7 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_i2c.h"
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccATBg46.s 			page 18
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s 			page 18
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 stm32h7xx_hal_i2c_ex.c
-C:\Users\l1234\AppData\Local\Temp\ccATBg46.s:20     .text.HAL_I2CEx_ConfigAnalogFilter:00000000 $t
-C:\Users\l1234\AppData\Local\Temp\ccATBg46.s:27     .text.HAL_I2CEx_ConfigAnalogFilter:00000000 HAL_I2CEx_ConfigAnalogFilter
-C:\Users\l1234\AppData\Local\Temp\ccATBg46.s:115    .text.HAL_I2CEx_ConfigDigitalFilter:00000000 $t
-C:\Users\l1234\AppData\Local\Temp\ccATBg46.s:122    .text.HAL_I2CEx_ConfigDigitalFilter:00000000 HAL_I2CEx_ConfigDigitalFilter
-C:\Users\l1234\AppData\Local\Temp\ccATBg46.s:224    .text.HAL_I2CEx_EnableWakeUp:00000000 $t
-C:\Users\l1234\AppData\Local\Temp\ccATBg46.s:231    .text.HAL_I2CEx_EnableWakeUp:00000000 HAL_I2CEx_EnableWakeUp
-C:\Users\l1234\AppData\Local\Temp\ccATBg46.s:320    .text.HAL_I2CEx_DisableWakeUp:00000000 $t
-C:\Users\l1234\AppData\Local\Temp\ccATBg46.s:327    .text.HAL_I2CEx_DisableWakeUp:00000000 HAL_I2CEx_DisableWakeUp
-C:\Users\l1234\AppData\Local\Temp\ccATBg46.s:416    .text.HAL_I2CEx_EnableFastModePlus:00000000 $t
-C:\Users\l1234\AppData\Local\Temp\ccATBg46.s:423    .text.HAL_I2CEx_EnableFastModePlus:00000000 HAL_I2CEx_EnableFastModePlus
-C:\Users\l1234\AppData\Local\Temp\ccATBg46.s:470    .text.HAL_I2CEx_EnableFastModePlus:00000028 $d
-C:\Users\l1234\AppData\Local\Temp\ccATBg46.s:476    .text.HAL_I2CEx_DisableFastModePlus:00000000 $t
-C:\Users\l1234\AppData\Local\Temp\ccATBg46.s:483    .text.HAL_I2CEx_DisableFastModePlus:00000000 HAL_I2CEx_DisableFastModePlus
-C:\Users\l1234\AppData\Local\Temp\ccATBg46.s:530    .text.HAL_I2CEx_DisableFastModePlus:0000002c $d
+C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s:20     .text.HAL_I2CEx_ConfigAnalogFilter:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s:27     .text.HAL_I2CEx_ConfigAnalogFilter:00000000 HAL_I2CEx_ConfigAnalogFilter
+C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s:115    .text.HAL_I2CEx_ConfigDigitalFilter:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s:122    .text.HAL_I2CEx_ConfigDigitalFilter:00000000 HAL_I2CEx_ConfigDigitalFilter
+C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s:224    .text.HAL_I2CEx_EnableWakeUp:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s:231    .text.HAL_I2CEx_EnableWakeUp:00000000 HAL_I2CEx_EnableWakeUp
+C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s:320    .text.HAL_I2CEx_DisableWakeUp:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s:327    .text.HAL_I2CEx_DisableWakeUp:00000000 HAL_I2CEx_DisableWakeUp
+C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s:416    .text.HAL_I2CEx_EnableFastModePlus:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s:423    .text.HAL_I2CEx_EnableFastModePlus:00000000 HAL_I2CEx_EnableFastModePlus
+C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s:470    .text.HAL_I2CEx_EnableFastModePlus:00000028 $d
+C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s:476    .text.HAL_I2CEx_DisableFastModePlus:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s:483    .text.HAL_I2CEx_DisableFastModePlus:00000000 HAL_I2CEx_DisableFastModePlus
+C:\Users\l1234\AppData\Local\Temp\ccuAvOo2.s:530    .text.HAL_I2CEx_DisableFastModePlus:0000002c $d
 
 NO UNDEFINED SYMBOLS

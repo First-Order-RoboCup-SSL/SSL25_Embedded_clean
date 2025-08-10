@@ -25,6 +25,10 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include "radio/radio.h"
 #include "bsp_pid.h"
 #include "bsp_motor_feedback.h"
 #include "bsp_inverse_kinematics.h"
@@ -32,10 +36,6 @@
 #include "bsp_sbus_controller.h"
 #include <math.h>
 #include <string.h>
-
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-#include "radio/radio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -163,6 +163,8 @@ int main(void)
   MX_FDCAN3_Init();
   MX_TIM8_Init();
   MX_TIM23_Init();
+  MX_TIM12_Init();
+  MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
   /*power init begin*/
   HAL_GPIO_WritePin(GPIOC,GPIO_PIN_14,GPIO_PIN_SET);

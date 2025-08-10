@@ -18,7 +18,6 @@
   */
 /* USER CODE END Header */
 
-
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __MAIN_H
 #define __MAIN_H
@@ -65,10 +64,17 @@ void Error_Handler(void);
 #define NRF24_IRQ_EXTI_IRQn EXTI9_5_IRQn
 #define KICKER_Pin GPIO_PIN_9
 #define KICKER_GPIO_Port GPIOE
+#define NRF_IRQ_Pin GPIO_PIN_14
+#define NRF_IRQ_GPIO_Port GPIOE
+#define NRF_IRQ_EXTI_IRQn EXTI15_10_IRQn
 #define NRF24_1_CSN_Pin GPIO_PIN_15
 #define NRF24_1_CSN_GPIO_Port GPIOE
 #define NRF24_1_CE_Pin GPIO_PIN_10
 #define NRF24_1_CE_GPIO_Port GPIOD
+#define NRF_CE_Pin GPIO_PIN_14
+#define NRF_CE_GPIO_Port GPIOD
+#define NRF_CSN_Pin GPIO_PIN_15
+#define NRF_CSN_GPIO_Port GPIOD
 #define IR_SENSOR_Pin GPIO_PIN_9
 #define IR_SENSOR_GPIO_Port GPIOB
 

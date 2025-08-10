@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 1
 
 
    1              		.cpu cortex-m7
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
   28:Bsp/Src/bsp_sbus_controller.c **** static inline int16_t map_value(int16_t x, int16_t in_min, int16_t in_max, int16_t out_min, int16_t
   29:Bsp/Src/bsp_sbus_controller.c ****     // Handle edge cases to prevent overflow
   30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 2
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 2
 
 
   31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
   61              		.loc 1 44 5 is_stmt 1 view .LVU13
   62              		.loc 1 44 24 is_stmt 0 view .LVU14
   63 0014 FFF7FEFF 		bl	HAL_GetTick
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 3
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 3
 
 
   64              	.LVL0:
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  111              	.LFB146:
   49:Bsp/Src/bsp_sbus_controller.c **** 
   50:Bsp/Src/bsp_sbus_controller.c **** bool BSP_SBUS_IsSignalValid(void)
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 4
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 4
 
 
   51:Bsp/Src/bsp_sbus_controller.c **** {
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  149 0024 40F2FF71 		movw	r1, #2047
  150              	.LBE8:
   55:Bsp/Src/bsp_sbus_controller.c ****         // Set all channels to failsafe value
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 5
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 5
 
 
  151              		.loc 1 55 26 view .LVU35
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  185              	.LVL6:
   57:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[i] = SBUS_FAILSAFE_VALUE;
  186              		.loc 1 57 27 view .LVU56
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 6
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 6
 
 
   58:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels_mapped[i] = MAPPED_MAX_VALUE / 2; // Center position
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  231 0002 0F28     		cmp	r0, #15
  232              		.loc 1 68 21 view .LVU69
  233 0004 1A88     		ldrh	r2, [r3]
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 7
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 7
 
 
  234              		.loc 1 68 26 view .LVU70
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
   89:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[1] = ((sbus_frame[2] >> 3 | sbus_frame[3] << 5)                          
   90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
   91:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[3] = ((sbus_frame[5] >> 1 | sbus_frame[6] << 7)                          
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 8
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 8
 
 
   92:Bsp/Src/bsp_sbus_controller.c **** 
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  298 0034 13B1     		cbz	r3, .L16
   81:Bsp/Src/bsp_sbus_controller.c ****             // Update signal status
  299              		.loc 1 81 58 discriminator 1 view .LVU92
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 9
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 9
 
 
  300 0036 237E     		ldrb	r3, [r4, #24]	@ zero_extendqisi2
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  337              		.loc 1 89 13 is_stmt 1 view .LVU109
   89:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
  338              		.loc 1 89 44 is_stmt 0 view .LVU110
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 10
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 10
 
 
  339 005a A178     		ldrb	r1, [r4, #2]	@ zero_extendqisi2
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
   91:Bsp/Src/bsp_sbus_controller.c **** 
  375              		.loc 1 91 101 view .LVU129
  376 008a C2F30A02 		ubfx	r2, r2, #0, #11
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 11
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 11
 
 
   91:Bsp/Src/bsp_sbus_controller.c **** 
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
   28:Bsp/Src/bsp_sbus_controller.c ****     // Handle edge cases to prevent overflow
  415              		.loc 1 28 23 is_stmt 1 view .LVU146
  416              	.LBB21:
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 12
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 12
 
 
   30:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
   94:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
  455              		.loc 1 94 31 view .LVU163
   95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 13
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 13
 
 
  456              		.loc 1 95 17 view .LVU164
@@ -778,7 +778,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  494 00f6 40F20E70 		movw	r0, #1806
  495 00fa 8242     		cmp	r2, r0
  496 00fc 52DC     		bgt	.L32
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 14
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 14
 
 
   34:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
@@ -838,7 +838,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
   95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
  534              		.loc 1 95 73 is_stmt 0 view .LVU198
  535 011a F022     		movs	r2, #240
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 15
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 15
 
 
  536 011c 9A80     		strh	r2, [r3, #4]	@ movhi
@@ -898,7 +898,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  574 0142 12B2     		sxth	r2, r2
  575              	.LVL31:
   34:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 16
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 16
 
 
  576              		.loc 1 34 13 view .LVU215
@@ -958,7 +958,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  614 0166 02DB     		blt	.L27
   96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
  615              		.loc 1 96 56 is_stmt 1 view .LVU232
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 17
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 17
 
 
   96:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
@@ -1018,7 +1018,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
   36:Bsp/Src/bsp_sbus_controller.c **** }
  654              		.loc 1 36 12 view .LVU249
  655 018c 43F3CF13 		sbfx	r3, r3, #7, #16
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 18
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 18
 
 
  656              	.LVL41:
@@ -1078,7 +1078,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  699              	.L31:
   30:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
  700              		.loc 1 30 29 view .LVU262
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 19
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 19
 
 
  701 01a0 0022     		movs	r2, #0
@@ -1138,7 +1138,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  746              	.LBE30:
  747              	.LBE31:
  748              	.LBE32:
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 20
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 20
 
 
  749              		.cfi_endproc
@@ -1198,7 +1198,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  797              	.L55:
  798              		.align	2
  799              	.L54:
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 21
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 21
 
 
  800 0004 00000000 		.word	sbus_channels_mapped
@@ -1258,7 +1258,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  848              		@ frame_needed = 0, uses_anonymous_args = 0
  126:Bsp/Src/bsp_sbus_controller.c ****     if (huart->Instance == UART5) {
  849              		.loc 1 126 5 view .LVU282
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 22
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 22
 
 
  850              		.loc 1 126 8 is_stmt 0 view .LVU283
@@ -1318,7 +1318,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  890              	.LBI41:
   65:Bsp/Src/bsp_sbus_controller.c **** void BSP_SBUS_ProcessData(uint8_t byte)
  891              		.loc 1 65 6 is_stmt 1 view .LVU293
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 23
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 23
 
 
  892              	.LBB57:
@@ -1378,7 +1378,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  932              		.cfi_remember_state
  933              		.cfi_restore 14
  934              		.cfi_restore 5
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 24
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 24
 
 
  935              		.cfi_restore 4
@@ -1438,7 +1438,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
   83:Bsp/Src/bsp_sbus_controller.c ****             sbus_last_update = HAL_GetTick();
  976              		.loc 1 83 30 view .LVU322
  977 005c 634B     		ldr	r3, .L94+20
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 25
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 25
 
 
   84:Bsp/Src/bsp_sbus_controller.c ****             sbus_signal_lost = false;
@@ -1498,7 +1498,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
   90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
  1013              		.loc 1 90 44 is_stmt 0 view .LVU342
  1014 0086 E978     		ldrb	r1, [r5, #3]	@ zero_extendqisi2
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 26
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 26
 
 
   90:Bsp/Src/bsp_sbus_controller.c ****             sbus_channels[2] = ((sbus_frame[3] >> 6 | sbus_frame[4] << 2 | sbus_frame[5] << 10)    
@@ -1558,7 +1558,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  1050              		.loc 1 95 20 view .LVU361
  1051 00b0 EF2A     		cmp	r2, #239
  1052 00b2 01DC     		bgt	.L64
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 27
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 27
 
 
   95:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] < SBUS_MIN_VALUE) sbus_channels[i] = SBUS_MIN_VALUE;
@@ -1618,7 +1618,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  1091              	.LVL69:
   35:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
  1092              		.loc 1 35 10 view .LVU378
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 28
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 28
 
 
  1093 00da 4749     		ldr	r1, .L94+32
@@ -1678,7 +1678,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
   96:Bsp/Src/bsp_sbus_controller.c ****                 if (sbus_channels[i] > SBUS_MAX_VALUE) sbus_channels[i] = SBUS_MAX_VALUE;
  1131              		.loc 1 96 34 is_stmt 0 view .LVU395
  1132 00fa 5A88     		ldrh	r2, [r3, #2]
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 29
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 29
 
 
  1133 00fc 12B2     		sxth	r2, r2
@@ -1738,7 +1738,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  1171              		.loc 1 35 5 is_stmt 1 view .LVU411
   36:Bsp/Src/bsp_sbus_controller.c ****     return (int16_t)(temp + out_min);
  1172              		.loc 1 36 5 view .LVU412
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 30
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 30
 
 
   35:Bsp/Src/bsp_sbus_controller.c ****     temp = temp / (in_max - in_min);
@@ -1798,7 +1798,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  1211              	.L71:
   97:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
  1212              		.loc 1 97 17 is_stmt 1 view .LVU429
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 31
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 31
 
 
   97:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
@@ -1858,7 +1858,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  1251              	.LBE49:
  1252              	.LBE53:
   97:Bsp/Src/bsp_sbus_controller.c ****                 sbus_channels_mapped[i] = map_value(sbus_channels[i], 
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 32
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 32
 
 
  1253              		.loc 1 97 41 view .LVU446
@@ -1918,7 +1918,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
   30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
  1291              		.loc 1 30 8 is_stmt 0 view .LVU463
  1292 018e F02B     		cmp	r3, #240
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 33
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 33
 
 
  1293 0190 10DD     		ble	.L82
@@ -1978,7 +1978,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  1332              	.LBB51:
   30:Bsp/Src/bsp_sbus_controller.c ****     if (x <= in_min) return out_min;
  1333              		.loc 1 30 29 is_stmt 0 view .LVU479
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 34
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 34
 
 
  1334 01b0 0022     		movs	r2, #0
@@ -2038,7 +2038,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  1376 01cc 40F6FF72 		movw	r2, #4095
  1377              	.LVL109:
   31:Bsp/Src/bsp_sbus_controller.c ****     if (x >= in_max) return out_max;
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 35
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 35
 
 
  1378              		.loc 1 31 29 view .LVU492
@@ -2098,7 +2098,7 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  1437 0000 01       		.byte	1
  1438              		.global	sbus_last_update
  1439              		.section	.bss.sbus_last_update,"aw",%nobits
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 36
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 36
 
 
  1440              		.align	2
@@ -2127,46 +2127,46 @@ ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 1
  1467              		.file 9 "Bsp/Inc/bsp_sbus_controller.h"
  1468              		.file 10 "c:\\msys64\\mingw64\\arm-none-eabi\\include\\string.h"
  1469              		.file 11 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h"
-ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s 			page 37
+ARM GAS  C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s 			page 37
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 bsp_sbus_controller.c
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:20     .text.BSP_SBUS_Init:00000000 $t
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:27     .text.BSP_SBUS_Init:00000000 BSP_SBUS_Init
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:92     .text.BSP_SBUS_Init:00000038 $d
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1430   .bss.frame_complete:00000000 frame_complete
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1436   .data.sbus_signal_lost:00000000 sbus_signal_lost
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1425   .bss.frame_index:00000000 frame_index
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1443   .bss.sbus_last_update:00000000 sbus_last_update
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1419   .bss.sbus_frame:00000000 sbus_frame
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1456   .data:00000008 sbus_channels
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1450   .data:00000000 sbus_channels_mapped
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:103    .text.BSP_SBUS_IsSignalValid:00000000 $t
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:110    .text.BSP_SBUS_IsSignalValid:00000000 BSP_SBUS_IsSignalValid
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:205    .text.BSP_SBUS_IsSignalValid:00000054 $d
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:213    .text.BSP_SBUS_ProcessData:00000000 $t
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:220    .text.BSP_SBUS_ProcessData:00000000 BSP_SBUS_ProcessData
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:736    .text.BSP_SBUS_ProcessData:000001bc $d
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:753    .text.BSP_SBUS_GetChannels:00000000 $t
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:760    .text.BSP_SBUS_GetChannels:00000000 BSP_SBUS_GetChannels
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:774    .text.BSP_SBUS_GetChannels:00000004 $d
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:779    .text.BSP_SBUS_GetMappedChannels:00000000 $t
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:786    .text.BSP_SBUS_GetMappedChannels:00000000 BSP_SBUS_GetMappedChannels
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:800    .text.BSP_SBUS_GetMappedChannels:00000004 $d
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:805    .text.BSP_SBUS_UART_StartReceive:00000000 $t
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:812    .text.BSP_SBUS_UART_StartReceive:00000000 BSP_SBUS_UART_StartReceive
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:829    .text.BSP_SBUS_UART_StartReceive:0000000c $d
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1413   .bss.sbus_rx_byte:00000000 sbus_rx_byte
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:835    .text.BSP_SBUS_UART_RxCpltCallback:00000000 $t
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:842    .text.BSP_SBUS_UART_RxCpltCallback:00000000 BSP_SBUS_UART_RxCpltCallback
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1390   .text.BSP_SBUS_UART_RxCpltCallback:000001d8 $d
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1414   .bss.sbus_rx_byte:00000000 $d
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1416   .bss.sbus_frame:00000000 $d
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1422   .bss.frame_index:00000000 $d
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1431   .bss.frame_complete:00000000 $d
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1440   .bss.sbus_last_update:00000000 $d
-C:\Users\l1234\AppData\Local\Temp\ccvSEZxB.s:1447   .data:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:20     .text.BSP_SBUS_Init:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:27     .text.BSP_SBUS_Init:00000000 BSP_SBUS_Init
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:92     .text.BSP_SBUS_Init:00000038 $d
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:1430   .bss.frame_complete:00000000 frame_complete
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:1436   .data.sbus_signal_lost:00000000 sbus_signal_lost
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:1425   .bss.frame_index:00000000 frame_index
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:1443   .bss.sbus_last_update:00000000 sbus_last_update
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:1419   .bss.sbus_frame:00000000 sbus_frame
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:1456   .data:00000008 sbus_channels
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:1450   .data:00000000 sbus_channels_mapped
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:103    .text.BSP_SBUS_IsSignalValid:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:110    .text.BSP_SBUS_IsSignalValid:00000000 BSP_SBUS_IsSignalValid
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:205    .text.BSP_SBUS_IsSignalValid:00000054 $d
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:213    .text.BSP_SBUS_ProcessData:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:220    .text.BSP_SBUS_ProcessData:00000000 BSP_SBUS_ProcessData
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:736    .text.BSP_SBUS_ProcessData:000001bc $d
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:753    .text.BSP_SBUS_GetChannels:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:760    .text.BSP_SBUS_GetChannels:00000000 BSP_SBUS_GetChannels
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:774    .text.BSP_SBUS_GetChannels:00000004 $d
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:779    .text.BSP_SBUS_GetMappedChannels:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:786    .text.BSP_SBUS_GetMappedChannels:00000000 BSP_SBUS_GetMappedChannels
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:800    .text.BSP_SBUS_GetMappedChannels:00000004 $d
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:805    .text.BSP_SBUS_UART_StartReceive:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:812    .text.BSP_SBUS_UART_StartReceive:00000000 BSP_SBUS_UART_StartReceive
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:829    .text.BSP_SBUS_UART_StartReceive:0000000c $d
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:1413   .bss.sbus_rx_byte:00000000 sbus_rx_byte
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:835    .text.BSP_SBUS_UART_RxCpltCallback:00000000 $t
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:842    .text.BSP_SBUS_UART_RxCpltCallback:00000000 BSP_SBUS_UART_RxCpltCallback
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:1390   .text.BSP_SBUS_UART_RxCpltCallback:000001d8 $d
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:1414   .bss.sbus_rx_byte:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:1416   .bss.sbus_frame:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:1422   .bss.frame_index:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:1431   .bss.frame_complete:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:1440   .bss.sbus_last_update:00000000 $d
+C:\Users\l1234\AppData\Local\Temp\ccdlEJLB.s:1447   .data:00000000 $d
 
 UNDEFINED SYMBOLS
 HAL_GetTick
